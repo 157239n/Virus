@@ -1,0 +1,123 @@
+
+@echo off
+
+setlocal enableDelayedExpansion
+
+:getNumberOfVariables
+for /f "tokens=*" %%a in ('type "%~pd0text"') do (
+    set /A numberOfVariables=%%a
+    goto :getVariables
+)
+
+:getVariables
+set /a count=0
+for /f "tokens=* skip=1" %%a in ('type "%~pd0text"') do (
+    set /a div=count%%2
+    if "!div!"=="0" (
+        set key=%%a
+    ) else (
+        if "!key!"=="virus_id" (set virus_id=%%a)
+        if "!key!"=="attack_id" (set attack_id=%%a)
+    )
+    set /a count=count+1
+)
+
+echo !virus_id!
+echo %virus_id%
+echo !attack_id!
+
+rem specific signature
+
+
+// virus graphs:
+
+        new Chart(document.getElementById('dailyChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: [<?php echo join(", ", map($graphableDaily, function ($element) {
+                    return "\"" . $element["label"] . "\"";
+                }));/**/ ?>],
+                datasets: [{
+                    label: 'First dataset',
+                    steppedLine: "middle",
+                    backgroundColor: chartColors.orange,
+                    borderColor: chartColors.orange,
+                    data: [<?php echo join(", ", map($graphableDaily, function ($element) {
+                        if ($element["active"] == 0) {
+                            return "\"Offline\"";
+                        } else {
+                            return "\"Online\"";
+                        }
+                    })); ?>],
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                title: {display: true, text: "Daily active view"},
+                aspectRatio: 1.8,
+                hover: {mode: 'nearest', intersect: true},
+                legend: {display: false},
+                scales: {
+                    xAxes: [{ticks: {autoSkip: false}}],
+                    yAxes: [{type: "category", labels: ["Online", "Offline"]}]
+                }
+            }
+        });
+
+        /**
+         * Get a graphable 24-element array of {"active", "label"}
+         *
+         * @param string $virus_id The virus id
+         * @param int $user_time_zone
+         * @return array the graphable array
+         */
+        function getDailyTimes(string $virus_id, int $user_time_zone): array {
+            // important variables
+            $currentTime = time();
+            $initialHourSlice = date("G", $currentTime - 24 * 3600);
+            $uptimes = getUptimes($virus_id);
+            // dummy data
+            /*
+            $uptimes = [["unix_time" => $currentTime - 22 * 3600, "active" => 1],
+                ["unix_time" => $currentTime - 20 * 3600],
+                ["unix_time" => $currentTime - 15 * 3600],
+                ["unix_time" => $currentTime - 12 * 3600],
+                ["unix_time" => $currentTime - 3 * 3600],
+                ["unix_time" => $currentTime - 1 * 3600]];/**/
+            // filtering out the uptimes that are more than 1 day away
+            $uptimes[] = ["unix_time" => $currentTime];
+            $uptimes = filter($uptimes, function ($element, $index, $currentTime) {
+                return $currentTime - $element["unix_time"] < 24 * 3600;
+            }, $currentTime);
+            // start making graphable
+            $graphable = [];
+            $hourSliceLabels = [0 => "00:00", 6 => "06:00", 12 => "12:00", 18 => "18:00"];
+            for ($i = 0; $i < 24; $i++) {
+                $graphable[] = ["active" => 0, "label" => @$hourSliceLabels[($initialHourSlice + $i + $user_time_zone) % 24]];
+            }
+            if (count($uptimes) > 1) {
+                $lastActive = 1 - (int)$uptimes[0]["active"];
+                $lastHourSlice = $initialHourSlice;
+                // iterate through uptimes, then set graphable's actives
+                for ($i = 0; $i < count($uptimes); $i++) {
+                    $nextHourSlice = (int)date("G", $uptimes[$i]["unix_time"]);
+                    $j = fixHour($lastHourSlice);
+                    while ($j != fixHour($nextHourSlice)) { // using while instead of for because we have to deal with loop backs and stuff
+                        $graphable[fixHour($j - $initialHourSlice)]["active"] = $lastActive;
+                        $j = fixHour($j + 1);
+                    }
+                    $lastHourSlice = $nextHourSlice;
+                    $lastActive = 1 - $lastActive;
+                }
+            }
+            return $graphable;
+        }
+
+
+
+
+
+
+            rem get the unix timestamp
+            rem for /f "tokens=*" %%i in ('%~pd0unixTime') do (set time=%%i)

@@ -1,0 +1,27 @@
+
+User-facing:
+/user/index.php: dashboard, avatar, list of viruses and attack dates. Click on any virus will go to /user/virus
+/user/login.php: logging in, contacting controller login and register
+/user/virus/index.php: virus info. virus_id is stored in the session variable
+/user/attack/index.php: attack info. attack_id is stored in the session variable
+
+Virus communication:
+/viruses/{virus_id}/attacks/: get all {attack_id} belonging to this virus, so that batch knows the {attack_id} to fetch it down
+/viruses/{virus_id}/attacks/{attack_id}/code: raw batch codes for a specific attack to execute
+/viruses/{virus_id}/attacks/{attack_id}/report: place where the virus reports back the results
+/viruses/{virus_id}/ping: place where the virus can pings the web server and say that it's well and fine. This should happen in the virus daemon
+Note that "viruses" can be switched to "vrs" and "attacks" can be switched to "aks". This is for social engineering
+
+Init scripts virus interface:
+/new/{user_handle}: Entry point
+/new/{user_handle}/entry/{virus_id}: entry.cmd, downloaded automatically by init above. Is the daemon that will keep running forever
+/new/{user_handle}/worker: worker.cmd, will handle new attacks scheduled by entry.cmd
+/new/{user_handle}/unixtime: unixtime.cmd, will output a string telling what's the current unix time
+
+The only sort of "authentication" that is built in is the virus's id number. It is made using an internal counter and a
+strong hash function (SHA256). If there is a collision, then it will just increments one. That way, no one can actually guess the
+virus's id, and so it will be quite nice.
+
+/users/{user_handle}/newVirus/init: init script, creates new virus_id in the backend
+/users/{user_handle}/newVirus/entry/{virus_id}: entry script, called by init script
+/users/{user_handle}/newVirus/worker/{virus_id}: worker script

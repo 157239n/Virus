@@ -1,0 +1,2 @@
+* * * * * /bin/bash -c "php /var/www/virus/scan.php"
+# and an empty line

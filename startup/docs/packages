@@ -1,0 +1,8 @@
+
+Packages will have 4 main attributes that it needs to register with the system. This is done by invoking PackageRegistrar::register()
+
+This accepts 4 parameters:
+- dbName: the name of the package that is stored in the database, looks like win.session.Screenshot. Must be globally unique
+- className: the name of the actual class that will handle the interaction, looks like \Kelvinho\Virus\Attack\AttackPackages\Windows\OneTime\Screenshot. Don't have to be unique, but normally it wouldn't make sense to have a class handle the load of 2 packages
+- displayName: the name that will be displayed to the user, looks like easy.Screenshot
+- description: a long description that will tell the user what this does
