@@ -1,1 +1,2 @@
 DOMAIN=https://virus.kelvinho.org
+MYSQL_HOST=virus_mysql

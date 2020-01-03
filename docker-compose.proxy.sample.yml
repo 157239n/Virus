@@ -31,7 +31,7 @@ services:
             - proxy_virus
             - db
         env_file:
-            - env/mysql
+            - env/site
 networks:
     proxy_virus:
         external: true

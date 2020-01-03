@@ -1,5 +1,4 @@
 MYSQL_USER=user
 MYSQL_PASSWORD=password
 MYSQL_DATABASE=db
-MYSQL_HOST=virus_mysql
 MYSQL_ROOT_PASSWORD=password
