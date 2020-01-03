@@ -7,6 +7,7 @@ use Kelvinho\Virus\Header;
 use function Kelvinho\Virus\logAttackStatus;
 use function Kelvinho\Virus\logError;
 use function Kelvinho\Virus\logUnreachable;
+use function Kelvinho\Virus\map;
 
 function niceSize(int $bytes): string {
     $labels = ["TB", "GB", "MB", "KB", "bytes"];
@@ -86,7 +87,7 @@ function processLine($handle, int $givenDepth, array &$path, string $unprocessed
             return null;
         }
     }
-    $contents = \Kelvinho\Virus\map(explode(";", $line), function ($element) {
+    $contents = map(explode(";", $line), function ($element) {
         return trim($element);
     });
     switch ($contents[1]) {
@@ -145,17 +146,15 @@ if (!isset($_SESSION["attack_id"])) {
     <?php echo AdminTemplates::header(); ?>
     <body>
     <?php echo AdminTemplates::body($attack); ?>
-    <div>Max depth</div>
-    <input class="w3-input" type="text" id="depth"
-           value="<?php echo $attack->getMaxDepth(); ?>" <?php if ($attack->getStatus() != AttackInterface::STATUS_DORMANT) {
+    <label for="depth">Max depth</label><input class="w3-input" type="text" id="depth"
+                                      value="<?php echo $attack->getMaxDepth(); ?>" <?php if ($attack->getStatus() != AttackInterface::STATUS_DORMANT) {
         echo "disabled";
-    }; ?>>
+    } ?>>
     <br>
-    <div>Directory</div>
-    <input class="w3-input" type="text" id="dir"
-           value="<?php echo $attack->getRootDir(); ?>" <?php if ($attack->getStatus() != AttackInterface::STATUS_DORMANT) {
+    <label for="dir">Directory</label><input class="w3-input" type="text" id="dir"
+                                    value="<?php echo $attack->getRootDir(); ?>" <?php if ($attack->getStatus() != AttackInterface::STATUS_DORMANT) {
         echo "disabled";
-    }; ?>>
+    } ?>>
     <?php
     switch ($attack->getStatus()) {
         case AttackInterface::STATUS_DORMANT: ?>
@@ -228,6 +227,7 @@ if (!isset($_SESSION["attack_id"])) {
             logAttackStatus($attack->getStatus());
     }
     ?>
+    <!--suppress HtmlFormInputWithoutLabel -->
     <input id="copyPlace" style="display: none;" type="text">
     </body>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>

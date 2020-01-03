@@ -22,14 +22,17 @@ require_once(__DIR__ . "/autoload.php");
  * @param string $virus_id
  */
 function trimEntry(mysqli $mysqli, string $virus_id) {
-    $answer = $mysqli->query("select count(*) as count from uptimes where virus_id = \"$virus_id\" group by virus_id");
+    $answer = $mysqli->query("select count(*) as count, virus_id from uptimes where virus_id = \"$virus_id\" group by virus_id");
     if ($answer) {
         $row = $answer->fetch_assoc();
+        \Kelvinho\Virus\log("#" . $row["virus_id"]);
         if ($row["count"] > 1000) {
             $mysqli->query("delete from uptimes where virus_id = \"$virus_id\" order by unix_time limit " . ($row["count"] - 1000));
         }
     }
 }
+
+\Kelvinho\Virus\log("@" . getenv("MYSQL_HOST") . " " . getenv("MYSQL_USER") . " " . getenv("MYSQL_PASSWORD") . " " . getenv("MYSQL_DATABASE"));
 
 $mysqli = db();
 if ($mysqli->connect_errno) {

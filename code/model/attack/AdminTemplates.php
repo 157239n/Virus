@@ -13,7 +13,8 @@ use function Kelvinho\Virus\formattedTime;
  *
  * These are some admin templates, for making the admin page of attack packages easier and more convenient
  */
-class AdminTemplates {
+class AdminTemplates
+{
     /**
      * The header (<head> included. This contains:
      * - Css from 157239n.com
@@ -23,7 +24,8 @@ class AdminTemplates {
      *
      * @return string The html code to embed in
      */
-    public static function header(): string {
+    public static function header(): string
+    {
         ob_start(); ?>
         <head>
             <title>Attack info</title>
@@ -44,33 +46,42 @@ class AdminTemplates {
      * @param AttackInterface $attack The attack object
      * @return string The html code to embed in
      */
-    public static function body(AttackInterface $attack): string {
+    public static function body(AttackInterface $attack): string
+    {
         ob_start(); ?>
         <h1><a href="<?php echo DOMAIN_VIRUS_INFO; ?>">Attack info</a></h1>
         <br>
-        <div>Name</div>
-        <input id="name" class="w3-input" type="text" value="<?php echo $attack->getName(); ?>">
+        <label for="name">Name</label><input id="name" class="w3-input" type="text"
+                                             value="<?php echo $attack->getName(); ?>">
         <br>
-        <div>Package</div>
-        <input class="w3-input" type="text" disabled value="<?php echo PackageRegistrar::getDisplayName($attack->getPackageDbName()); ?>">
+        <label>
+            Package
+            <input class="w3-input" type="text" disabled
+                   value="<?php echo PackageRegistrar::getDisplayName($attack->getPackageDbName()); ?>">
+        </label>
         <br>
-        <div>Package description</div>
-        <textarea rows="3" cols="80" class="w3-input" disabled
-                  style="resize: vertical;"><?php echo PackageRegistrar::getDescription($attack->getPackageDbName()); ?></textarea>
+        <label>
+            Package description
+            <textarea rows="3" cols="80" class="w3-input" disabled
+                      style="resize: vertical;"><?php echo PackageRegistrar::getDescription($attack->getPackageDbName()); ?></textarea>
+        </label>
         <br>
-        <div>Hash/id</div>
-        <input class="w3-input" type="text" disabled value="<?php echo $attack->getAttackId(); ?>">
+        <label>
+            Hash/id
+            <input class="w3-input" type="text" disabled value="<?php echo $attack->getAttackId(); ?>">
+        </label>
         <br>
-        <div>Status</div>
-        <input class="w3-input" type="text" disabled value="<?php echo $attack->getStatus();
-        if ($attack->getStatus() === AttackInterface::STATUS_EXECUTED) {
-            $user = User::get($_SESSION["user_handle"]);
-            echo " at " . formattedTime($attack->getExecutedTime() + Timezone::getUnixOffset($user->getTimezone())) . " UTC " . $user->getTimezone();
-        } ?>">
+        <label>
+            Status
+            <input class="w3-input" type="text" disabled value="<?php echo $attack->getStatus();
+            if ($attack->getStatus() === AttackInterface::STATUS_EXECUTED) {
+                $user = User::get($_SESSION["user_handle"]);
+                echo " at " . formattedTime($attack->getExecutedTime() + Timezone::getUnixOffset($user->getTimezone())) . " UTC " . $user->getTimezone();
+            } ?>">
+        </label>
         <br>
-        <div>Profile</div>
-        <textarea id="profile" rows="6" cols="80" class="w3-input"
-                  style="resize: vertical;"><?php echo $attack->getProfile(); ?></textarea>
+        <label for="profile">Profile</label><textarea id="profile" rows="6" cols="80" class="w3-input"
+                                               style="resize: vertical;"><?php echo $attack->getProfile(); ?></textarea>
         <br>
         <?php return ob_get_clean();
     }
@@ -83,7 +94,8 @@ class AdminTemplates {
      * @param AttackInterface $attack The attack object
      * @return string The html code to embed in
      */
-    public static function script(AttackInterface $attack): string {
+    public static function script(AttackInterface $attack): string
+    {
         ob_start(); ?>
         <script type="application/javascript">
             function deployAttack() {

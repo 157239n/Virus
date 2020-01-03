@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpUnused */
 
 namespace Kelvinho\Virus\Attack\AttackPackages\Windows\OneTime;
 

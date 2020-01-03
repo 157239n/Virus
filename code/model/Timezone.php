@@ -34,6 +34,7 @@ class Timezone {
         return isset(self::$descriptions[$timezone]);
     }
 
+    /** @noinspection PhpUnused */
     public static function getDescription(int $timezone): string {
         if (self::okay($timezone)) {
             return self::$descriptions[$timezone];

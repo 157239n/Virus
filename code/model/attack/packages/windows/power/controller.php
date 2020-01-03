@@ -1,6 +1,6 @@
 <?php
 
-use Kelvinho\Virus\Attack\AttackPackages\Power;
+use Kelvinho\Virus\Attack\AttackPackages\Windows\OneTime\Power;
 
 if (isset($_POST["type"])) {
     global $attack;

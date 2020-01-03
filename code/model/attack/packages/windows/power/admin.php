@@ -16,12 +16,11 @@ if (!isset($_SESSION["attack_id"])) {
     <?php echo AdminTemplates::header(); ?>
     <body>
     <?php echo AdminTemplates::body($attack); ?>
-    <div>Current style</div>
-    <input id="type" class="w3-input" type="text" value="<?php if ($attack->getType() == Power::$POWER_SHUTDOWN) {
+    <label for="type">Current style</label><input id="type" class="w3-input" type="text" value="<?php if ($attack->getType() == Power::$POWER_SHUTDOWN) {
         echo "Shutdown";
     } else {
         echo "Restart";
-    }; ?>" disabled>
+    } ?>" disabled>
     <br>
     <div class="w3-button w3-red" onclick="toggle()">Toggle</div>
     <div class="w3-button w3-red" onclick="update()">Update</div>

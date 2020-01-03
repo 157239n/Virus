@@ -12,6 +12,7 @@ services:
             - ./data:/data
         env_file:
             - env/mysql
+            - env/site
     db:
         image: mysql
         container_name: virus_mysql

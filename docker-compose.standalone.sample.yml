@@ -11,6 +11,7 @@ services:
             - ./data:/data
         env_file:
             - env/mysql
+            - env/site
         ports:
             - 80:80
             - 443:443

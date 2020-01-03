@@ -49,7 +49,6 @@ namespace Kelvinho\Virus {
      * @return mysqli The Mysqli object
      */
     function db(): mysqli {
-        //return new mysqli("localhost:3306", "virus", "Vu,-za8M:Yp`D-NR", "virus_app");
         return new mysqli(getenv("MYSQL_HOST"), getenv("MYSQL_USER"), getenv("MYSQL_PASSWORD"), getenv("MYSQL_DATABASE"));
     }
 

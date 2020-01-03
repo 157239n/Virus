@@ -16,12 +16,11 @@ if (!isset($_SESSION["attack_id"])) {
     <?php echo AdminTemplates::header(); ?>
     <body>
     <?php echo AdminTemplates::body($attack); ?>
-    <div>Script</div>
-    <textarea id="script" rows="12" cols="80" class="w3-input"
-              style="resize: vertical;"
+    <label for="script">Script</label><textarea id="script" rows="12" cols="80" class="w3-input"
+                                          style="resize: vertical;"
         <?php if ($attack->getStatus() != AttackInterface::STATUS_DORMANT) {
             echo "disabled";
-        }; ?>
+        } ?>
     ><?php echo $attack->getScript(); ?></textarea>
     <?php
     switch ($attack->getStatus()) {

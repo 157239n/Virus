@@ -1,4 +1,3 @@
 #!/bin/bash
 
 cat /var/log/apache2/virusError.log
-cat /var/log/apache2/phpmyadminError.log

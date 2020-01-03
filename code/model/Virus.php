@@ -36,7 +36,6 @@ class Virus {
      * The virus will use this to tell that it's still alive and listening
      */
     public function ping(): void {
-        // TODO: may want to upgrade this, so that each time span the virus is active is recorded. Currently pinging serves only to see whether the target computer is turned on
         $mysqli = db();
         if ($mysqli->connect_errno) {
             logMysql($mysqli->connect_error);
