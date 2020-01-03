@@ -1,2 +1,4 @@
 DOMAIN=https://virus.kelvinho.org
+ALT_DOMAIN=http://cloud.kelvinho.org
+ALT_SECURE_DOMAIN=https://cloud.kelvinho.org
 MYSQL_HOST=virus_mysql
