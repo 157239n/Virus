@@ -1,6 +1,7 @@
 /backup/*
 !/backup/backup.sh
 !/backup/restore.sh
+docker-compose.yml
 /data
 /env
 /mysql

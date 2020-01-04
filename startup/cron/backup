@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -a
+source /startup/env/mysql
+source /startup/env/site
+/backup/backup.sh
+set +a

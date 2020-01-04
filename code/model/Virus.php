@@ -19,7 +19,6 @@ class Virus {
     private string $virus_id = "";
     private string $name = "";
     private int $last_ping;
-    private int $ping_interval;
     private string $profile;
     public const VIRUS_ALL = 0; // all viruses
     public const VIRUS_ACTIVE = 1; // viruses that are alive, and pings back quite often
@@ -68,14 +67,6 @@ class Virus {
         return $this->last_ping;
     }
 
-    public function getPingInterval(): int {
-        return $this->ping_interval;
-    }
-
-    public function setPingInterval($ping_interval): void {
-        $this->ping_interval = $ping_interval;
-    }
-
     /**
      * Deletes the virus permanently.
      */
@@ -101,7 +92,7 @@ class Virus {
         if ($mysqli->connect_errno) {
             logMysql($mysqli->connect_error);
         }
-        $mysqli->query("update viruses set name = \"" . $mysqli->escape_string($this->name) . "\", ping_interval = $this->ping_interval where virus_id = \"$this->virus_id\"");
+        $mysqli->query("update viruses set name = \"" . $mysqli->escape_string($this->name) . "\" where virus_id = \"$this->virus_id\"");
         $mysqli->close();
         file_put_contents(DATA_FILE . "/viruses/$this->virus_id/profile.txt", $this->profile);
     }
@@ -114,10 +105,9 @@ class Virus {
         if ($mysqli->connect_errno) {
             logMysql($mysqli->connect_error);
         }
-        $row = $mysqli->query("select name, last_ping, ping_interval from viruses where virus_id = \"$this->virus_id\"")->fetch_assoc();
+        $row = $mysqli->query("select name, last_ping from viruses where virus_id = \"$this->virus_id\"")->fetch_assoc();
         $this->name = $row["name"];
         $this->last_ping = $row["last_ping"];
-        $this->ping_interval = $row["ping_interval"];
         $mysqli->close();
         $this->profile = file_get_contents(DATA_FILE . "/viruses/$this->virus_id/profile.txt");
     }
@@ -209,7 +199,7 @@ class Virus {
         if ($mysqli->connect_errno) {
             logMysql($mysqli->connect_error);
         }
-        $mysqli->query("insert into viruses (virus_id, user_handle, last_ping, name, ping_interval, active) values (\"$virus_id\", \"$user_handle\", 0, \"(not set)\", " . VIRUS_PING_INTERVAL . ", b'0')");
+        $mysqli->query("insert into viruses (virus_id, user_handle, last_ping, name, active) values (\"$virus_id\", \"$user_handle\", 0, \"(not set)\", b'0')");
         $mysqli->close();
         mkdir(DATA_FILE . "/viruses/$virus_id");
         touch(DATA_FILE . "/viruses/$virus_id/profile.txt");

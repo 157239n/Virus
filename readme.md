@@ -25,7 +25,7 @@ Don't know what the hell am I talking about? Here's what to learn more before yo
 There are these files containing the environment variables:
 - mysql: stores mainly data used to create the database initially and to access it from an outside script
   - MYSQL\_USER: username used by mysql and accessing scripts, can be anything
-  - MYSQL\_PASSWORD: username used by mysql and accessing scripts, can be anything
+  - MYSQL\_PASSWORD: username used by mysql and accessing scripts, can be anything. Please do not have really, really special characters. Quotes (', " and `) are not okay, (@, %, _, ...) should be okay but I have not tested this
   - MYSQL\_DATABASE: database name used by mysql and accessing scripts. Have to be virus\_app, to be in sync with the initial mysql startup script at mysql\_startup/
   - MYSQL\_ROOT\_PASSWORD: root password, only used by mysql. You must have either this or MYSQL\_RANDOM\_ROOT\_PASSWORD=yes
 - site: stores mainly data used for sites, meaning PhpMyAdmin and the application

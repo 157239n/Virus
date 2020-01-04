@@ -20,7 +20,6 @@ CREATE TABLE IF NOT EXISTS viruses (
     user_handle varchar(20) not null,
     last_ping int not null, /* unix timestamp */
     name varchar(50) not null, /* short text of the virus, equivalent to "target name", if you will */
-    ping_interval int not null,
     active bit not null, /* whether this virus is currently active (pinging back) or not. 0 for not active, 1 for active */
     index (virus_id, user_handle),
     primary key (virus_id)

@@ -32,7 +32,8 @@ function trimEntry(mysqli $mysqli, string $virus_id) {
     }
 }
 
-//\Kelvinho\Virus\log("@" . getenv("MYSQL_HOST") . " " . getenv("MYSQL_USER") . " " . getenv("MYSQL_PASSWORD") . " " . getenv("MYSQL_DATABASE"));
+#\Kelvinho\Virus\log("@" . getenv("MYSQL_HOST") . " " . getenv("MYSQL_USER") . " " . getenv("MYSQL_PASSWORD") . " " . getenv("MYSQL_DATABASE"));
+#\Kelvinho\Virus\log("in scan");
 
 $mysqli = db();
 if ($mysqli->connect_errno) {
