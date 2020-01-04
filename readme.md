@@ -24,12 +24,12 @@ Don't know what the hell am I talking about? Here's what to learn more before yo
 
 There are these files containing the environment variables:
 - mysql: stores mainly data used to create the database initially and to access it from an outside script
-  - MYSQL_USER: username used by mysql and accessing scripts, can be anything
-  - MYSQL_PASSWORD: username used by mysql and accessing scripts, can be anything
-  - MYSQL_DATABASE: database name used by mysql and accessing scripts. Have to be virus_app, to be in sync with the initial mysql startup script at mysql_startup/. Change this only if you know what you are doing
-  - MYSQL_ROOT_PASSWORD: root password, only used by mysql. You must have either this or MYSQL_RANDOM_ROOT_PASSWORD=yes
+  - MYSQL\_USER: username used by mysql and accessing scripts, can be anything
+  - MYSQL\_PASSWORD: username used by mysql and accessing scripts, can be anything
+  - MYSQL\_DATABASE: database name used by mysql and accessing scripts. Have to be virus\_app, to be in sync with the initial mysql startup script at mysql\_startup/
+  - MYSQL\_ROOT\_PASSWORD: root password, only used by mysql. You must have either this or MYSQL\_RANDOM\_ROOT\_PASSWORD=yes
 - site: stores mainly data used for sites, meaning PhpMyAdmin and the application
   - DOMAIN: main domain where your users will see. Can be either http or https
-  - ALT_DOMAIN: main domain where your viruses will see. Has to be http. Doesn't have to be different from the domain above
-  - ALT_SECURE_DOMAIN: main domain where your viruses will see. Has to be https
-  - MYSQL_HOST: mysql container host name, specified in (and must be in sync with) the docker-compose.yml file
+  - ALT\_DOMAIN: main domain where your viruses will see. Has to be http. Doesn't have to be different from the domain above
+  - ALT\_SECURE\_DOMAIN: main domain where your viruses will see. Has to be https
+  - MYSQL\_HOST: mysql container host name, specified in (and must be in sync with) the docker-compose.yml file

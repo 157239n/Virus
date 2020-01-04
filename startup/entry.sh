@@ -13,12 +13,12 @@ chown -R www-data:www-data /var/log/apache2
 cat /startup/env/site | /startup/setupFpmEnv.sh
 cp /env/php_fpm /etc/environment
 
-#crontab /startup/cron.txt
-#cron -f
+crontab /startup/cron.txt
+cron -f
 
-while true; do
-  php /var/www/virus/scan.php
-  sleep 20
-done
+#while true; do
+#  php /var/www/virus/scan.php
+#  sleep 20
+#done
 
 tail -f /dev/null

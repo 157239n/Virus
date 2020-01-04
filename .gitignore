@@ -1,5 +1,6 @@
-backup/
-data/
-env/
-docker-compose.yml
-mysql/
+/backup/*
+!/backup/backup.sh
+!/backup/restore.sh
+/data
+/env
+/mysql

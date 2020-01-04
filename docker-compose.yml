@@ -10,6 +10,7 @@ services:
         volumes:
             - ./code:/var/www/virus
             - ./data:/data
+            - ./backup:/backup
         env_file:
             - env/mysql
             - env/site
