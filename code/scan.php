@@ -7,9 +7,9 @@ don't really mind if the user 'accidentally' invoke this, because that will just
 virtually no harm.
 */
 
-use Kelvinho\Virus\Virus;
+use Kelvinho\Virus\Logs;
+use Kelvinho\Virus\Virus\Virus;
 use function Kelvinho\Virus\db;
-use function Kelvinho\Virus\logMysql;
 
 require_once(__DIR__ . "/autoload.php");
 
@@ -25,19 +25,15 @@ function trimEntry(mysqli $mysqli, string $virus_id) {
     $answer = $mysqli->query("select count(*) as count, virus_id from uptimes where virus_id = \"$virus_id\" group by virus_id");
     if ($answer) {
         $row = $answer->fetch_assoc();
-        \Kelvinho\Virus\log("#" . $row["virus_id"]);
         if ($row["count"] > 1000) {
             $mysqli->query("delete from uptimes where virus_id = \"$virus_id\" order by unix_time limit " . ($row["count"] - 1000));
         }
     }
 }
 
-#\Kelvinho\Virus\log("@" . getenv("MYSQL_HOST") . " " . getenv("MYSQL_USER") . " " . getenv("MYSQL_PASSWORD") . " " . getenv("MYSQL_DATABASE"));
-#\Kelvinho\Virus\log("in scan");
-
 $mysqli = db();
 if ($mysqli->connect_errno) {
-    logMysql($mysqli->connect_error);
+    Logs::mysql($mysqli->connect_error);
 }
 $answer = $mysqli->query("select virus_id, last_ping, cast(active as unsigned integer) as activeI from viruses");
 if ($answer) {
