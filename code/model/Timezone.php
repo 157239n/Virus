@@ -2,6 +2,10 @@
 
 namespace Kelvinho\Virus;
 
+/**
+ * Class Timezone, handles timezones, Singleton
+ * @package Kelvinho\Virus
+ */
 class Timezone {
     private static array $descriptions = array(
         -12 => "No one",

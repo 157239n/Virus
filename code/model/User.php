@@ -2,6 +2,8 @@
 
 namespace Kelvinho\Virus;
 
+use Kelvinho\Virus\Virus\Virus;
+
 /**
  * Class User
  * @package Kelvinho\Virus
@@ -15,41 +17,21 @@ class User {
     private int $timezone = 0;
 
     private function fetchData(): void {
-        if (Authenticator::authenticated($this->user_handle)) {
-            $mysqli = db();
-            if ($mysqli->connect_errno) {
-                logMysql($mysqli->connect_error);
-            }
-            $answer = $mysqli->query("select name, timezone from users where user_handle = \"$this->user_handle\"");
-            while ($row = $answer->fetch_assoc()) {
-                $this->name = $row["name"];
-                $this->timezone = $row["timezone"];
-            }
-            $mysqli->close();
-        } else {
-            logError("This shouldn't have happened, \\Kelvinho\\Virus\\User\\fetchData()");
+        $mysqli = db();
+        if ($mysqli->connect_errno) {
+            Logs::mysql($mysqli->connect_error);
         }
+        $answer = $mysqli->query("select name, timezone from users where user_handle = \"$this->user_handle\"");
+        while ($row = $answer->fetch_assoc()) {
+            $this->name = $row["name"];
+            $this->timezone = $row["timezone"];
+        }
+        $mysqli->close();
     }
 
     private function __construct(string $user_handle) {
         $this->user_handle = $user_handle;
         $this->fetchData();
-    }
-
-    /**
-     * Deletes the user permanently.
-     */
-    public function delete(): void {
-        map(User::getViruses($this->user_handle, Virus::VIRUS_ALL), function (/** @noinspection PhpUnusedParameterInspection */ $last_ping, $virus_id) {
-            $virus = Virus::get($virus_id);
-            $virus->delete();
-        });
-        $mysqli = db();
-        if ($mysqli->connect_errno) {
-            logMysql($mysqli->connect_error);
-        }
-        $mysqli->query("delete from users where user_handle = \"$this->user_handle\"");
-        $mysqli->close();
     }
 
     public function getTimezone(): int {
@@ -63,54 +45,39 @@ class User {
     public function saveState(): void {
         $mysqli = db();
         if ($mysqli->connect_errno) {
-            logMysql($mysqli->connect_error);
+            Logs::mysql($mysqli->connect_error);
         }
         $mysqli->query("update attacks set timezone = $this->timezone where user_handle = \"$this->user_handle\"");
         $mysqli->close();
     }
 
     /**
-     * Get viruses as an associative array with attack_id => last_ping.
+     * Get array of index -> {"virus_id" -> "{virus_id}", "last_ping" -> "{last_ping}"}
      *
      * @param string $user_handle
      * @param int $virusStatus
-     * @return array Associative array with attack_id => last_ping
+     * @return array
      */
     public static function getViruses(string $user_handle, int $virusStatus): array {
         switch ($virusStatus) {
             case Virus::VIRUS_ALL:
                 $mysqli = db();
                 if ($mysqli->connect_errno) {
-                    logMysql($mysqli->connect_error);
+                    Logs::mysql($mysqli->connect_error);
                 }
                 $viruses = [];
                 $answer = $mysqli->query("select virus_id, last_ping from viruses where user_handle = \"$user_handle\"");
                 if ($answer) {
                     while ($row = $answer->fetch_assoc()) {
-                        $viruses[$row["virus_id"]] = $row["last_ping"];
+                        array_push($viruses, array("virus_id" => $row["virus_id"], "last_ping" => $row["last_ping"]));
                     }
                 }
                 $mysqli->close();
                 return $viruses;
-            case Virus::VIRUS_ACTIVE:
-                return filter(User::getViruses($user_handle, Virus::VIRUS_ALL), function (int $last_ping) {
-                    return Virus::getState($last_ping) == Virus::VIRUS_ACTIVE;
-                }, null, false);
-            case Virus::VIRUS_DORMANT:
-                return filter(User::getViruses($user_handle, Virus::VIRUS_ALL), function (int $last_ping) {
-                    return Virus::getState($last_ping) == Virus::VIRUS_DORMANT;
-                }, null, false);
-            case Virus::VIRUS_LOST:
-                return filter(User::getViruses($user_handle, Virus::VIRUS_ALL), function (int $last_ping) {
-                    return Virus::getState($last_ping) == Virus::VIRUS_LOST;
-                }, null, false);
-            case Virus::VIRUS_EXPECTING:
-                return filter(User::getViruses($user_handle, Virus::VIRUS_ALL), function (int $last_ping) {
-                    return Virus::getState($last_ping) == Virus::VIRUS_EXPECTING;
-                }, null, false);
             default:
-                logError("Virus status of $virusStatus is not found");
-                return null;
+                return filter(User::getViruses($user_handle, Virus::VIRUS_ALL), function ($data, /** @noinspection PhpUnusedParameterInspection */ $key, int $virusStatus) {
+                    return Virus::getState($data["last_ping"]) == $virusStatus;
+                }, $virusStatus);
         }
     }
 
@@ -130,7 +97,7 @@ class User {
             // adding user to database
             $mysqli = db();
             if ($mysqli->connect_errno) {
-                logMysql($mysqli->connect_error);
+                Logs::mysql($mysqli->connect_error);
             }
             $mysqli->query("insert into users (user_handle, password, name, timezone) values (\"$user_handle\", \"$password\", \"" . $mysqli->escape_string($name) . "\", $timezone)");
             $mysqli->close();
@@ -147,7 +114,7 @@ class User {
     public static function exists(string $user_handle): bool {
         $mysqli = db();
         if ($mysqli->connect_errno) {
-            logMysql($mysqli->connect_error);
+            Logs::mysql($mysqli->connect_error);
         }
         $answer = $mysqli->query("select user_handle from users where user_handle = \"" . $mysqli->escape_string($user_handle) . "\"");
         $mysqli->close();
@@ -173,4 +140,9 @@ class User {
             return null;
         }
     }
+/*
+    public static function currentUserHandle(): ?string {
+        return self::$current_user_handle;
+    }
+*/
 }

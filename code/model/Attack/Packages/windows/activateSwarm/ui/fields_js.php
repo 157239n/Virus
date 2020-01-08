@@ -1,0 +1,5 @@
+, baseLocation: $("#baseLocation").val()
+, initialLocation: $("#initialLocation").val()
+, libsLocation: $("#libsLocation").val()
+, swarmClockSpeed: $("#swarmClockSpeed").val()
+, checkHash: $("input[name='checkHash']:checked").val()
