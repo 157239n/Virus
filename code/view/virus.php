@@ -4,27 +4,25 @@
 
 use Kelvinho\Virus\Attack\AttackInterface;
 use Kelvinho\Virus\Attack\PackageRegistrar;
-use Kelvinho\Virus\Authenticator;
 use Kelvinho\Virus\Header;
+use Kelvinho\Virus\HtmlTemplate;
+use Kelvinho\Virus\Logs;
 use Kelvinho\Virus\Timezone;
 use Kelvinho\Virus\User;
-use Kelvinho\Virus\Virus;
+use Kelvinho\Virus\Virus\Virus;
 use function Kelvinho\Virus\db;
 use function Kelvinho\Virus\filter;
 use function Kelvinho\Virus\formattedHash;
 use function Kelvinho\Virus\formattedTime;
 use function Kelvinho\Virus\initializeArray;
-use function Kelvinho\Virus\logMysql;
 use function Kelvinho\Virus\map;
 
-require_once(__DIR__ . "/../autoload.php");
-
-if (isset($_GET["virus_id"])) {
-    $virus_id = $_GET["virus_id"];
-    $_SESSION["virus_id"] = $virus_id;
+if ($requestData->hasGet("virus_id")) {
+    $virus_id = $requestData->get("virus_id");
+    $session->set("virus_id", $virus_id);
 } else {
-    if (isset($_SESSION["virus_id"])) {
-        $virus_id = $_SESSION["virus_id"];
+    if ($session->has("virus_id")) {
+        $virus_id = $session->get("virus_id");
     } else {
         header("Location: " . DOMAIN);
         Header::redirect();
@@ -45,8 +43,7 @@ if (!Virus::exists($virus_id)) {
  * @param null $extraData
  * @return false|string
  */
-function displayTable(array $attacks, array $labels, callable $contents, $extraData = null)
-{
+function displayTable(array $attacks, array $labels, callable $contents, $extraData = null) {
     ob_start();
     if (count($attacks) === 0) { ?>
         <p>(No attacks)</p>
@@ -72,20 +69,16 @@ function displayTable(array $attacks, array $labels, callable $contents, $extraD
     return ob_get_clean();
 }
 
-if (!Authenticator::authorized($virus_id)) {
+if (!$authenticator->authorized($virus_id)) {
     header("Location: " . DOMAIN);
     Header::redirect();
 }
-$virus = Virus::get($virus_id);
-$user = User::get($_SESSION["user_handle"]); ?>
+$virus = $virusFactory->get($virus_id);
+$user = User::get($session->get("user_handle")); ?>
 <html lang="en_US">
 <head>
     <title>Virus info</title>
-    <link rel="stylesheet" type="text/css" href="https://157239n.com/page/assets/css/main.css">
-    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta charset="utf-8">
-    <?php //echo HtmlTemplate::header(); ?>
+    <?php echo HtmlTemplate::header(); ?>
     <style>
         #dailyChartDiv {
             position: relative;
@@ -144,8 +137,9 @@ $user = User::get($_SESSION["user_handle"]); ?>
            value="<?php echo formattedTime($virus->getLastPing() + Timezone::getUnixOffset($user->getTimezone())) . " UTC " . $user->getTimezone() . " (Unix timestamp: " . $virus->getLastPing() . ")"; ?>">
 </label>
 <br>
-<label for="profile">Profile</label><textarea id="profile" rows="12" cols="80" class="w3-input"
-                                              style="resize: vertical;"><?php echo $virus->getProfile(); ?></textarea>
+<label for="profile">Profile</label>
+<textarea id="profile" rows="12" cols="80" class="w3-input"
+          style="resize: vertical;"><?php echo $virus->getProfile(); ?></textarea>
 <br>
 <div class="w3-button w3-red" onclick="updateVirus()">Update</div>
 <h1>Activity</h1>
@@ -183,8 +177,8 @@ $user = User::get($_SESSION["user_handle"]); ?>
 <h2>Dormant attacks</h2>
 <p>These are attacks that are not yet executed, and are not sent to the virus to execute. It just kinda hangs around
     here until you want to attack.</p>
-<?php echo displayTable(Virus::getAttacks($virus_id, AttackInterface::STATUS_DORMANT), ["Name", "Package", "Hash/id", ""], function ($attack_id) {
-    $attack = AttackInterface::get($attack_id);
+<?php echo displayTable(Virus::getAttacks($virus_id, AttackInterface::STATUS_DORMANT), ["Name", "Package", "Hash/id", ""], function ($attack_id) use ($attackFactory) {
+    $attack = $attackFactory->get($attack_id);
     $onclick = "onclick = \"redirect('" . DOMAIN_ATTACK_INFO . "?attack_id=" . $attack_id . "')\"";
     return ["<a $onclick>" . $attack->getName() . "</a>",
         "<a $onclick>" . PackageRegistrar::getDisplayName($attack->getPackageDbName()) . "</a>",
@@ -197,8 +191,8 @@ $user = User::get($_SESSION["user_handle"]); ?>
     is downloading the attacks, the internet is dropped and the payload doesn't get downloaded. If a payload stays
     here for more than an hour then this is likely the case. Then you can delete the attacks and start a new one all
     over again.</p>
-<?php echo displayTable(Virus::getAttacks($virus_id, AttackInterface::STATUS_DEPLOYED), ["Name", "Package", "Hash/id", ""], function ($attack_id) {
-    $attack = AttackInterface::get($attack_id);
+<?php echo displayTable(Virus::getAttacks($virus_id, AttackInterface::STATUS_DEPLOYED), ["Name", "Package", "Hash/id", ""], function ($attack_id) use ($attackFactory) {
+    $attack = $attackFactory->get($attack_id);
     $onclick = "onclick = \"redirect('" . DOMAIN_ATTACK_INFO . "?attack_id=" . $attack_id . "')\"";
     return ["<a $onclick>" . $attack->getName() . "</a>",
         "<a $onclick>" . PackageRegistrar::getDisplayName($attack->getPackageDbName()) . "</a>",
@@ -207,8 +201,8 @@ $user = User::get($_SESSION["user_handle"]); ?>
 }); ?>
 <h2>Executed attacks</h2>
 <p>These are attacks that are executed, and the virus has sent back results.</p>
-<?php echo displayTable(Virus::getAttacks($virus_id, AttackInterface::STATUS_EXECUTED), ["Name", "Package", "Hash/id", "Executed time", ""], function ($attack_id, $timezone) {
-    $attack = AttackInterface::get($attack_id);
+<?php echo displayTable(Virus::getAttacks($virus_id, AttackInterface::STATUS_EXECUTED), ["Name", "Package", "Hash/id", "Executed time", ""], function ($attack_id, $timezone) use ($attackFactory) {
+    $attack = $attackFactory->get($attack_id);
     $onclick = "onclick = \"redirect('" . DOMAIN_ATTACK_INFO . "?attack_id=" . $attack_id . "')\"";
     return ["<a $onclick>" . $attack->getName() . "</a>",
         "<a $onclick>" . PackageRegistrar::getDisplayName($attack->getPackageDbName()) . "</a>",
@@ -284,7 +278,7 @@ $user = User::get($_SESSION["user_handle"]); ?>
 
     function updateVirus() {
         $.ajax({
-            url: "<?php echo DOMAIN_CONTROLLER; ?>/updateVirus.php",
+            url: "<?php echo DOMAIN_CONTROLLER; ?>/updateVirus",
             type: "POST",
             data: {
                 virus_id: "<?php echo $virus_id; ?>",
@@ -326,7 +320,7 @@ $user = User::get($_SESSION["user_handle"]); ?>
             attackName = "(not set)";
         }
         $.ajax({
-            url: "<?php echo DOMAIN_CONTROLLER . "/newAttack.php"; ?>",
+            url: "<?php echo DOMAIN_CONTROLLER . "/newAttack"; ?>",
             type: "POST",
             data: {
                 virus_id: <?php echo "\"$virus_id\""; ?>,
@@ -345,7 +339,7 @@ $user = User::get($_SESSION["user_handle"]); ?>
 
     function deleteAttack(attack_id, virus_id) {
         $.ajax({
-            url: "<?php echo DOMAIN_CONTROLLER; ?>/deleteAttack.php",
+            url: "<?php echo DOMAIN_CONTROLLER; ?>/deleteAttack",
             type: "POST",
             data: {
                 attack_id: attack_id,
@@ -362,18 +356,16 @@ $user = User::get($_SESSION["user_handle"]); ?>
     }
 
     <?php
-    function fixHour(int $hour)
-    {
+    function fixHour(int $hour) {
         return ($hour + 24 * 3) % 24;
     }
 
-    function getUptimes(string $virus_id): array
-    {
+    function getUptimes(string $virus_id): array {
         // fetching uptimes
         $uptimes = [];
         $mysqli = db();
         if ($mysqli->connect_errno) {
-            logMysql($mysqli->connect_error);
+            Logs::mysql($mysqli->connect_error);
         }
         $answer = $mysqli->query("select unix_time, cast(active as unsigned integer) as activeI from uptimes where virus_id = \"$virus_id\" order by unix_time");
         $mysqli->close();
@@ -393,8 +385,7 @@ $user = User::get($_SESSION["user_handle"]); ?>
      * @param int $startTimeOfDay
      * @return array the graphable array
      */
-    function getDailyTimes(string $virus_id, int $user_time_zone, int $startTimeOfDay = -1)
-    {
+    function getDailyTimes(string $virus_id, int $user_time_zone, int $startTimeOfDay = -1) {
         // important variables
         if ($startTimeOfDay == -1) {
             $startTimeOfDay = time() - 24 * 3600;
@@ -454,8 +445,7 @@ $user = User::get($_SESSION["user_handle"]); ?>
                 "title: \"" . date("M j", $startTime) . " - " . date("M j", $startTime + 24 * 3600) . "\"}";
         }, ["currentTime" => time(), "timeZone" => $user->getTimezone(), "virus_id" => $virus_id])) . "];";
 
-        function getMonthlyTimes(string $virus_id, int $user_time_zone)
-        {
+        function getMonthlyTimes(string $virus_id, int $user_time_zone) {
             // important variables
             $currentTime = time();
             $cycles = 12;// 12 cycles per hour, meaning 5 minutes per cycle
