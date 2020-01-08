@@ -3,35 +3,32 @@
 // sends this a get parameter "file" with the name of the file inside of each attack's directory. This will check for
 // permissions and then return back the file.
 
-use Kelvinho\Virus\Authenticator;
-use Kelvinho\Virus\Controller\Helper;
 use Kelvinho\Virus\Header;
+use function Kelvinho\Virus\goodPath;
 
-require_once(__DIR__ . "/../autoload.php");
-
-if (!isset($_GET["file"])) {
+if (!$requestData->hasGet("file")) {
     Header::notFound();
 }
-$file = $_GET["file"];
+$file = $requestData->get("file");
 
-if (isset($_GET["desiredName"])) {
-    $desiredName = $_GET["desiredName"];
+if ($requestData->hasGet("desiredName")) {
+    $desiredName = $requestData->get("desiredName");
 } else {
     $desiredName = "file";
 }
 
-Helper::verifyIds($_SESSION["virus_id"], $_SESSION["attack_id"]);
-$virus_id = $_SESSION["virus_id"];
-$attack_id = $_SESSION["attack_id"];
+$virus_id = $session->getCheck("virus_id");
+$attack_id = $session->getCheck("attack_id");
 
-if (!Authenticator::authorized($virus_id, $attack_id)) {
+if (!$authenticator->authorized($virus_id, $attack_id)) {
     Header::forbidden();
-} else {
-    $absPath = DATA_FILE . "/attacks/$attack_id/$file";
+}
 
-    if (file_exists($absPath)) {
-        \header("Content-type: " . mime_content_type($absPath));
-        \header("Content-Disposition: inline; filename=\"$desiredName\"");
-        readfile($absPath);
-    }
+$relativePath = "/attacks/$attack_id/$file";
+$absPath = DATA_FILE . $relativePath;
+
+if (goodPath(DATA_FILE, $relativePath)) {
+    \header("Content-type: " . mime_content_type($absPath));
+    \header("Content-Disposition: inline; filename=\"$desiredName\"");
+    readfile($absPath);
 }

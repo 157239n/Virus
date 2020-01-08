@@ -1,28 +1,21 @@
 <?php
 
-require_once(__DIR__ . "/../autoload.php");
-
-use Kelvinho\Virus\Authenticator;
 use Kelvinho\Virus\Header;
-use Kelvinho\Virus\Virus;
-use function Kelvinho\Virus\checkVariable;
+use Kelvinho\Virus\Virus\Virus;
 
-$virus_id = checkVariable($_POST["virus_id"]);
-$name = checkVariable($_POST["name"]);
-//$ping_interval = checkVariable($_POST["ping_interval"]);
-$profile = checkVariable($_POST["profile"]);
+$virus_id = $requestData->postCheck("virus_id");
+$name = $requestData->postCheck("name");
+$profile = $requestData->postCheck("profile");
 
 if (!Virus::exists($virus_id)) {
     Header::badRequest();
 }
 
-if (!Authenticator::authorized($virus_id)) {
+if (!$authenticator->authorized($virus_id)) {
     Header::forbidden();
-} else {
-    $virus = Virus::get($virus_id);;
-    $virus->setName($name);
-    //$virus->setPingInterval((int)$ping_interval);
-    //$virus->setPingInterval(7);
-    $virus->setProfile($profile);
-    $virus->saveState();
 }
+
+$virus = $virusFactory->get($virus_id);
+$virus->setName($name);
+$virus->setProfile($profile);
+$virus->saveState();

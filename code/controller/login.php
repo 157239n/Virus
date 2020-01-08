@@ -1,15 +1,12 @@
 <?php
 
-require_once(__DIR__ . "/../autoload.php");
-
-use Kelvinho\Virus\Authenticator;
 use Kelvinho\Virus\Header;
 
-$user_handle = $_POST["user_handle"];
-$password = $_POST["password"];
+$user_handle = $requestData->post("user_handle");
+$password = $requestData->post("password");
 
-Authenticator::authenticate($user_handle, $password);
-if (Authenticator::authenticated()) {
+$authenticator->authenticate($user_handle, $password);
+if ($authenticator->authenticated()) {
     Header::ok();
 } else {
     Header::forbidden();

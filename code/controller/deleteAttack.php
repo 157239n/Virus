@@ -1,21 +1,15 @@
 <?php
 
-use Kelvinho\Virus\Attack\AttackInterface;
-use Kelvinho\Virus\Authenticator;
-use Kelvinho\Virus\Controller\Helper;
 use Kelvinho\Virus\Header;
 
-require_once(__DIR__ . "/../autoload.php");
+$virus_id = $requestData->postCheck("virus_id");
+$attack_id = $requestData->postCheck("attack_id");
 
-Helper::verifyIds($_POST["virus_id"], $_POST["attack_id"]);
-$virus_id = $_POST["virus_id"];
-$attack_id = $_POST["attack_id"];
-
-if (!Authenticator::authorized($virus_id, $attack_id)) {
+if (!$authenticator->authorized($virus_id, $attack_id)) {
     Header::forbidden();
-} else {
-    $_SESSION["virus_id"] = $virus_id;
-    $attack = AttackInterface::get($attack_id);
-    $attack->delete();
-    Header::ok();
 }
+
+$session->set("virus_id", $virus_id);
+$attack = $attackFactory->get($attack_id);
+$attack->delete();
+Header::ok();
