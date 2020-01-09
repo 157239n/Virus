@@ -7,7 +7,6 @@ don't really mind if the user 'accidentally' invoke this, because that will just
 virtually no harm.
 */
 
-use Kelvinho\Virus\Logs;
 use Kelvinho\Virus\Virus\Virus;
 use function Kelvinho\Virus\db;
 
@@ -32,9 +31,6 @@ function trimEntry(mysqli $mysqli, string $virus_id) {
 }
 
 $mysqli = db();
-if ($mysqli->connect_errno) {
-    Logs::mysql($mysqli->connect_error);
-}
 $answer = $mysqli->query("select virus_id, last_ping, cast(active as unsigned integer) as activeI from viruses");
 if ($answer) {
     while ($row = $answer->fetch_assoc()) {

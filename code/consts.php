@@ -27,8 +27,8 @@ define("NAME_LENGTH_LIMIT", 20);
 
 // all in seconds, original plan commented on the right
 define("VIRUS_PING_INTERVAL", 7); // 10 minutes
-define("STARTUP_DELAY", 3); // 5 minutes
 define("ATTACK_UPLOAD_RETRY_INTERVAL", 5); // 1 minute
+define("ATTACK_RETRIES", 10);
 define("SWARM_CLOCK_SPEED", 2); // thus, the checking time will be 2 times this
 define("SWARM_CHECK_MULTIPLIER", 2); // liveliness check will have a window of time of SWARM_CLOCK_SPEED * SWARM_CHECK_MULTIPLIER seconds to talk to each other
 define("SWARM_CREATION_MULTIPLIER", 5); // creation events will have a spare time to get things up to speed in SWARM_CLOCK_SPEED * SWARM_CREATION_MULTIPLIER before it's deemed failed and worth another try

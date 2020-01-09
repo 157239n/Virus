@@ -1,7 +1,7 @@
 <?php /** @noinspection PhpIncludeInspection */
 
 // routes for UI
-use Kelvinho\Virus\Header;
+use Kelvinho\Virus\Singleton\Header;
 
 $router->get("", function () use ($requestData) {
     if ($requestData->getHost() == DOMAIN) {
@@ -12,10 +12,10 @@ $router->get("", function () use ($requestData) {
         Header::redirect();
     }
 });
-$router->get("dashboard", function () use ($requestData, $authenticator, $session, $virusFactory) {
+$router->get("dashboard", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory) {
     include(__DIR__ . "/../view/dashboard.php");
 });
-$router->get("virus", function () use ($requestData, $authenticator, $session, $virusFactory, $attackFactory) {
+$router->get("virus", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory, $attackFactory) {
     include(__DIR__ . "/../view/virus.php");
 });
 $router->get("attack", function () use ($requestData, $authenticator, $session, $attackFactory) {
@@ -26,9 +26,9 @@ $router->get("login", function () use ($requestData, $authenticator) {
 });
 
 // and controller stuff
-$router->post("controller/*", function () use ($requestData, $authenticator, $session, $attackFactory, $virusFactory) {
+$router->post("controller/*", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory, $attackFactory) {
     include(__DIR__ . "/../controller/" . $requestData->getExplodedPath()[1] . ".php");
 });
-$router->get("controller/*", function () use ($requestData, $authenticator, $session, $attackFactory, $virusFactory) {
+$router->get("controller/*", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory, $attackFactory) {
     include(__DIR__ . "/../controller/" . $requestData->getExplodedPath()[1] . ".php");
 });

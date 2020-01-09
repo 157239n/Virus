@@ -1,13 +1,9 @@
 <?php
 
-use Kelvinho\Virus\Header;
+use Kelvinho\Virus\Singleton\Header;
 
-$user_handle = $requestData->post("user_handle");
-$password = $requestData->post("password");
+$user_handle = $requestData->postCheck("user_handle");
+$password = $requestData->postCheck("password");
 
 $authenticator->authenticate($user_handle, $password);
-if ($authenticator->authenticated()) {
-    Header::ok();
-} else {
-    Header::forbidden();
-}
+$authenticator->authenticated() ? Header::ok() : Header::forbidden();

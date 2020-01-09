@@ -1,13 +1,19 @@
 <?php
 
-namespace Kelvinho\Virus;
+namespace Kelvinho\Virus\Id;
+
+use function Kelvinho\Virus\db;
 
 /**
- * Class Ids, Singleton
+ * Class IdGeneratorImp
+ * Responsible for generating new virus_id and attack_id, making sure a value has not been used before.
  *
- * @package Kelvinho\Virus
+ * @package Kelvinho\Virus\Id
+ * @author Quang Ho <157239q@gmail.com>
+ * @copyright Copyright (c) 2020 Quang Ho <https://github.com/157239n>
+ * @license http://www.opensource.org/licenses/mit-license.html  MIT License
  */
-class Ids {
+class IdGeneratorImp implements IdGenerator {
     /**
      * Creates a new id based on SHA256 hash. This will check against the existing database to make sure there are no collisions.
      * If there are a collision then it will generate a new one automatically.
@@ -16,12 +22,9 @@ class Ids {
      * @param string $table The table to check against, like attacks, viruses
      * @return string The new id
      */
-    public static function newId(string $field, string $table) {
+    private function newId(string $field, string $table) {
         $id = hash("sha256", rand());
         $mysqli = db();
-        if ($mysqli->connect_errno) {
-            Logs::mysql($mysqli->connect_error);
-        }
         $answer = $mysqli->query("select $field from $table where $field = $id");
         $mysqli->close();
         $hasId = false;
@@ -31,27 +34,27 @@ class Ids {
             }
         }
         if ($hasId) {
-            return Ids::newId($field, $table);
+            return IdGeneratorImp::newId($field, $table);
         } else {
             return $id;
         }
     }
 
     /**
-     * Creates a new virus id. Guarantees to be unique.
+     * Generates a new virus id.
      *
-     * @return string The 64-character-long virus id
+     * @return string
      */
-    public static function newVirusId(): string {
-        return Ids::newId("virus_id", "viruses");
+    public function newVirusId(): string {
+        return IdGeneratorImp::newId("virus_id", "viruses");
     }
 
     /**
-     * Creates a new attack id. Guarantees to be unique.
+     * Generates a new attack id.
      *
-     * @return string The 64-character-long attack id
+     * @return string
      */
-    public static function newAttackId(): string {
-        return Ids::newId("attack_id", "attacks");
+    public function newAttackId(): string {
+        return IdGeneratorImp::newId("attack_id", "attacks");
     }
 }

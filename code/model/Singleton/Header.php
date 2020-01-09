@@ -1,12 +1,14 @@
 <?php
 
-namespace Kelvinho\Virus;
+namespace Kelvinho\Virus\Singleton;
 
 /**
- * Class Header, Singleton
- * @package Kelvinho\Virus
+ * Class Header. Convenience class for setting http response code and exiting.
  *
- * This is a convenient class for setting the http response code and exiting the script.
+ * @package Kelvinho\Virus\Singleton
+ * @author Quang Ho <157239q@gmail.com>
+ * @copyright Copyright (c) 2020 Quang Ho <https://github.com/157239n>
+ * @license http://www.opensource.org/licenses/mit-license.html  MIT License
  */
 class Header {
     public static function ok() {
@@ -32,5 +34,10 @@ class Header {
     public static function redirect() {
         http_response_code(302);
         exit(0);
+    }
+
+    public static function redirectToGoogle() {
+        header("Location: http://google.com");
+        self::redirect();
     }
 }

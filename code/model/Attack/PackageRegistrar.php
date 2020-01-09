@@ -4,9 +4,12 @@ namespace Kelvinho\Virus\Attack;
 
 /**
  * Class PackageRegistrar, Singleton
- * @package Kelvinho\Virus\Attack
- *
  * Oversees the attack packages. They look like scanPartitions, but their real class name with namespace will be Kelvinho\Virus\Attack\Packages\ScanPartitions
+ *
+ * @package Kelvinho\Virus\Attack
+ * @author Quang Ho <157239q@gmail.com>
+ * @copyright Copyright (c) 2020 Quang Ho <https://github.com/157239n>
+ * @license http://www.opensource.org/licenses/mit-license.html  MIT License
  */
 class PackageRegistrar {
     private static array $packages = [];
@@ -16,7 +19,7 @@ class PackageRegistrar {
      * Registers an attack package. This is supposed to be called from packages/{platform}/{package name}/register.php
      *
      * @param string $dbName Name stored in the database
-     * @param string $className Actual class name to instantiate AttackInterface object
+     * @param string $className Actual class name to instantiate AttackBase object
      * @param string $displayName Name displayed to users
      * @param string $location Directory of the package
      * @param array $classes The groups this package belongs to

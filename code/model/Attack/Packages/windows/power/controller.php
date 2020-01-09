@@ -2,6 +2,8 @@
 
 use Kelvinho\Virus\Attack\Packages\Windows\OneTime\Power;
 
+/** @var Power $this */
+
 $type = $this->requestData->postCheck("type");
 
 switch (trim($type)) {

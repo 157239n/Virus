@@ -1,7 +1,7 @@
 <?php
 
-use Kelvinho\Virus\HtmlTemplate;
-use Kelvinho\Virus\Timezone;
+use Kelvinho\Virus\Singleton\HtmlTemplate;
+use Kelvinho\Virus\Singleton\Timezone;
 use function Kelvinho\Virus\map;
 
 require_once(__DIR__ . "/../autoload.php");
@@ -20,7 +20,7 @@ if ($authenticator->authenticated()) {
 <label for="login_user_handle">User name</label><input id="login_user_handle" class="w3-input" type="text">
 <br>
 <label for="login_password">Password</label><input id="login_password" class="w3-input" type="password">
-<div style="color: red;"><?php echo $requestData->get("loginMessage"); ?></div>
+<div style="color: red;"><?php echo $requestData->get("loginMessage", ""); ?></div>
 <h1>Register</h1>
 <br>
 <label for="register_user_handle">User name</label><input id="register_user_handle" class="w3-input" type="text">
@@ -39,7 +39,7 @@ if ($authenticator->authenticated()) {
         <?php }); ?>
     </div>
 </div>
-<div id="register_message" style="color: red;"><?php echo $requestData->get("registerMessage"); ?></div>
+<div id="register_message" style="color: red;"><?php echo $requestData->get("registerMessage", ""); ?></div>
 <h1>What is this?</h1>
 <p>Oh hi there, I guess you're new around here?</p>
 <p>Long story short, a few years ago, I made my first virus to go and spy on some people. It was mainly for

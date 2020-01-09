@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
     password_salt varchar(5) not null, /* random 5 character string */
     name varchar(100) not null,
     timezone int not null,
+    hold bit not null, /* 1 if the installation entry point is blocked off, 0 for freely interchangeable */
     index (user_handle),
     primary key (user_handle)
 );

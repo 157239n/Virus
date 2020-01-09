@@ -4,6 +4,7 @@
 
 namespace Kelvinho\Virus {
 
+    use Kelvinho\Virus\Singleton\Logs;
     use mysqli;
 
     /**
@@ -51,7 +52,9 @@ namespace Kelvinho\Virus {
      * @return mysqli The Mysqli object
      */
     function db(): mysqli {
-        return new mysqli(getenv("MYSQL_HOST"), getenv("MYSQL_USER"), getenv("MYSQL_PASSWORD"), getenv("MYSQL_DATABASE"));
+        $mysqli = new mysqli(getenv("MYSQL_HOST"), getenv("MYSQL_USER"), getenv("MYSQL_PASSWORD"), getenv("MYSQL_DATABASE"));
+        if ($mysqli->connect_errno) Logs::error("Mysql failed. Info: $mysqli->connect_error");
+        return $mysqli;
     }
 
     /**

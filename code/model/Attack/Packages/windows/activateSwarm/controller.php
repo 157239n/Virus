@@ -1,14 +1,12 @@
 <?php
 
-$baseLocation = $this->requestData->postCheck("baseLocation");
-$initialLocation = $this->requestData->postCheck("initialLocation");
-$libsLocation = $this->requestData->postCheck("libsLocation");
-$swarmClockSpeed = $this->requestData->postCheck("swarmClockSpeed");
-$checkHash = $this->requestData->postCheck("checkHash");
+use Kelvinho\Virus\Attack\Packages\Windows\OneTime\ActivateSwarm;
 
-$this->setBaseLocation($_POST["baseLocation"]);
-$this->setInitialLocation($_POST["initialLocation"]);
-$this->setLibsLocation($_POST["libsLocation"]);
-$this->setSwarmClockSpeed($_POST["swarmClockSpeed"]);
-$this->setCheckHash($_POST["checkHash"]);
+/** @var ActivateSwarm $this */
+
+$this->setBaseLocation($this->requestData->postCheck("baseLocation"));
+$this->setInitialLocation($this->requestData->postCheck("initialLocation"));
+$this->setLibsLocation($this->requestData->postCheck("libsLocation"));
+$this->setSwarmClockSpeed($this->requestData->postCheck("swarmClockSpeed"));
+$this->setCheckHash($this->requestData->postCheck("checkHash"));
 $this->saveState();

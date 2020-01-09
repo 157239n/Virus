@@ -1,7 +1,7 @@
 <?php
 
-use Kelvinho\Virus\Attack\AttackInterface;
-use Kelvinho\Virus\Header;
+use Kelvinho\Virus\Attack\AttackBase;
+use Kelvinho\Virus\Singleton\Header;
 
 require_once(__DIR__ . "/../autoload.php");
 
@@ -19,7 +19,7 @@ if ($requestData->hasGet("attack_id")) {
 
 $virus_id = $session->get("virus_id");
 
-if (!AttackInterface::exists($attack_id)) {
+if (!AttackBase::exists($attack_id)) {
     header("Location: " . DOMAIN);
     Header::redirect();
 }

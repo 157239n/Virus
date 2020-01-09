@@ -1,10 +1,14 @@
 <?php
 
-namespace Kelvinho\Virus;
+namespace Kelvinho\Virus\Singleton;
 
 /**
- * Class Timezone, handles timezones, Singleton
- * @package Kelvinho\Virus
+ * Class Timezone, handles timezones.
+ *
+ * @package Kelvinho\Virus\Singleton
+ * @author Quang Ho <157239q@gmail.com>
+ * @copyright Copyright (c) 2020 Quang Ho <https://github.com/157239n>
+ * @license http://www.opensource.org/licenses/mit-license.html  MIT License
  */
 class Timezone {
     private static array $descriptions = array(

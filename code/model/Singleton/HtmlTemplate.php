@@ -1,11 +1,11 @@
 <?php
 
-namespace Kelvinho\Virus;
+namespace Kelvinho\Virus\Singleton;
 
 /**
- * Class HtmlTemplate, Singleton
+ * Class HtmlTemplate, provides sort of a shared structure. This is not really elegant, I will factor it later.
  *
- * @package Kelvinho\Virus
+ * @package Kelvinho\Virus\Singleton
  */
 class HtmlTemplate {
     /**

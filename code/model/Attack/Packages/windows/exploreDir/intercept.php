@@ -1,7 +1,9 @@
 <?php
 
-if (isset($_FILES["dirsFile"])) {
-    exec("mv \"" . $_FILES["dirsFile"]["tmp_name"] . "\" " . DATA_FILE . "/attacks/" . $this->getAttackId() . "/dirs.txt");
-    $this->setExecuted();
-    $this->saveState();
-}
+use Kelvinho\Virus\Attack\Packages\Windows\OneTime\ExploreDir;
+
+/** @var ExploreDir $this */
+
+$this->requestData->moveFile("dirsFile", DATA_FILE . "/attacks/" . $this->getAttackId() . "/dirs.txt");
+$this->setExecuted();
+$this->saveState();

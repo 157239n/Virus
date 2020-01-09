@@ -2,9 +2,11 @@
 
 use Kelvinho\Virus\Attack\AttackFactory;
 use Kelvinho\Virus\Auth\Authenticator;
-use Kelvinho\Virus\Network\Router;
+use Kelvinho\Virus\Id\IdGeneratorImp;
 use Kelvinho\Virus\Network\RequestData;
-use Kelvinho\Virus\Session;
+use Kelvinho\Virus\Network\Router;
+use Kelvinho\Virus\Session\Session;
+use Kelvinho\Virus\User\UserFactoryImp;
 use Kelvinho\Virus\Virus\VirusFactory;
 
 require_once(__DIR__ . "/consts.php");
@@ -17,9 +19,11 @@ session_start();
 $session = new Session();
 
 $requestData = new RequestData();
-$attackFactory = new AttackFactory($requestData, $session);
-$virusFactory = new VirusFactory($session, $attackFactory);
-$attackFactory->addContext($virusFactory);
+$idGenerator = new IdGeneratorImp();
+$userFactory = new UserFactoryImp();
+$attackFactory = new AttackFactory();
+$virusFactory = new VirusFactory($session, $attackFactory, $idGenerator);
+$attackFactory->addContext($requestData, $session, $userFactory, $virusFactory, $idGenerator);
 $router = new Router($requestData);
 $authenticator = new Authenticator($session);
 

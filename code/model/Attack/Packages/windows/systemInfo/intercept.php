@@ -1,9 +1,9 @@
 <?php
 
-if (isset($_FILES["systemFile"])) {
-    $contents = file_get_contents($_FILES["systemFile"]["tmp_name"]);
+use Kelvinho\Virus\Attack\Packages\Windows\OneTime\SystemInfo;
 
-    $this->setSystemInfo($contents);
-    $this->setExecuted();
-    $this->saveState();
-}
+/** @var SystemInfo $this */
+
+$this->setSystemInfo($this->requestData->fileCheck("systemFile"));
+$this->setExecuted();
+$this->saveState();

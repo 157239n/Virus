@@ -3,18 +3,28 @@
 namespace Kelvinho\Virus\Virus;
 
 use Kelvinho\Virus\Attack\AttackFactory;
-use Kelvinho\Virus\Ids;
-use Kelvinho\Virus\Logs;
-use Kelvinho\Virus\Session;
+use Kelvinho\Virus\Id\IdGenerator;
+use Kelvinho\Virus\Id\IdGeneratorImp;
+use Kelvinho\Virus\Session\Session;
 use function Kelvinho\Virus\db;
 
+/**
+ * Class VirusFactory. Responsible for instantiating viruses and creating new ones.
+ *
+ * @package Kelvinho\Virus\Virus
+ * @author Quang Ho <157239q@gmail.com>
+ * @copyright Copyright (c) 2020 Quang Ho <https://github.com/157239n>
+ * @license http://www.opensource.org/licenses/mit-license.html  MIT License
+ */
 class VirusFactory {
     private Session $session;
     private AttackFactory $attackFactory;
+    private IdGenerator $idGenerator;
 
-    public function __construct(Session $session, AttackFactory $attackFactory) {
+    public function __construct(Session $session, AttackFactory $attackFactory, IdGenerator $idGenerator) {
         $this->session = $session;
         $this->attackFactory = $attackFactory;
+        $this->idGenerator = $idGenerator;
     }
 
     /**
@@ -36,12 +46,11 @@ class VirusFactory {
      * @return Virus The virus
      */
     public function new(string $user_handle = null, bool $standalone = true): Virus {
-        $virus_id = Ids::newVirusId();
+        $virus_id = $this->idGenerator->newVirusId();
         if ($user_handle == null) {
             $user_handle = $this->session->get("user_handle");
         }
         $mysqli = db();
-        if ($mysqli->connect_errno) Logs::mysql($mysqli->connect_error);
         $mysqli->query("insert into viruses (virus_id, user_handle, last_ping, name, active, type) values (\"$virus_id\", \"" . $user_handle . "\", 0, \"(not set)\", b'0', b'" . ($standalone ? "0" : "1") . "')");
         $mysqli->close();
         mkdir(DATA_FILE . "/viruses/$virus_id");

