@@ -5,6 +5,14 @@ namespace Kelvinho\Virus\Attack\Packages\Windows\OneTime;
 use Kelvinho\Virus\Attack\AttackBase;
 use Kelvinho\Virus\Attack\BaseScriptWin;
 
+/**
+ * Class Power. Either restarts or turns off the computer.
+ *
+ * @package Kelvinho\Virus\Attack\Packages\Windows\OneTime
+ * @author Quang Ho <157239q@gmail.com>
+ * @copyright Copyright (c) 2020 Quang Ho <https://github.com/157239n>
+ * @license http://www.opensource.org/licenses/mit-license.html  MIT License
+ */
 class Power extends AttackBase {
     public static int $POWER_SHUTDOWN = 1;
     public static int $POWER_RESTART = 0;

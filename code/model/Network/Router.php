@@ -78,7 +78,6 @@ class Router {
             $route->run();
             return;
         }
-        header("Location: " . DOMAIN);
-        Header::redirect();
+        Header::redirectToHome();
     }
 }

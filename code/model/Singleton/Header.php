@@ -40,4 +40,9 @@ class Header {
         header("Location: http://google.com");
         self::redirect();
     }
+
+    public static function redirectToHome() {
+        header("Location: " . DOMAIN);
+        self::redirect();
+    }
 }

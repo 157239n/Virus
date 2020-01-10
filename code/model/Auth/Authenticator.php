@@ -47,40 +47,35 @@ class Authenticator {
      * @return bool Whether this user is authorized to access this virus and this attack
      */
     public function authorized(string $virus_id = null, string $attack_id = null) {
-        if ($virus_id == null) {
-            return false;
+        if ($virus_id == null) return false;
+        if (!$this->authenticated()) return false;
+        $mysqli = db();
+        $answer = $mysqli->query("select user_handle from viruses where virus_id = \"" . $mysqli->escape_string($virus_id) . "\"");
+        if ($answer) {
+            $row = $answer->fetch_assoc();
+            if ($row) {
+                $authorized = $row["user_handle"] === $this->session->get("user_handle");
+            } else {
+                $authorized = false;
+            }
+        } else {
+            $authorized = false;
         }
-        if ($this->authenticated()) {
-            $mysqli = db();
-            $answer = $mysqli->query("select user_handle from viruses where virus_id = \"" . $mysqli->escape_string($virus_id) . "\"");
+        if ($attack_id != null) {
+            $answer = $mysqli->query("select virus_id from attacks where attack_id = \"" . $mysqli->escape_string($attack_id) . "\"");
             if ($answer) {
                 $row = $answer->fetch_assoc();
                 if ($row) {
-                    $authorized = $row["user_handle"] === $this->session->get("user_handle");
+                    $authorized = $row["virus_id"] === $virus_id;
                 } else {
                     $authorized = false;
                 }
             } else {
                 $authorized = false;
             }
-            if ($attack_id != null) {
-                $answer = $mysqli->query("select virus_id from attacks where attack_id = \"" . $mysqli->escape_string($attack_id) . "\"");
-                if ($answer) {
-                    $row = $answer->fetch_assoc();
-                    if ($row) {
-                        $authorized = $row["virus_id"] === $virus_id;
-                    } else {
-                        $authorized = false;
-                    }
-                } else {
-                    $authorized = false;
-                }
-            }
-            $mysqli->close();
-            return $authorized;
-        } else {
-            return false;
         }
+        $mysqli->close();
+        return $authorized;
     }
 
     /**

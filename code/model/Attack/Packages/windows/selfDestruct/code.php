@@ -5,6 +5,14 @@ namespace Kelvinho\Virus\Attack\Packages\Windows\OneTime;
 use Kelvinho\Virus\Attack\AttackBase;
 use Kelvinho\Virus\Attack\BaseScriptWin;
 
+/**
+ * Class SelfDestruct. Self destructs simple viruses, not swarms. This basically delete the directory 3 levels up from this one and delete the startup script too.
+ *
+ * @package Kelvinho\Virus\Attack\Packages\Windows\OneTime
+ * @author Quang Ho <157239q@gmail.com>
+ * @copyright Copyright (c) 2020 Quang Ho <https://github.com/157239n>
+ * @license http://www.opensource.org/licenses/mit-license.html  MIT License
+ */
 class SelfDestruct extends AttackBase {
     private string $access_token; // this is supposed to increase security, but may not be so, like, now that I think about it, this is pretty unnecessary
 

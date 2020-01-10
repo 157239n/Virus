@@ -32,13 +32,11 @@ class AttackRenderer {
      *
      * @param AttackBase $attack The attack
      * @param Session $session System Session singleton
+     * @param UserFactory $userFactory
      */
     public static function render(AttackBase $attack, Session $session, UserFactory $userFactory) {
         $packageDirectory = PackageRegistrar::getLocation($attack->getPackageDbName());
-        if (!$session->has("attack_id")) {
-            header("Location: " . DOMAIN);
-            Header::redirect();
-        }
+        if (!$session->has("attack_id")) Header::redirectToHome();
         ?>
         <html lang="en_US">
         <head>

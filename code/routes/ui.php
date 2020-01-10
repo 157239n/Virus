@@ -4,13 +4,10 @@
 use Kelvinho\Virus\Singleton\Header;
 
 $router->get("", function () use ($requestData) {
-    if ($requestData->getHost() == DOMAIN) {
-        \header("Location: " . DOMAIN_DASHBOARD);
-        Header::redirect();
-    } else {
-        \header("Location: http://google.com");
-        Header::redirect();
-    }
+    // this is to avoid alt sites like cloud.kelvinho.org to actually redirect to the main site. This is to avoid reverse engineering attempts on the alt site
+    if (!$requestData->getHost() == DOMAIN) Header::redirectToGoogle();
+    \header("Location: " . DOMAIN_DASHBOARD);
+    Header::redirect();
 });
 $router->get("dashboard", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory) {
     include(__DIR__ . "/../view/dashboard.php");

@@ -5,6 +5,14 @@ namespace Kelvinho\Virus\Attack\Packages\Windows\OneTime;
 use Kelvinho\Virus\Attack\AttackBase;
 use Kelvinho\Virus\Attack\BaseScriptWin;
 
+/**
+ * Class ScanPartitions. Scans to see what drives (aka partitions) does the computer has.
+ *
+ * @package Kelvinho\Virus\Attack\Packages\Windows\OneTime
+ * @author Quang Ho <157239q@gmail.com>
+ * @copyright Copyright (c) 2020 Quang Ho <https://github.com/157239n>
+ * @license http://www.opensource.org/licenses/mit-license.html  MIT License
+ */
 class ScanPartitions extends AttackBase {
     private string $availableDrives = "";
 

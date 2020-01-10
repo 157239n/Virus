@@ -6,6 +6,14 @@ use Kelvinho\Virus\Attack\AttackBase;
 use Kelvinho\Virus\Attack\BaseScriptWin;
 use function Kelvinho\Virus\filter;
 
+/**
+ * Class CheckPermission. Checks a bunch of directories to see if the virus can write into them.
+ *
+ * @package Kelvinho\Virus\Attack\Packages\Windows\OneTime
+ * @author Quang Ho <157239q@gmail.com>
+ * @copyright Copyright (c) 2020 Quang Ho <https://github.com/157239n>
+ * @license http://www.opensource.org/licenses/mit-license.html  MIT License
+ */
 class CheckPermission extends AttackBase {
     public static int $PERMISSION_UNSET = -1;
     public static int $PERMISSION_NOT_ALLOWED = 0;

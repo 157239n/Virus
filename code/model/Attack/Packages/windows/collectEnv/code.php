@@ -6,10 +6,12 @@ use Kelvinho\Virus\Attack\AttackBase;
 use Kelvinho\Virus\Attack\BaseScriptWin;
 
 /**
- * Class CollectEnv
- * @package Kelvinho\Virus\Attack\Packages
+ * Class CollectEnv. Collects environment variables.
  *
- * This simply do a bunch of if exist "c:\" (echo true). Returns a string of the available drives.
+ * @package Kelvinho\Virus\Attack\Packages\Windows\OneTime
+ * @author Quang Ho <157239q@gmail.com>
+ * @copyright Copyright (c) 2020 Quang Ho <https://github.com/157239n>
+ * @license http://www.opensource.org/licenses/mit-license.html  MIT License
  */
 class CollectEnv extends AttackBase {
     private array $data = [];

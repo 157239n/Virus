@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpUnusedParameterInspection */
 
 namespace Kelvinho\Virus\Attack\Packages\Windows\OneTime;
 
@@ -7,6 +7,14 @@ use Kelvinho\Virus\Attack\BaseScriptWin;
 use function Kelvinho\Virus\filter;
 use function Kelvinho\Virus\map;
 
+/**
+ * Class CollectFile. Collects a bunch of files
+ *
+ * @package Kelvinho\Virus\Attack\Packages\Windows\OneTime
+ * @author Quang Ho <157239q@gmail.com>
+ * @copyright Copyright (c) 2020 Quang Ho <https://github.com/157239n>
+ * @license http://www.opensource.org/licenses/mit-license.html  MIT License
+ */
 class CollectFile extends AttackBase {
     public array $fileNames = [];
 
