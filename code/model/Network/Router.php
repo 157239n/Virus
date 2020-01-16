@@ -78,6 +78,7 @@ class Router {
             $route->run();
             return;
         }
-        Header::redirectToHome();
+        $this->requestData->rightHost() ? Header::redirectToHome() : Header::notFound();
+        //\header("Location: http://google.com", true, 308);
     }
 }

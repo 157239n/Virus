@@ -36,11 +36,6 @@ class Header {
         exit(0);
     }
 
-    public static function redirectToGoogle() {
-        header("Location: http://google.com");
-        self::redirect();
-    }
-
     public static function redirectToHome() {
         header("Location: " . DOMAIN);
         self::redirect();

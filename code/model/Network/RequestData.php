@@ -124,12 +124,13 @@ class RequestData {
     }
 
     /**
-     * Gets actual host name, with https:// in front
+     * Make sure the domain registered using the environment variable is the same as the one detected.
+     * This is to avoid alt sites like cloud.kelvinho.org to actually redirect to the main site. This is to avoid reverse engineering attempts on the alt site
      *
-     * @return string
+     * @return bool
      */
-    public function getHost(): string {
-        return "https://" . $this->serverVariables["HTTP_HOST"];
+    public function rightHost(): bool {
+        return "https://" . $this->serverVariables["HTTP_HOST"] == DOMAIN;
     }
 
     /**

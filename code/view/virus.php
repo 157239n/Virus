@@ -50,6 +50,7 @@ function displayTable(array $attacks, array $labels, callable $contents, $extraD
     return ob_get_clean();
 }
 
+if (!$session->has("virus_id")) Header::redirectToHome();
 $virus_id = $session->getCheck("virus_id");
 if (!$authenticator->authorized($virus_id)) Header::redirectToHome();
 

@@ -1,4 +1,4 @@
-FROM 157239n/php_fpm
+FROM 157239n/php_fpm7.4
 LABEL vendor=""
 COPY startup /startup
 COPY env /startup/env
