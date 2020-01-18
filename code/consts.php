@@ -11,6 +11,7 @@ define("DATA_FILE", "/data"); // where all of the persistent state outside of th
 define("DOMAIN", getenv("DOMAIN"));
 define("ALT_DOMAIN", getenv("ALT_DOMAIN")); // this is to avoid "virus. ..." displayed to the target user when social engineering
 define("ALT_SECURE_DOMAIN", getenv("ALT_SECURE_DOMAIN")); // this is to avoid "virus. ..." displayed to the target user when social engineering
+define("ALT_DOMAIN_SHORT", str_replace("http://", "", ALT_DOMAIN));
 define("DOMAIN_CONTROLLER", DOMAIN . "/controller");
 define("DOMAIN_DASHBOARD", DOMAIN . "/dashboard");
 define("DOMAIN_VIRUS_INFO", DOMAIN . "/virus");

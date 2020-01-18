@@ -130,7 +130,7 @@ class RequestData {
      * @return bool
      */
     public function rightHost(): bool {
-        return "https://" . $this->serverVariables["HTTP_HOST"] == DOMAIN;
+        return str_replace("http://", "", str_replace("https://", "", DOMAIN)) == $this->serverVariables["HTTP_HOST"];
     }
 
     /**

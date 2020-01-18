@@ -2,6 +2,7 @@
 
 // routes for UI
 use Kelvinho\Virus\Singleton\Header;
+use function Kelvinho\Virus\goodPath;
 
 $router->get("", function () use ($requestData) {
     if (!$requestData->rightHost()) Header::notFound();
@@ -23,6 +24,15 @@ $router->get("attack", function () use ($requestData, $authenticator, $session, 
 $router->get("login", function () use ($requestData, $authenticator) {
     if (!$requestData->rightHost()) Header::notFound();
     include(__DIR__ . "/../view/login.php");
+});
+
+// and resources
+$router->get("resources/images/*", function () use ($requestData) {
+    if (!$requestData->rightHost()) Header::notFound();
+    if ($filePath = goodPath(__DIR__ . "/../resources/images/", $requestData->getExplodedPath()[2])) {
+        \header("Content-type: " . mime_content_type($filePath));
+        readfile($filePath);
+    } else Header::notFound();
 });
 
 // and controller stuff

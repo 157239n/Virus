@@ -14,11 +14,10 @@ $attack_id = $session->getCheck("attack_id");
 
 if (!$authenticator->authorized($virus_id, $attack_id)) Header::forbidden();
 
-$relativePath = "/attacks/$attack_id/$file";
-$absPath = DATA_FILE . $relativePath;
+$absPath = goodPath(DATA_FILE, "/attacks/$attack_id/$file");
 
-if (goodPath(DATA_FILE, $relativePath)) {
+if ($absPath) {
     \header("Content-type: " . mime_content_type($absPath));
     \header("Content-Disposition: inline; filename=\"$desiredName\"");
     readfile($absPath);
-}
+} else Header::notFound();

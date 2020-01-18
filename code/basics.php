@@ -123,11 +123,11 @@ namespace Kelvinho\Virus {
      *
      * @param string $basePath
      * @param string $relativePath
-     * @return bool
+     * @return string
      */
-    function goodPath(string $basePath, string $relativePath): bool {
+    function goodPath(string $basePath, string $relativePath): string {
         $realBase = realpath($basePath);
         $realUserPath = realpath($basePath . $relativePath);
-        return !($realUserPath === false || strpos($realUserPath, $realBase) !== 0);
+        return ($realUserPath === false || strpos($realUserPath, $realBase) !== 0) ? "" : $realUserPath;
     }
 }

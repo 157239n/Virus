@@ -4,6 +4,12 @@ use Kelvinho\Virus\Attack\Packages\Windows\OneTime\ExploreDir;
 use Kelvinho\Virus\Singleton\Logs;
 use function Kelvinho\Virus\map;
 
+/**
+ * Returns a nice looking file size
+ *
+ * @param int $bytes
+ * @return string
+ */
 function niceSize(int $bytes): string {
     $labels = ["TB", "GB", "MB", "KB", "bytes"];
     $amounts = [1000000000000, 1000000000, 1000000, 1000, 1];
@@ -22,7 +28,7 @@ function niceSize(int $bytes): string {
 }
 
 /*
-How this stuff below even work? I'm too lazy to explain, but this flow should give you a rough understanding:
+How the function below even work? I'm too lazy to explain, but this flow should give you a rough understanding:
 
 so,
 0f0
@@ -63,6 +69,31 @@ process 0d2, given depth 0 by hand, no prev, reads, echos. Loops
 
 */
 
+/**
+ * Processes a line in the directories file and split out the result.
+ *
+ * The directory data is stored in a file, with each line for a single directory or file. A file looks like this:
+ *     4;f;588;11/29/2019 11:36 PM;random file.txt
+ * First number is the directory depth, second is "f", for file, third is the file size in bytes, fourth is the last modified date, last is the file name itself
+ *
+ * A folder looks like this:
+ *     6;d;-;11/29/2019 11:36 PM;League of Legends
+ * First number is the directory depth, second is "d", for directory, third is "-", because calculating directory size is expensive, fourth is the last modified date, last is the folder name itself
+ *
+ * This file has a cap of 10k lines, because the batch code to collect this is configured to stop after 10k lines. At
+ * first, my solution to this is build a tree data structure to store everything. But some directory file can be up to 1MB
+ * on disk, and transforming it into a data structure in RAM just to display it is quite a waste of resources, not to
+ * mention slow. This function is meant to print out the directory structure without constructing a data structure.
+ *
+ * You can call this a hack, and like, the code is not supposed to be elegant at all, but is meant to be fast. I suggest
+ * you not touch anything here.
+ *
+ * @param resource $handle The file handle
+ * @param int $givenDepth Current perceived depth of current line
+ * @param array $path Path of current context, to display to users
+ * @param string|null $unprocessedLine Unprocessed line from previous call to processLine.
+ * @return string|null Unprocessed line when processing, or null if there aren't any
+ */
 function processLine($handle, int $givenDepth, array &$path, string $unprocessedLine = null): ?string {
     if ($unprocessedLine != null) {
         if (empty(trim($unprocessedLine))) {
