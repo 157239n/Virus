@@ -96,6 +96,7 @@ class Virus {
         });
         $mysqli = db();
         $mysqli->query("delete from viruses where virus_id = \"$this->virus_id\"");
+        $mysqli->query("delete from uptimes where virus_id = \"$this->virus_id\"");
         $mysqli->close();
         exec("rm -r " . DATA_FILE . "/viruses/$this->virus_id");
     }

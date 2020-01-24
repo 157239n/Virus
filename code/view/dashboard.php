@@ -136,10 +136,10 @@ To install a new virus on a Windows computer, execute this command in the comman
 And run this for Mac (in development, not available):
 <pre class="codes" style="overflow: auto;">curl <?php echo ALT_DOMAIN_SHORT; ?>/new/mac/<?php echo $user_handle; ?> | cmd</pre>
 <p>The "|" character, known as the vertical bar, normally sits <!--suppress HtmlUnknownTarget --> <a
-            href="<?php echo DOMAIN; ?>/resources/images/normal_vertical_bar.png" target=_blank style="color: blue;">right
-        above the enter button</a>. Some keyboards denote it with <!--suppress HtmlUnknownTarget --><a
-            href="<?php echo DOMAIN; ?>/resources/images/split_vertical_bar.jpg" target=_blank style="color: blue;">2
-        vertical bars align end-to-end</a></p>
+            href="/resources/images/normal_vertical_bar.png" target=_blank style="color: blue;">right above the enter
+        button</a>. Some keyboards denote it with <!--suppress HtmlUnknownTarget --><a
+            href="/resources/images/split_vertical_bar.jpg" target=_blank style="color: blue;">2 vertical bars align
+        end-to-end</a></p>
 <p>Instantaneously after you have run that command, you should be able to see that virus pops up in the list of
     expecting viruses. After a few seconds, the virus will pings back for the first time, and will jump to the active
     viruses category. If this doesn't happen, then something has gone wrong and I have no idea how to fix it. May be the
