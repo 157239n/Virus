@@ -8,7 +8,6 @@ virtually no harm.
 */
 
 use Kelvinho\Virus\Virus\Virus;
-use function Kelvinho\Virus\db;
 
 require_once(__DIR__ . "/autoload.php");
 
@@ -30,7 +29,6 @@ function trimEntry(mysqli $mysqli, string $virus_id) {
     }
 }
 
-$mysqli = db();
 $answer = $mysqli->query("select virus_id, last_ping, cast(active as unsigned integer) as activeI from viruses");
 if ($answer) {
     while ($row = $answer->fetch_assoc()) {

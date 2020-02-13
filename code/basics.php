@@ -1,12 +1,6 @@
-<?php /** @noinspection PhpUnused */
-
-/** @noinspection PhpUnusedParameterInspection */
+<?php
 
 namespace Kelvinho\Virus {
-
-    use Kelvinho\Virus\Singleton\Logs;
-    use mysqli;
-
     /**
      * Map.
      *
@@ -44,17 +38,6 @@ namespace Kelvinho\Virus {
             }
         }
         return $newList;
-    }
-
-    /**
-     * Returns a database to work with.
-     *
-     * @return mysqli The Mysqli object
-     */
-    function db(): mysqli {
-        $mysqli = new mysqli(getenv("MYSQL_HOST"), getenv("MYSQL_USER"), getenv("MYSQL_PASSWORD"), getenv("MYSQL_DATABASE"));
-        if ($mysqli->connect_errno) Logs::error("Mysql failed. Info: $mysqli->connect_error");
-        return $mysqli;
     }
 
     /**

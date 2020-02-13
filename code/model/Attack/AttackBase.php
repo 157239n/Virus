@@ -6,7 +6,7 @@ use Kelvinho\Virus\Network\RequestData;
 use Kelvinho\Virus\Session\Session;
 use Kelvinho\Virus\User\UserFactory;
 use Kelvinho\Virus\Virus\VirusFactory;
-use function Kelvinho\Virus\db;
+use mysqli;
 
 /**
  * Abstract class AttackBase. All attacks should subclass this.
@@ -40,16 +40,18 @@ abstract class AttackBase {
     protected VirusFactory $virusFactory;
     protected AttackFactory $attackFactory;
     protected UserFactory $userFactory;
+    private mysqli $mysqli;
 
-    function __construct() {
+    protected function __construct() {
     }
 
-    function setContext(RequestData $requestData, Session $session, UserFactory $userFactory, VirusFactory $virusFactory, AttackFactory $attackFactory) {
+    function setContext(RequestData $requestData, Session $session, UserFactory $userFactory, VirusFactory $virusFactory, AttackFactory $attackFactory, mysqli $mysqli) {
         $this->requestData = $requestData;
         $this->session = $session;
         $this->userFactory = $userFactory;
         $this->virusFactory = $virusFactory;
         $this->attackFactory = $attackFactory;
+        $this->mysqli = $mysqli;
     }
 
     function setAttackId(string $attack_id): void {
@@ -142,9 +144,7 @@ abstract class AttackBase {
     public function saveState(): void {
         file_put_contents(DATA_FILE . "/attacks/$this->attack_id/state.json", $this->getState());
         file_put_contents(DATA_FILE . "/attacks/$this->attack_id/profile.txt", $this->getProfile());
-        $mysqli = db();
-        $mysqli->query("update attacks set status = \"$this->status\", name = \"" . $mysqli->escape_string($this->name) . "\", status = \"$this->status\", executed_time = $this->executed_time where attack_id = \"$this->attack_id\"");
-        $mysqli->close();
+        $this->mysqli->query("update attacks set status = \"$this->status\", name = \"" . $this->mysqli->escape_string($this->name) . "\", status = \"$this->status\", executed_time = $this->executed_time where attack_id = \"$this->attack_id\"");
     }
 
     /**
@@ -161,10 +161,6 @@ abstract class AttackBase {
      * @param string $resourceIdentifier The resource name
      */
     abstract public function processExtras(string $resourceIdentifier): void;
-
-    public function render(): void {
-        AttackRenderer::render($this, $this->session, $this->userFactory);
-    }
 
     /**
      * This will include the correct controller page for this particular attack type.
@@ -225,28 +221,7 @@ abstract class AttackBase {
      * Deletes the attack permanently.
      */
     public function delete(): void {
-        $mysqli = db();
-        $mysqli->query("delete from attacks where attack_id = \"$this->attack_id\"");
-        $mysqli->close();
+        $this->mysqli->query("delete from attacks where attack_id = \"$this->attack_id\"");
         exec("rm -r " . DATA_FILE . "/attacks/$this->attack_id");
-    }
-
-    /**
-     * Checks whether an attack id exists or not.
-     *
-     * @param string $attack_id The attack id
-     * @return bool Whether it exists or not
-     */
-    public static function exists(string $attack_id): bool {
-        $mysqli = db();
-        $answer = $mysqli->query("select attack_id from attacks where attack_id = \"" . $mysqli->escape_string($attack_id) . "\"");
-        $mysqli->close();
-        if ($answer) {
-            $row = $answer->fetch_assoc();
-            if ($row) {
-                return true;
-            }
-        }
-        return false;
     }
 }
