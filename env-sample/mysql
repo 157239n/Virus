@@ -1,4 +1,0 @@
-MYSQL_USER=user
-MYSQL_PASSWORD=password
-MYSQL_DATABASE=virus_app
-MYSQL_ROOT_PASSWORD=password

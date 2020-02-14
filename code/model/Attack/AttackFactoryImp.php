@@ -40,35 +40,6 @@ class AttackFactoryImp implements AttackFactory {
     }
 
     /**
-     * Get an attack when given an attack id.
-     *
-     * @param string $attack_id The attack id
-     * @return AttackBase The attack
-     */
-    public function get(string $attack_id): AttackBase {
-        $answer = $this->mysqli->query("select name, attack_package, virus_id, status, executed_time from attacks where attack_id = \"$attack_id\"");
-        if (!$answer) throw new AttackNotFound();
-        $row = $answer->fetch_assoc();
-        if (!$row) throw new AttackNotFound();
-
-        $packageDbName = $row["attack_package"];
-        if (!PackageRegistrar::hasPackage($packageDbName)) throw new AttackPackageNotFound();
-        $classname = PackageRegistrar::getClassName($packageDbName);
-        /** @var AttackBase $attack */
-        $attack = new $classname();
-
-        $attack->setContext($this->requestData, $this->session, $this->userFactory, $this->virusFactory, $this, $this->mysqli);
-        $attack->setAttackId($attack_id);
-        $attack->setVirusId($row["virus_id"]);
-        $attack->setPackageDbName($row["attack_package"]);
-        $attack->setName($row["name"]);
-        $attack->setStatus($row["status"]);
-        $attack->setExecutedTime($row["executed_time"]);
-        $attack->loadFromDisk();
-        return $attack;
-    }
-
-    /**
      * Creates a new attack.
      *
      * @param string $virus_id The virus id
@@ -97,6 +68,35 @@ class AttackFactoryImp implements AttackFactory {
         $this->mysqli->query("insert into attacks (attack_id, virus_id, attack_package, status, name) values (\"$attack_id\", \"$virus_id\", \"$attack_package\", \"" . $attack->getStatus() . "\", \"" . $this->mysqli->escape_string($name) . "\")");
         $attack->saveState();
         return $this->get($attack_id);
+    }
+
+    /**
+     * Get an attack when given an attack id.
+     *
+     * @param string $attack_id The attack id
+     * @return AttackBase The attack
+     */
+    public function get(string $attack_id): AttackBase {
+        $answer = $this->mysqli->query("select name, attack_package, virus_id, status, executed_time from attacks where attack_id = \"$attack_id\"");
+        if (!$answer) throw new AttackNotFound();
+        $row = $answer->fetch_assoc();
+        if (!$row) throw new AttackNotFound();
+
+        $packageDbName = $row["attack_package"];
+        if (!PackageRegistrar::hasPackage($packageDbName)) throw new AttackPackageNotFound();
+        $classname = PackageRegistrar::getClassName($packageDbName);
+        /** @var AttackBase $attack */
+        $attack = new $classname();
+
+        $attack->setContext($this->requestData, $this->session, $this->userFactory, $this->virusFactory, $this, $this->mysqli);
+        $attack->setAttackId($attack_id);
+        $attack->setVirusId($row["virus_id"]);
+        $attack->setPackageDbName($row["attack_package"]);
+        $attack->setName($row["name"]);
+        $attack->setStatus($row["status"]);
+        $attack->setExecutedTime($row["executed_time"]);
+        $attack->loadFromDisk();
+        return $attack;
     }
 
     /**

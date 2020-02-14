@@ -42,7 +42,7 @@ abstract class AttackBase {
     protected UserFactory $userFactory;
     private mysqli $mysqli;
 
-    protected function __construct() {
+    public function __construct() {
     }
 
     function setContext(RequestData $requestData, Session $session, UserFactory $userFactory, VirusFactory $virusFactory, AttackFactory $attackFactory, mysqli $mysqli) {
@@ -54,56 +54,48 @@ abstract class AttackBase {
         $this->mysqli = $mysqli;
     }
 
-    function setAttackId(string $attack_id): void {
-        $this->attack_id = $attack_id;
-    }
-
     public function getAttackId(): string {
         return $this->attack_id;
     }
 
-    public function setStatus(string $status): void {
-        $this->status = $status;
+    function setAttackId(string $attack_id): void {
+        $this->attack_id = $attack_id;
     }
 
     public function getStatus(): string {
         return $this->status;
     }
 
-    public function isStatus(string $status): bool {
-        return $status == $this->status;
+    public function setStatus(string $status): void {
+        $this->status = $status;
     }
 
-    public function setName(string $name): void {
-        $this->name = $name;
+    public function isStatus(string $status): bool {
+        return $status == $this->status;
     }
 
     public function getName(): string {
         return $this->name;
     }
 
-    public function setProfile(string $profile): void {
-        $this->profile = $profile;
-    }
-
-    public function getProfile(): string {
-        return $this->profile;
-    }
-
-    function setPackageDbName(string $packageDbName): void {
-        $this->packageDbName = $packageDbName;
+    public function setName(string $name): void {
+        $this->name = $name;
     }
 
     public function getPackageDbName(): string {
         return $this->packageDbName;
     }
 
-    function setVirusId(string $virus_id): void {
-        $this->virus_id = $virus_id;
+    function setPackageDbName(string $packageDbName): void {
+        $this->packageDbName = $packageDbName;
     }
 
     public function getVirusId(): string {
         return $this->virus_id;
+    }
+
+    function setVirusId(string $virus_id): void {
+        $this->virus_id = $virus_id;
     }
 
     /**
@@ -112,13 +104,6 @@ abstract class AttackBase {
     public function generateIntercept(): string {
         return "";
     }
-
-    /**
-     * This will restore the state of an attack with all of its configuration using a json string.
-     *
-     * @param string $json The JSON string
-     */
-    abstract protected function setState(string $json): void;
 
     /**
      * This will load the state of this attack using the file /data/attacks/{attack_id}/state.json
@@ -132,11 +117,11 @@ abstract class AttackBase {
     }
 
     /**
-     * This will get the state of an attack as a json string.
+     * This will restore the state of an attack with all of its configuration using a json string.
      *
-     * @return string The JSON string
+     * @param string $json The JSON string
      */
-    abstract protected function getState(): string;
+    abstract protected function setState(string $json): void;
 
     /**
      * This will save the state of everything about this attack.
@@ -145,6 +130,21 @@ abstract class AttackBase {
         file_put_contents(DATA_FILE . "/attacks/$this->attack_id/state.json", $this->getState());
         file_put_contents(DATA_FILE . "/attacks/$this->attack_id/profile.txt", $this->getProfile());
         $this->mysqli->query("update attacks set status = \"$this->status\", name = \"" . $this->mysqli->escape_string($this->name) . "\", status = \"$this->status\", executed_time = $this->executed_time where attack_id = \"$this->attack_id\"");
+    }
+
+    /**
+     * This will get the state of an attack as a json string.
+     *
+     * @return string The JSON string
+     */
+    abstract protected function getState(): string;
+
+    public function getProfile(): string {
+        return $this->profile;
+    }
+
+    public function setProfile(string $profile): void {
+        $this->profile = $profile;
     }
 
     /**

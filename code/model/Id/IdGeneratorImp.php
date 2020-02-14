@@ -21,6 +21,15 @@ class IdGeneratorImp implements IdGenerator {
     }
 
     /**
+     * Generates a new virus id.
+     *
+     * @return string
+     */
+    public function newVirusId(): string {
+        return IdGeneratorImp::newId("virus_id", "viruses");
+    }
+
+    /**
      * Creates a new id based on SHA256 hash. This will check against the existing database to make sure there are no collisions.
      * If there are a collision then it will generate a new one automatically.
      *
@@ -42,15 +51,6 @@ class IdGeneratorImp implements IdGenerator {
         } else {
             return $id;
         }
-    }
-
-    /**
-     * Generates a new virus id.
-     *
-     * @return string
-     */
-    public function newVirusId(): string {
-        return IdGeneratorImp::newId("virus_id", "viruses");
     }
 
     /**

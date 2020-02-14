@@ -38,17 +38,18 @@ class Timezone {
         11 => "Solomon Islands, Vanuatu",
         12 => "New Zealand, Marshal Islands");
 
-    public static function okay(int $timezone): bool {
-        return isset(self::$descriptions[$timezone]);
-    }
-
-    /** @noinspection PhpUnused */
     public static function getDescription(int $timezone): string {
         if (self::okay($timezone)) {
             return self::$descriptions[$timezone];
         } else {
             return "";
         }
+    }
+
+    /** @noinspection PhpUnused */
+
+    public static function okay(int $timezone): bool {
+        return isset(self::$descriptions[$timezone]);
     }
 
     public static function getDescriptions(): array {

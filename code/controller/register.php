@@ -1,7 +1,6 @@
 <?php
 
 use Kelvinho\Virus\Singleton\Header;
-use Kelvinho\Virus\User\User;
 
 $user_handle = $requestData->postCheck("user_handle");
 $password = $requestData->postCheck("password");

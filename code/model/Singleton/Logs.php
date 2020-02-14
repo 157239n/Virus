@@ -14,25 +14,6 @@ use function Kelvinho\Virus\formattedTime;
  */
 class Logs {
     /**
-     * Logs stuff.
-     *
-     * @param string $message The message to log
-     */
-    public static function log(string $message): void {
-        file_put_contents(LOG_FILE, $message . "\n", FILE_APPEND);
-    }
-
-    /**
-     * Logs with "Error: " in front and exits the script.
-     *
-     * @param string $message The message to log
-     */
-    public static function error(string $message): void {
-        Logs::log("Error: " . $message);
-        Header::badRequest();
-    }
-
-    /**
      * Logs when a virus pings back but is not recognized.
      *
      * @param string $virus_id The virus id
@@ -59,5 +40,24 @@ class Logs {
      */
     public static function unreachableState(string $where): void {
         Logs::error("This is supposed to be unreachable. Where: $where");
+    }
+
+    /**
+     * Logs with "Error: " in front and exits the script.
+     *
+     * @param string $message The message to log
+     */
+    public static function error(string $message): void {
+        Logs::log("Error: " . $message);
+        Header::badRequest();
+    }
+
+    /**
+     * Logs stuff.
+     *
+     * @param string $message The message to log
+     */
+    public static function log(string $message): void {
+        file_put_contents(LOG_FILE, $message . "\n", FILE_APPEND);
     }
 }

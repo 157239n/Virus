@@ -1,40 +1,39 @@
 version: "3.5"
 services:
-    virus:
-        build: .
-        container_name: virus
-        restart: always
-        networks:
-            - proxy_virus
-            - db
-        volumes:
-            - ./code:/var/www/virus
-            - ./data:/data
-            - ./backup:/backup
-        env_file:
-            - env/mysql
-            - env/site
-    db:
-        image: mysql
-        container_name: virus_mysql
-        restart: always
-        networks:
-            - db
-        volumes:
-            - ./mysql:/var/lib/mysql
-            - ./mysql_startup:/docker-entrypoint-initdb.d
-        env_file:
-            - env/mysql
-    phpmyadmin:
-        image: 157239n/phpmyadmin
-        container_name: virus_phpmyadmin
-        restart: always
-        networks:
-            - proxy_virus
-            - db
-        env_file:
-            - env/site
+  virus:
+    build: .
+    container_name: virus
+    restart: always
+    networks:
+      - proxy_virus
+      - db
+    volumes:
+      - ./code:/var/www/virus
+      - ./data:/data
+      - ./backup:/backup
+    env_file:
+      - .env
+  db:
+    image: mysql
+    container_name: virus_mysql
+    restart: always
+    networks:
+      - db
+    volumes:
+      - ./mysql:/var/lib/mysql
+      - ./mysql_startup:/docker-entrypoint-initdb.d
+    env_file:
+      - .env
+  phpmyadmin:
+    image: 157239n/phpmyadmin
+    container_name: virus_phpmyadmin
+    restart: always
+    networks:
+      - proxy_virus
+      - db
+    env_file:
+      - .env
 networks:
-    proxy_virus:
-        external: true
-    db:
+  proxy_virus:
+    external: true
+  db:

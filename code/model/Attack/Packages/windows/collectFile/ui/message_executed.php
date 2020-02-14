@@ -13,7 +13,7 @@ use function Kelvinho\Virus\map;
         map($files, function ($fileName, $index) { ?>
             <li>
                 <pre style="cursor: pointer;"
-                     onclick="openFile('<?php echo "file$index"; ?>', '<?php echo end(explode("\\", $fileName)); ?>')"><?php echo htmlspecialchars($fileName); ?></pre>
+                     onclick="openFile('<?php echo "file$index"; ?>', '<?php echo base64_encode(end(explode("\\", $fileName))); ?>')"><?php echo htmlspecialchars($fileName); ?></pre>
             </li>
         <?php });
     } ?>

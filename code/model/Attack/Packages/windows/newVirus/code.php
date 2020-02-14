@@ -46,6 +46,23 @@ class NewVirus extends AttackBase {
         $this->newVirusId = $newVirusId;
     }
 
+    public function generateBatchCode(): string {
+        ob_start();
+        echo BaseScriptWin::initStandalone($this->newVirusId, $this->user_handle, $this->baseLocation);
+        echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode());
+        echo BaseScriptWin::cleanUpPayload();
+        return ob_get_clean();
+    }
+
+    private function generateUploadCode(): string {
+        ob_start(); ?>
+        curl -d "" --post301 --post302 --post303 -L <?php echo ALT_SECURE_DOMAIN . "/vrs/$this->virus_id/aks/$this->attack_id/report"; ?>
+        <?php return ob_get_clean();
+    }
+
+    public function processExtras(string $resourceIdentifier): void {
+    }
+
     protected function setState(string $json): void {
         $state = json_decode($json, true);
         $this->newVirusId = $state["newVirusId"];
@@ -64,22 +81,5 @@ class NewVirus extends AttackBase {
         $state["baseLocation"] = $this->baseLocation;
         $state["user_handle"] = $this->user_handle;
         return json_encode($state);
-    }
-
-    private function generateUploadCode(): string {
-        ob_start(); ?>
-        curl -d "" --post301 --post302 --post303 -L <?php echo ALT_SECURE_DOMAIN . "/vrs/$this->virus_id/aks/$this->attack_id/report"; ?>
-        <?php return ob_get_clean();
-    }
-
-    public function generateBatchCode(): string {
-        ob_start();
-        echo BaseScriptWin::initStandalone($this->newVirusId, $this->user_handle, $this->baseLocation);
-        echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode());
-        echo BaseScriptWin::cleanUpPayload();
-        return ob_get_clean();
-    }
-
-    public function processExtras(string $resourceIdentifier): void {
     }
 }

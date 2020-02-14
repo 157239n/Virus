@@ -43,27 +43,6 @@ class RequestData {
     }
 
     /**
-     * Gets a GET variable. This also includes variables in the URL.
-     *
-     * @param string $key
-     * @param string|null $default Default value if parameter is not found
-     * @return string|null
-     */
-    public function get(string $key, string $default = null): ?string {
-        return $this->hasGet($key) ? $this->getVariables[$key] : $default;
-    }
-
-    /**
-     * Whether a GET variable exists.
-     *
-     * @param string $key
-     * @return bool
-     */
-    public function hasGet(string $key): bool {
-        return array_key_exists($key, $this->getVariables);
-    }
-
-    /**
      * If the GET variable doesn't exist, sets response code to bad request and exits.
      *
      * @param string $key
@@ -79,24 +58,24 @@ class RequestData {
     }
 
     /**
-     * Gets a POST variable.
+     * Whether a GET variable exists.
+     *
+     * @param string $key
+     * @return bool
+     */
+    public function hasGet(string $key): bool {
+        return array_key_exists($key, $this->getVariables);
+    }
+
+    /**
+     * Gets a GET variable. This also includes variables in the URL.
      *
      * @param string $key
      * @param string|null $default Default value if parameter is not found
      * @return string|null
      */
-    public function post(string $key, string $default = null): ?string {
-        return $this->hasPost($key) ? @$this->postVariables[$key] : $default;
-    }
-
-    /**
-     * Whether a POST variable exists.
-     *
-     * @param string $key
-     * @return bool
-     */
-    public function hasPost(string $key): bool {
-        return array_key_exists($key, $this->postVariables);
+    public function get(string $key, string $default = null): ?string {
+        return $this->hasGet($key) ? $this->getVariables[$key] : $default;
     }
 
     /**
@@ -112,6 +91,27 @@ class RequestData {
             Header::badRequest();
             return null;
         }
+    }
+
+    /**
+     * Whether a POST variable exists.
+     *
+     * @param string $key
+     * @return bool
+     */
+    public function hasPost(string $key): bool {
+        return array_key_exists($key, $this->postVariables);
+    }
+
+    /**
+     * Gets a POST variable.
+     *
+     * @param string $key
+     * @param string|null $default Default value if parameter is not found
+     * @return string|null
+     */
+    public function post(string $key, string $default = null): ?string {
+        return $this->hasPost($key) ? @$this->postVariables[$key] : $default;
     }
 
     /**
@@ -134,6 +134,17 @@ class RequestData {
     }
 
     /**
+     * If the file doesn't exist, sets response code to bad request and exits.
+     *
+     * @param string $fileName
+     * @return string
+     */
+    public function fileCheck(string $fileName): string {
+        if (!$this->hasFile($fileName)) Header::badRequest();
+        return $this->file($fileName);
+    }
+
+    /**
      * Whether this file exists.
      *
      * @param string $fileName
@@ -152,17 +163,6 @@ class RequestData {
      */
     public function file(string $fileName, string $default = null): string {
         return $this->hasFile($fileName) ? file_get_contents($this->fileVariables[$fileName]["tmp_name"]) : $default;
-    }
-
-    /**
-     * If the file doesn't exist, sets response code to bad request and exits.
-     *
-     * @param string $fileName
-     * @return string
-     */
-    public function fileCheck(string $fileName): string {
-        if (!$this->hasFile($fileName)) Header::badRequest();
-        return $this->file($fileName);
     }
 
     /**

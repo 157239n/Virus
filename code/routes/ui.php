@@ -50,3 +50,9 @@ $router->get("controller/*/*", function () use ($requestData, $authenticator, $s
     include(__DIR__ . "/../controller/" . $requestData->getExplodedPath()[1] . ".php"); ?>
     <script>window.location = "<?php echo base64_decode($requestData->getExplodedPath()[2]); ?>";</script><?php
 });
+
+// and scanning the system
+$router->get("scan", function () use ($requestData) {
+    include(__DIR__ . "/../scan.php");
+});
+

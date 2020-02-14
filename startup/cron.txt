@@ -1,0 +1,4 @@
+# a line in front
+* * * * * /backup/backup.sh 1>>/var/log/cron/output.log 2>>/var/log/cron/error.log
+0 * * * * curl virus/scan 1>>/var/log/cron/output.log 2>>/var/log/cron/error.log
+# and an empty line

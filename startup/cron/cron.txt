@@ -1,3 +1,0 @@
-* * * * * /startup/cron/scan
-0 * * * * /startup/cron/backup
-# and an empty line

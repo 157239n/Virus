@@ -1,7 +1,6 @@
 <?php
 
 use Kelvinho\Virus\Singleton\Header;
-use Kelvinho\Virus\Virus\Virus;
 
 $virus_id = $requestData->postCheck("virus_id");
 $name = $requestData->postCheck("name");

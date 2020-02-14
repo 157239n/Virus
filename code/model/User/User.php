@@ -24,15 +24,6 @@ class User {
     private bool $hold;
     private mysqli $mysqli;
 
-    private function fetchData(): void {
-        $answer = $this->mysqli->query("select name, timezone, hold from users where user_handle = \"$this->user_handle\"");
-        while ($row = $answer->fetch_assoc()) {
-            $this->name = $row["name"];
-            $this->timezone = $row["timezone"];
-            $this->hold = $row["hold"];
-        }
-    }
-
     /**
      * User constructor.
      * @param string $user_handle
@@ -43,6 +34,15 @@ class User {
         $this->user_handle = $user_handle;
         $this->mysqli = $mysqli;
         $this->fetchData();
+    }
+
+    private function fetchData(): void {
+        $answer = $this->mysqli->query("select name, timezone, hold from users where user_handle = \"$this->user_handle\"");
+        while ($row = $answer->fetch_assoc()) {
+            $this->name = $row["name"];
+            $this->timezone = $row["timezone"];
+            $this->hold = $row["hold"];
+        }
     }
 
     public function getTimezone(): int {

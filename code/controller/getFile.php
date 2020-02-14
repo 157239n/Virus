@@ -18,6 +18,6 @@ $absPath = goodPath(DATA_FILE, "/attacks/$attack_id/$file");
 
 if ($absPath) {
     \header("Content-type: " . mime_content_type($absPath));
-    \header("Content-Disposition: inline; filename=\"$desiredName\"");
+    \header("Content-Disposition: inline; filename=\"" . base64_decode($desiredName) . "\"");
     readfile($absPath);
 } else Header::notFound();

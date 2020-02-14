@@ -1,0 +1,6 @@
+#!/bin/bash
+
+echo ----------- error -----------
+cat /var/log/cron/error.log
+echo ----------- output -----------
+cat /var/log/cron/output.log

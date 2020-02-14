@@ -1,4 +1,3 @@
-
 <h1>Explanation</h1>
 <p>This attack is complicated. And dangerous too. If you do not know anything about programming stuff or the target
     is someone who is not tech-savvy, I suggest you never touch this package, because you might make the system

@@ -9,9 +9,9 @@ virtually no harm.
 
 use Kelvinho\Virus\Virus\Virus;
 
-require_once(__DIR__ . "/autoload.php");
-
 // loops through all viruses data, get active field and last_ping. Do math, then figure whether to write to the database
+
+echo "Inside scan, db name: " . getenv("MYSQL_DATABASE");
 
 /**
  * Limits each virus to only have 1000 entries in the uptimes table
@@ -51,4 +51,3 @@ if ($answer) {
         }
     }
 }
-$mysqli->close();

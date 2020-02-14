@@ -14,31 +14,12 @@ use mysqli;
  * @license http://www.opensource.org/licenses/mit-license.html  MIT License
  */
 class AuthenticatorImp implements Authenticator {
-    public static AuthenticatorImp $authenticator;
     private Session $session;
     private mysqli $mysqli;
 
     public function __construct(Session $session, mysqli $mysqli) {
         $this->session = $session;
         $this->mysqli = $mysqli;
-    }
-
-    /**
-     * Returns whether the user is authenticated.
-     *
-     * @param string|null $user_handle Optional user handle to make sure that the authenticated user is the same as the requesting user
-     * @return bool Whether the user is authenticated
-     */
-    public function authenticated(string $user_handle = null): bool {
-        if (empty($user_handle)) {
-            return $this->session->has("user_handle");
-        } else {
-            if ($this->session->has("user_handle")) {
-                return $this->session->get("user_handle") === $user_handle;
-            } else {
-                return false;
-            }
-        }
     }
 
     /**
@@ -76,6 +57,20 @@ class AuthenticatorImp implements Authenticator {
             }
         }
         return $authorized;
+    }
+
+    /**
+     * Returns whether the user is authenticated.
+     *
+     * @param string|null $user_handle Optional user handle to make sure that the authenticated user is the same as the requesting user
+     * @return bool Whether the user is authenticated
+     */
+    public function authenticated(string $user_handle = null): bool {
+        if (empty($user_handle)) {
+            return $this->session->has("user_handle");
+        } else {
+            return $this->session->get("user_handle") === $user_handle;
+        }
     }
 
     /**

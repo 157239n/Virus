@@ -1,5 +1,6 @@
 #!/bin/bash
 
+mkdir /var/log/cron
 mkdir /data
 mkdir /data/users
 mkdir /data/viruses
@@ -10,8 +11,7 @@ chown -R www-data:www-data /var/www/virus
 chown -R www-data:www-data /var/log/apache2
 
 /startup/runPhpFpm.sh
-cat /startup/env/site | /startup/setupFpmEnv.sh
-cp /env/php_fpm /etc/environment
+cat /etc/environment | /startup/setupFpmEnv.sh
 
-crontab /startup/cron/cron.txt
+crontab /startup/cron.txt
 cron -f

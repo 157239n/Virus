@@ -28,11 +28,6 @@ class VirusFactoryImp implements VirusFactory {
         $this->mysqli = $mysqli;
     }
 
-    public function get($virus_id): Virus {
-        if (!$this->exists($virus_id)) throw new VirusNotFound();
-        return new Virus($virus_id, $this->attackFactory, $this->mysqli);
-    }
-
     public function new(string $user_handle = null, bool $standalone = true): Virus {
         $virus_id = $this->idGenerator->newVirusId();
         if ($user_handle == null) {
@@ -43,6 +38,11 @@ class VirusFactoryImp implements VirusFactory {
         touch(DATA_FILE . "/viruses/$virus_id/profile.txt");
 
         return $this->get($virus_id);
+    }
+
+    public function get($virus_id): Virus {
+        if (!$this->exists($virus_id)) throw new VirusNotFound();
+        return new Virus($virus_id, $this->attackFactory, $this->mysqli);
     }
 
     public function exists(string $virus_id): bool {

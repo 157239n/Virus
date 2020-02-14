@@ -1,5 +1,7 @@
 <?php /** @noinspection PhpIncludeInspection */
 
+// NOTICE: remember to close the mysql connection after including this file
+
 use Kelvinho\Virus\Attack\AttackFactoryImp;
 use Kelvinho\Virus\Auth\AuthenticatorImp;
 use Kelvinho\Virus\Id\IdGeneratorImp;

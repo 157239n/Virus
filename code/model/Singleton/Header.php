@@ -31,13 +31,13 @@ class Header {
         exit(1);
     }
 
-    public static function redirect() {
-        http_response_code(302);
-        exit(0);
-    }
-
     public static function redirectToHome() {
         header("Location: " . DOMAIN);
         self::redirect();
+    }
+
+    public static function redirect() {
+        http_response_code(302);
+        exit(0);
     }
 }

@@ -14,17 +14,6 @@ use Kelvinho\Virus\Singleton\Header;
  */
 class Session {
     /**
-     * Gets session variable.
-     *
-     * @param string $key
-     * @param null $default Default value if session variable is not there
-     * @return string|null
-     */
-    public function get(string $key, $default = null): ?string {
-        return $this->has($key) ? $_SESSION[$key] : $default;
-    }
-
-    /**
      * Sets session variable.
      *
      * @param string $key
@@ -32,6 +21,18 @@ class Session {
      */
     public function set(string $key, string $value): void {
         $_SESSION[$key] = $value;
+    }
+
+    /**
+     * Get the session variable. Set response code to not found.
+     *
+     * @param string $key
+     * @return string
+     */
+    public function getCheck(string $key): string {
+        if ($this->has($key)) return $this->get($key);
+        Header::notFound();
+        return null;
     }
 
     /**
@@ -45,14 +46,13 @@ class Session {
     }
 
     /**
-     * Get the session variable. Set response code to not found.
+     * Gets session variable.
      *
      * @param string $key
-     * @return string
+     * @param null $default Default value if session variable is not there
+     * @return string|null
      */
-    public function getCheck(string $key): string {
-        if ($this->has($key)) return $this->get($key);
-        Header::notFound();
-        return null;
+    public function get(string $key, $default = null): ?string {
+        return $this->has($key) ? $_SESSION[$key] : $default;
     }
 }
