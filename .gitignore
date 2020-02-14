@@ -3,5 +3,5 @@
 !/backup/restore.sh
 docker-compose.yml
 /data
-/env
+.env
 /mysql
