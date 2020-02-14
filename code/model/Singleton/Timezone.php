@@ -39,11 +39,7 @@ class Timezone {
         12 => "New Zealand, Marshal Islands");
 
     public static function getDescription(int $timezone): string {
-        if (self::okay($timezone)) {
-            return self::$descriptions[$timezone];
-        } else {
-            return "";
-        }
+        return self::okay($timezone) ? self::$descriptions[$timezone] : "";
     }
 
     /** @noinspection PhpUnused */

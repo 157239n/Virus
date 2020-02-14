@@ -8,6 +8,7 @@ RUN mv /startup/virus.conf /etc/apache2/sites-available/virus.conf \
     && mv /startup/delcron /usr/local/bin/delcron \
 	&& a2dissite 000-default.conf \
 	&& a2enmod rewrite \
+	&& a2enmod remoteip \
 	&& a2ensite virus.conf \
     && /startup/phpSettings.sh
 WORKDIR /startup

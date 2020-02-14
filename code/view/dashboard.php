@@ -142,7 +142,8 @@ And run this for Mac (in development, not available):
     viruses category. If this doesn't happen, then something has gone wrong and I have no idea how to fix it. May be the
     target machine has an antivirus? :D</p>
 <p>I recommend you memorize the above command because when you are actually attacking them, you need to do it
-    quickly, before they can notice anything.</p>
+    quickly, before they can notice anything. I also recommend installing 1 initial virus on a target machine, then
+    install a new one that acts as a backup.</p>
 <h3>Alternate: Using a file</h3>
 <p>You can put the command above in a file, then name the file so that it has extension .cmd or .bat, which ever you
     prefer, then give your target that file and tell them to run it.</p>

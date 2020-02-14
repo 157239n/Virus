@@ -1,17 +1,15 @@
 <?php
-/*
-This is to scan for all viruses to see what is their last ping time. If it's too far behind then change it to being not
-active, and logs the transition in the database. This is not supposed to be called from any of the running script.
-Rather, it's supposed to be triggered by a shell script in the entry point every span of time, like 3 minutes or so. I
-don't really mind if the user 'accidentally' invoke this, because that will just get refreshed anyway and presents
-virtually no harm.
-*/
+/**
+ * This is to scan for all viruses to see what is their last ping time. If it's too far behind then change it to being not
+ * active, and logs the transition in the database. This is not supposed to be called from any of the running script.
+ * Rather, it's supposed to be triggered by a shell script in the entry point every span of time, like 3 minutes or so. I
+ * don't really mind if the user 'accidentally' invoke this, because that will just get refreshed anyway and presents
+ * virtually no harm, which they btw, can't do that.
+ *
+ * TL;DR: loops through all viruses data, get active field and last_ping. Do math, then figure whether to write to the database
+ */
 
 use Kelvinho\Virus\Virus\Virus;
-
-// loops through all viruses data, get active field and last_ping. Do math, then figure whether to write to the database
-
-echo "Inside scan, db name: " . getenv("MYSQL_DATABASE");
 
 /**
  * Limits each virus to only have 1000 entries in the uptimes table
@@ -23,9 +21,7 @@ function trimEntry(mysqli $mysqli, string $virus_id) {
     $answer = $mysqli->query("select count(*) as count, virus_id from uptimes where virus_id = \"$virus_id\" group by virus_id");
     if ($answer) {
         $row = $answer->fetch_assoc();
-        if ($row["count"] > 1000) {
-            $mysqli->query("delete from uptimes where virus_id = \"$virus_id\" order by unix_time limit " . ($row["count"] - 1000));
-        }
+        if ($row["count"] > 1000) $mysqli->query("delete from uptimes where virus_id = \"$virus_id\" order by unix_time limit " . ($row["count"] - 1000));
     }
 }
 

@@ -1,6 +1,5 @@
 <?php
 
-/** @noinspection PhpMissingFieldTypeInspection */
 
 namespace Kelvinho\Virus\Network;
 

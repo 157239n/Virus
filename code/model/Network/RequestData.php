@@ -185,4 +185,40 @@ class RequestData {
         if (!$this->hasFile($fileName)) Header::badRequest();
         rename($this->fileVariables[$fileName]["tmp_name"], $destination);
     }
+
+    /**
+     * If the $_SERVER variable doesn't exist, sets response code to bad request and exits.
+     *
+     * @param string $key
+     * @return string
+     */
+    public function serverCheck(string $key): string {
+        if ($this->hasServer($key)) {
+            return $this->server($key);
+        } else {
+            Header::badRequest();
+            return null;
+        }
+    }
+
+    /**
+     * Whether a $_SERVER variable exists.
+     *
+     * @param string $key
+     * @return bool
+     */
+    public function hasServer(string $key): bool {
+        return array_key_exists($key, $this->serverVariables);
+    }
+
+    /**
+     * Gets a $_SERVER variable.
+     *
+     * @param string $key
+     * @param string|null $default Default value if parameter is not found
+     * @return string|null
+     */
+    public function server(string $key, string $default = null): ?string {
+        return $this->hasServer($key) ? $this->serverVariables[$key] : $default;
+    }
 }

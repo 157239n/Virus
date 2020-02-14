@@ -52,7 +52,10 @@ $router->get("controller/*/*", function () use ($requestData, $authenticator, $s
 });
 
 // and scanning the system
-$router->get("scan", function () use ($requestData) {
+$router->get("scan", function () use ($requestData, $whitelistFactory) {
+    $whitelist = $whitelistFactory->new();
+    $whitelist->addIp($requestData->serverCheck("SERVER_ADDR"));
+    if (!$whitelist->allowed($requestData->serverCheck("REMOTE_ADDR")))
+        $requestData->rightHost() ? Header::redirectToHome() : Header::notFound();
     include(__DIR__ . "/../scan.php");
 });
-
