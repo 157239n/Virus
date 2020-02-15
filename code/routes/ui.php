@@ -59,3 +59,7 @@ $router->get("scan", function () use ($requestData, $whitelistFactory, $mysqli) 
         $requestData->rightHost() ? Header::redirectToHome() : Header::notFound();
     include(__DIR__ . "/../scan.php");
 });
+
+$router->get("test", function() {
+    include(__DIR__ . "/../test.php");
+});
