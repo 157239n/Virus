@@ -178,6 +178,7 @@ And run this for Mac (in development, not available):
 </body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 <script type="text/javascript" src="https://157239n.com/page/assets/js/main.js"></script>
+<!--suppress JSUnusedGlobalSymbols -->
 <script type="application/javascript">
     function virusInfo(virus_id) {
         $.ajax({

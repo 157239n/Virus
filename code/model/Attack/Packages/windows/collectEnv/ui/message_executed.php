@@ -2,6 +2,8 @@
 
 use function Kelvinho\Virus\map;
 
+/** @var \Kelvinho\Virus\Attack\Packages\Windows\OneTime\CollectEnv $attack */
+
 ?>
 <p>This attack is executed. The environmental variables are:</p>
 <ul style="overflow: auto;">

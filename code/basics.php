@@ -113,4 +113,18 @@ namespace Kelvinho\Virus {
         $realUserPath = realpath($basePath . $relativePath);
         return ($realUserPath === false || strpos($realUserPath, $realBase) !== 0) ? "" : $realUserPath;
     }
+
+    /**
+     * Strips the protocol part (http://, https://, ftp://, ...) out of a url.
+     *
+     * @param string $url
+     * @return string
+     */
+    function stripProtocol(string $url): string {
+        $protocols = ["http://", "https://", "ftp://", "sftp://", "ssh://"];
+        foreach ($protocols as $protocol) {
+            $url = str_replace($protocol, "", $url);
+        }
+        return $url;
+    }
 }

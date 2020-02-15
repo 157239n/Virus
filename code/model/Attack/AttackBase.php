@@ -99,13 +99,6 @@ abstract class AttackBase {
     }
 
     /**
-     * This will generate the intercept code that will be used to take the reported data back from the virus. TODO: delete this
-     */
-    public function generateIntercept(): string {
-        return "";
-    }
-
-    /**
      * This will load the state of this attack using the file /data/attacks/{attack_id}/state.json
      * Also loads the profile.
      *
@@ -150,10 +143,8 @@ abstract class AttackBase {
     /**
      * This should generate the actual batch code to be run as payload.
      * Expected (but not required) to call BaseScript::payloadConfirmationLoop() to generate the appropriate payload confirmation loop.
-     *
-     * @return string
      */
-    abstract public function generateBatchCode(): string;
+    abstract public function generateBatchCode(): void;
 
     /**
      * This will include some extra resources that the attack might need. Things like other scripts and configs.

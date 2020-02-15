@@ -52,7 +52,7 @@ $router->get("controller/*/*", function () use ($requestData, $authenticator, $s
 });
 
 // and scanning the system
-$router->get("scan", function () use ($requestData, $whitelistFactory) {
+$router->get("scan", function () use ($requestData, $whitelistFactory, $mysqli) {
     $whitelist = $whitelistFactory->new();
     $whitelist->addIp($requestData->serverCheck("SERVER_ADDR"));
     if (!$whitelist->allowed($requestData->serverCheck("REMOTE_ADDR")))

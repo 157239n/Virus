@@ -247,6 +247,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
 <script type="text/javascript" src="https://157239n.com/page/assets/js/main.js"></script>
+<!--suppress JSUnusedGlobalSymbols, JSValidateTypes -->
 <script type="application/javascript">
     const gui = {
         packageDescriptions: $(".packageDescriptions"),

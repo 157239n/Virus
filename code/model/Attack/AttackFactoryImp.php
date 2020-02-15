@@ -1,4 +1,4 @@
-<?php /** @noinspection PhpUndefinedMethodInspection */
+<?php
 
 
 namespace Kelvinho\Virus\Attack;

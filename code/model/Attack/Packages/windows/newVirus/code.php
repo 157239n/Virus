@@ -22,14 +22,6 @@ class NewVirus extends AttackBase {
         parent::__construct();
     }
 
-    public function generateIntercept(): string {
-        ob_start(); //@formatter:off ?>
-        $attack = $attackFactory->get("<?php echo $this->attack_id; ?>");
-        $attack->setExecuted();
-        $attack->saveState();
-        <?php return ob_get_clean(); //@formatter:on
-    }
-
     public function getBaseLocation(): string {
         return $this->baseLocation;
     }
@@ -46,12 +38,10 @@ class NewVirus extends AttackBase {
         $this->newVirusId = $newVirusId;
     }
 
-    public function generateBatchCode(): string {
-        ob_start();
+    public function generateBatchCode(): void {
         echo BaseScriptWin::initStandalone($this->newVirusId, $this->user_handle, $this->baseLocation);
         echo BaseScriptWin::payloadConfirmationLoop($this->virus_id, $this->attack_id, $this->generateUploadCode());
         echo BaseScriptWin::cleanUpPayload();
-        return ob_get_clean();
     }
 
     private function generateUploadCode(): string {

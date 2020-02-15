@@ -1,7 +1,5 @@
 <?php /** @noinspection PhpIncludeInspection */
 
-// NOTICE: remember to close the mysql connection after including this file
-
 use Kelvinho\Virus\Attack\AttackFactoryImp;
 use Kelvinho\Virus\Auth\AuthenticatorImp;
 use Kelvinho\Virus\Id\IdGeneratorImp;
@@ -27,12 +25,23 @@ if ($mysqli->connect_errno) Logs::error("Mysql failed. Info: $mysqli->connect_er
 
 $requestData = new RequestData();
 $whitelistFactory = new WhitelistFactory();
+
+/** @var \Kelvinho\Virus\Id\IdGenerator $idGenerator */
 $idGenerator = new IdGeneratorImp($mysqli);
+
+/** @var \Kelvinho\Virus\User\UserFactory $userFactory */
 $userFactory = new UserFactoryImp($mysqli);
+
+/** @var \Kelvinho\Virus\Attack\AttackFactory $attackFactory */
 $attackFactory = new AttackFactoryImp();
+
+/** @var \Kelvinho\Virus\Virus\VirusFactory $virusFactory */
 $virusFactory = new VirusFactoryImp($session, $attackFactory, $idGenerator, $mysqli);
+
+/** @var \Kelvinho\Virus\Auth\Authenticator $authenticator */
+$authenticator = new AuthenticatorImp($session, $mysqli);
+
 $attackFactory->addContext($requestData, $session, $userFactory, $virusFactory, $idGenerator, $mysqli);
 $router = new Router($requestData);
-$authenticator = new AuthenticatorImp($session, $mysqli);
 
 foreach (glob(__DIR__ . "/routes/*.php") as $file) require_once($file);

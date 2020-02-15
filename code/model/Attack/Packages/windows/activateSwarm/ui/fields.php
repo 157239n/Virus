@@ -2,6 +2,8 @@
 
 use Kelvinho\Virus\Attack\AttackBase;
 
+/** @var \Kelvinho\Virus\Attack\Packages\Windows\OneTime\ActivateSwarm $attack */
+
 ?>
 <label for="baseLocation">Base location</label>
 <input class="w3-input" type="text" id="baseLocation"

