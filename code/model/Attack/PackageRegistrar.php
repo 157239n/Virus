@@ -12,8 +12,8 @@ namespace Kelvinho\Virus\Attack;
  * @license http://www.opensource.org/licenses/mit-license.html  MIT License
  */
 class PackageRegistrar {
-    private static array $packages = [];
-    private static array $packageNames = [];
+    private array $iPackages = [];
+    private array $iPackageNames = [];
 
     /**
      * Registers an attack package. This is supposed to be called from packages/{platform}/{package name}/register.php
@@ -25,9 +25,9 @@ class PackageRegistrar {
      * @param array $classes The groups this package belongs to
      * @param string $description Description for users
      */
-    public static function register(string $dbName, string $className, string $displayName, string $location, array $classes, string $description) {
-        self::$packages[$dbName] = ["className" => $className, "displayName" => $displayName, "location" => $location, "classes" => $classes, "description" => $description];
-        array_push(self::$packageNames, $dbName);
+    public function iRegister(string $dbName, string $className, string $displayName, string $location, array $classes, string $description) {
+        $this->iPackages[$dbName] = ["className" => $className, "displayName" => $displayName, "location" => $location, "classes" => $classes, "description" => $description];
+        array_push($this->iPackageNames, $dbName);
     }
 
     /**
@@ -35,8 +35,8 @@ class PackageRegistrar {
      *
      * @return array
      */
-    public static function getPackages(): array {
-        return self::$packageNames;
+    public function getPackages(): array {
+        return $this->iPackageNames;
     }
 
     /**
@@ -45,8 +45,8 @@ class PackageRegistrar {
      * @param string $dbName Name of package stored in the database
      * @return bool
      */
-    public static function hasPackage(string $dbName): bool {
-        return isset(self::$packages[$dbName]);
+    public function hasPackage(string $dbName): bool {
+        return isset($this->iPackages[$dbName]);
     }
 
     /**
@@ -55,8 +55,8 @@ class PackageRegistrar {
      * @param string $dbName Name of package stored in the database
      * @return string The package display name
      */
-    public static function getDisplayName(string $dbName): string {
-        return self::$packages[$dbName]["displayName"];
+    public function getDisplayName(string $dbName): string {
+        return $this->iPackages[$dbName]["displayName"];
     }
 
     /**
@@ -65,8 +65,8 @@ class PackageRegistrar {
      * @param string $dbName The package name
      * @return string The package description
      */
-    public static function getDescription(string $dbName): string {
-        return self::$packages[$dbName]["description"];
+    public function getDescription(string $dbName): string {
+        return $this->iPackages[$dbName]["description"];
     }
 
     /**
@@ -76,8 +76,8 @@ class PackageRegistrar {
      * @param string $dbName The package name
      * @return string The actual class name
      */
-    public static function getClassName(string $dbName) {
-        return self::$packages[$dbName]["className"];
+    public function getClassName(string $dbName) {
+        return $this->iPackages[$dbName]["className"];
     }
 
     /**
@@ -86,7 +86,7 @@ class PackageRegistrar {
      * @param string $dbName The package name
      * @return string The package description
      */
-    public static function getLocation(string $dbName) {
-        return self::$packages[$dbName]["location"];
+    public function getLocation(string $dbName) {
+        return $this->iPackages[$dbName]["location"];
     }
 }

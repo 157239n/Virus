@@ -1,6 +1,7 @@
 <?php /** @noinspection PhpIncludeInspection */
 
 // routes for UI
+use Kelvinho\Virus\Attack\PackageRegistrar;
 use Kelvinho\Virus\Singleton\Header;
 use function Kelvinho\Virus\goodPath;
 
@@ -13,11 +14,11 @@ $router->get("dashboard", function () use ($requestData, $authenticator, $sessio
     if (!$requestData->rightHost()) Header::notFound();
     include(__DIR__ . "/../view/dashboard.php");
 });
-$router->get("virus", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory, $attackFactory, $mysqli) {
+$router->get("virus", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory, $attackFactory, $mysqli, $packageRegistrar) {
     if (!$requestData->rightHost()) Header::notFound();
     include(__DIR__ . "/../view/virus.php");
 });
-$router->get("attack", function () use ($requestData, $authenticator, $session, $userFactory, $attackFactory) {
+$router->get("attack", function () use ($requestData, $authenticator, $session, $userFactory, $attackFactory, $packageRegistrar) {
     if (!$requestData->rightHost()) Header::notFound();
     include(__DIR__ . "/../view/attack.php");
 });
@@ -33,22 +34,6 @@ $router->get("resources/images/*", function () use ($requestData) {
         \header("Content-type: " . mime_content_type($filePath));
         readfile($filePath);
     } else Header::notFound();
-});
-
-// and controller stuff
-$router->post("controller/*", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory, $attackFactory) {
-    if (!$requestData->rightHost()) Header::notFound();
-    include(__DIR__ . "/../controller/" . $requestData->getExplodedPath()[1] . ".php");
-});
-$router->get("controller/*", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory, $attackFactory) {
-    if (!$requestData->rightHost()) Header::notFound();
-    include(__DIR__ . "/../controller/" . $requestData->getExplodedPath()[1] . ".php");
-});
-// added redirection on the 2nd exploded path
-$router->get("controller/*/*", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory, $attackFactory) {
-    if (!$requestData->rightHost()) Header::notFound();
-    include(__DIR__ . "/../controller/" . $requestData->getExplodedPath()[1] . ".php"); ?>
-    <script>window.location = "<?php echo base64_decode($requestData->getExplodedPath()[2]); ?>";</script><?php
 });
 
 // and scanning the system

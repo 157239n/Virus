@@ -69,6 +69,28 @@ class Router {
     }
 
     /**
+     * Create a new GET and POST route.
+     *
+     * @param string $identifier
+     * @param callable $callback
+     */
+    public function getPost(string $identifier, callable $callback) {
+        $this->get($identifier, $callback);
+        $this->post($identifier, $callback);
+    }
+
+    /**
+     * Create multiple new GET and POST routes with the same callback.
+     *
+     * @param array $identifiers
+     * @param callable $callback
+     */
+    public function getPostMulti(array $identifiers, callable $callback) {
+        $this->getMulti($identifiers, $callback);
+        $this->postMulti($identifiers, $callback);
+    }
+
+    /**
      * Look for the good route and execute it.
      */
     public function run(): void {

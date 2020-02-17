@@ -35,26 +35,14 @@ class AuthenticatorImp implements Authenticator {
         $answer = $this->mysqli->query("select user_handle from viruses where virus_id = \"" . $this->mysqli->escape_string($virus_id) . "\"");
         if ($answer) {
             $row = $answer->fetch_assoc();
-            if ($row) {
-                $authorized = $row["user_handle"] === $this->session->get("user_handle");
-            } else {
-                $authorized = false;
-            }
-        } else {
-            $authorized = false;
-        }
+            $authorized = $row ? $row["user_handle"] === $this->session->get("user_handle") : false;
+        } else $authorized = false;
         if ($attack_id != null) {
             $answer = $this->mysqli->query("select virus_id from attacks where attack_id = \"" . $this->mysqli->escape_string($attack_id) . "\"");
             if ($answer) {
                 $row = $answer->fetch_assoc();
-                if ($row) {
-                    $authorized = $row["virus_id"] === $virus_id;
-                } else {
-                    $authorized = false;
-                }
-            } else {
-                $authorized = false;
-            }
+                $authorized = $row ? $row["virus_id"] === $virus_id : false;
+            } else $authorized = false;
         }
         return $authorized;
     }

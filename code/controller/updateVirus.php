@@ -7,7 +7,6 @@ $name = $requestData->postCheck("name");
 $profile = $requestData->postCheck("profile");
 
 if (!$virusFactory->exists($virus_id)) Header::badRequest();
-
 if (!$authenticator->authorized($virus_id)) Header::forbidden();
 
 $virus = $virusFactory->get($virus_id);

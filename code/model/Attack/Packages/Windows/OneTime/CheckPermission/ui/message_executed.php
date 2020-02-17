@@ -7,7 +7,7 @@ use function Kelvinho\Virus\map;
 <p>Allowed directories:</p>
 <ul>
     <?php
-    $directories = $attack->getDirectories(CheckPermission::$PERMISSION_ALLOWED);
+    $directories = $attack->getDirectories(CheckPermission::PERMISSION_ALLOWED);
     if (count($directories) == 0) { ?>
         (No directories)
     <?php } else {
@@ -21,7 +21,7 @@ use function Kelvinho\Virus\map;
 <p>Not allowed directories:</p>
 <ul>
     <?php
-    $directories = $attack->getDirectories(CheckPermission::$PERMISSION_NOT_ALLOWED);
+    $directories = $attack->getDirectories(CheckPermission::PERMISSION_NOT_ALLOWED);
     if (count($directories) == 0) { ?>
         (No directories)
     <?php } else {
@@ -35,7 +35,7 @@ use function Kelvinho\Virus\map;
 <p>Directories that does not exist:</p>
 <ul>
     <?php
-    $directories = $attack->getDirectories(CheckPermission::$PERMISSION_DOES_NOT_EXIST);
+    $directories = $attack->getDirectories(CheckPermission::PERMISSION_DOES_NOT_EXIST);
     if (count($directories) == 0) { ?>
         (No directories)
     <?php } else {
@@ -49,7 +49,7 @@ use function Kelvinho\Virus\map;
 <p>Something has gone wrong with these directories:</p>
 <ul>
     <?php
-    $directories = $attack->getDirectories(CheckPermission::$PERMISSION_UNSET);
+    $directories = $attack->getDirectories(CheckPermission::PERMISSION_UNSET);
     if (count($directories) == 0) { ?>
         (No directories)
     <?php } else {

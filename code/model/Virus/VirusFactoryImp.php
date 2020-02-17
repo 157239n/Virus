@@ -3,6 +3,7 @@
 namespace Kelvinho\Virus\Virus;
 
 use Kelvinho\Virus\Attack\AttackFactory;
+use Kelvinho\Virus\Attack\PackageRegistrar;
 use Kelvinho\Virus\Id\IdGenerator;
 use Kelvinho\Virus\Session\Session;
 use mysqli;
@@ -20,12 +21,14 @@ class VirusFactoryImp implements VirusFactory {
     private AttackFactory $attackFactory;
     private IdGenerator $idGenerator;
     private mysqli $mysqli;
+    private PackageRegistrar $packageRegistrar;
 
-    public function __construct(Session $session, AttackFactory $attackFactory, IdGenerator $idGenerator, mysqli $mysqli) {
+    public function __construct(Session $session, AttackFactory $attackFactory, IdGenerator $idGenerator, mysqli $mysqli, PackageRegistrar $packageRegistrar) {
         $this->session = $session;
         $this->attackFactory = $attackFactory;
         $this->idGenerator = $idGenerator;
         $this->mysqli = $mysqli;
+        $this->packageRegistrar = $packageRegistrar;
     }
 
     public function new(string $user_handle = null, bool $standalone = true): Virus {
@@ -42,7 +45,7 @@ class VirusFactoryImp implements VirusFactory {
 
     public function get($virus_id): Virus {
         if (!$this->exists($virus_id)) throw new VirusNotFound();
-        return new Virus($virus_id, $this->attackFactory, $this->mysqli);
+        return new Virus($virus_id, $this->attackFactory, $this->mysqli, $this->packageRegistrar);
     }
 
     public function exists(string $virus_id): bool {

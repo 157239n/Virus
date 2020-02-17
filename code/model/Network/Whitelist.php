@@ -2,6 +2,8 @@
 
 namespace Kelvinho\Virus\Network;
 
+use Kelvinho\Virus\Network\Ip\IpSchemaConverter;
+
 /**
  * Class Whitelist. Represents a whitelist of ip address. You can add ip addresses and ranges and test if another ip
  * address passes the test.

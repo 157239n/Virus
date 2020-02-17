@@ -2,8 +2,6 @@
 
 namespace Kelvinho\Virus\Network\Ip;
 
-use Kelvinho\Virus\Network\IpSchemaConverter;
-
 /**
  * Class Single. Represents a single, normal ip address.
  *

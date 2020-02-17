@@ -162,13 +162,14 @@ function processLine($handle, int $givenDepth, array &$path, string $unprocessed
     }
 }
 
+/** @var ExploreDir $attack */
 
 ?>
 <p>This attack is executed. Bold lines are the directories. You can click on them to either expand or
     collapse a directory. Click <a onclick="collapseAll()" style="color: blue; cursor: pointer">here</a> to
     collapse all. You can also click on files to copy their address for other purposes.</p>
 <p>Please note that this might not be all of the files available. The maximum number of files and folders
-    scanned are <?php echo ExploreDir::$maxLines ?>. Also if nothing is displayed below, it could be that
+    scanned are <?php echo ExploreDir::MAX_LINES ?>. Also if nothing is displayed below, it could be that
     the folder really does not have anything in it, or you have entered a nonexistent directory.</p>
 <p>This is the file tree of <?php echo $attack->getRootDir(); ?></p>
 <?php

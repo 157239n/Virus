@@ -2,8 +2,6 @@
 
 namespace Kelvinho\Virus\Network\Ip;
 
-use Kelvinho\Virus\Network\IpSchemaConverter;
-
 /**
  * Class Any. Represents every ip possible.
  *

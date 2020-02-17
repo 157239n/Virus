@@ -182,7 +182,7 @@ use function Kelvinho\Virus\map;
             for (let i = 0; i < this.extras.length - 1; i++) {
                 answer.push(this.extras[i].export());
             }
-            return answer;
+            return JSON.stringify(answer);
         }
     }
 

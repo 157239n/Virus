@@ -26,17 +26,19 @@ class AttackFactoryImp implements AttackFactory {
     private VirusFactory $virusFactory;
     private IdGenerator $idGenerator;
     private mysqli $mysqli;
+    private PackageRegistrar $packageRegistrar;
 
     public function __construct() {
     }
 
-    public function addContext(RequestData $requestData, Session $session, UserFactory $userFactory, VirusFactory $virusFactory, IdGenerator $idGenerator, mysqli $mysqli) {
+    public function addContext(RequestData $requestData, Session $session, UserFactory $userFactory, VirusFactory $virusFactory, IdGenerator $idGenerator, mysqli $mysqli, PackageRegistrar $packageRegistrar) {
         $this->requestData = $requestData;
         $this->session = $session;
         $this->userFactory = $userFactory;
         $this->virusFactory = $virusFactory;
         $this->idGenerator = $idGenerator;
         $this->mysqli = $mysqli;
+        $this->packageRegistrar = $packageRegistrar;
     }
 
     /**
@@ -49,9 +51,9 @@ class AttackFactoryImp implements AttackFactory {
      * @throws AttackPackageNotFound if the attack package doesn't exist
      */
     public function new(string $virus_id, string $attack_package, string $name): AttackBase {
-        if (!PackageRegistrar::hasPackage($attack_package)) throw new AttackPackageNotFound();
+        if (!$this->packageRegistrar->hasPackage($attack_package)) throw new AttackPackageNotFound();
         $attack_id = $this->idGenerator->newAttackId();
-        $classname = PackageRegistrar::getClassName($attack_package);
+        $classname = $this->packageRegistrar->getClassName($attack_package);
 
         mkdir(DATA_FILE . "/attacks/$attack_id");
         touch(DATA_FILE . "/attacks/$attack_id/profile.txt");
@@ -59,7 +61,7 @@ class AttackFactoryImp implements AttackFactory {
 
         $attack = new $classname();
         /** @var AttackBase $attack */
-        $attack->setContext($this->requestData, $this->session, $this->userFactory, $this->virusFactory, $this, $this->mysqli);
+        $attack->setContext($this->requestData, $this->session, $this->userFactory, $this->virusFactory, $this, $this->mysqli, $this->packageRegistrar);
         $attack->setAttackId($attack_id);
         $attack->setVirusId($virus_id);
         $attack->setPackageDbName($attack_package);
@@ -83,12 +85,12 @@ class AttackFactoryImp implements AttackFactory {
         if (!$row) throw new AttackNotFound();
 
         $packageDbName = $row["attack_package"];
-        if (!PackageRegistrar::hasPackage($packageDbName)) throw new AttackPackageNotFound();
-        $classname = PackageRegistrar::getClassName($packageDbName);
+        if (!$this->packageRegistrar->hasPackage($packageDbName)) throw new AttackPackageNotFound();
+        $classname = $this->packageRegistrar->getClassName($packageDbName);
         /** @var AttackBase $attack */
         $attack = new $classname();
 
-        $attack->setContext($this->requestData, $this->session, $this->userFactory, $this->virusFactory, $this, $this->mysqli);
+        $attack->setContext($this->requestData, $this->session, $this->userFactory, $this->virusFactory, $this, $this->mysqli, $this->packageRegistrar);
         $attack->setAttackId($attack_id);
         $attack->setVirusId($row["virus_id"]);
         $attack->setPackageDbName($row["attack_package"]);

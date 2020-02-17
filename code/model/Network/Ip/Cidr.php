@@ -2,8 +2,6 @@
 
 namespace Kelvinho\Virus\Network\Ip;
 
-use Kelvinho\Virus\Network\IpSchemaConverter;
-
 /**
  * Class Cidr. Represents ip addresses with cidr (classless inter-domain routing) notation and looks like 172.16.0.0/12.
  *

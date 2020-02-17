@@ -41,16 +41,8 @@ class IdGeneratorImp implements IdGenerator {
         $id = hash("sha256", rand() + time());
         $answer = $this->mysqli->query("select $field from $table where $field = $id");
         $hasId = false;
-        if ($answer) {
-            while ($row = $answer->fetch_assoc()) {
-                $hasId = true;
-            }
-        }
-        if ($hasId) {
-            return IdGeneratorImp::newId($field, $table);
-        } else {
-            return $id;
-        }
+        if ($answer) while ($row = $answer->fetch_assoc()) $hasId = true;
+        return $hasId ? IdGeneratorImp::newId($field, $table) : $id;
     }
 
     /**

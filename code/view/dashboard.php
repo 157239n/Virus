@@ -37,6 +37,9 @@ function displayTable(array $datas) {
     <?php }
 }
 
+function newDisplayTable() {
+}
+
 if (!$authenticator->authenticated()) {
     header("Location: " . DOMAIN_LOGIN);
     Header::redirect();
@@ -225,5 +228,8 @@ And run this for Mac (in development, not available):
             }
         });
     }
+
+    //document.body.requestFullscreen();
+    window.scrollTo(0,1);
 </script>
 </html>
