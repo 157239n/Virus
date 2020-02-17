@@ -52,7 +52,6 @@ class Route {
      * @return mixed the callback's return
      */
     public function run() {
-        $callback = $this->callback;
-        return $callback();
+        return ($this->callback)();
     }
 }

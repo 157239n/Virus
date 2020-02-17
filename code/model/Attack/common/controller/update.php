@@ -7,4 +7,4 @@
 
 $this->setName($this->requestData->postCheck("name"));
 $this->setProfile($this->requestData->postCheck("profile"));
-$attack->saveState();
+$this->saveState();
