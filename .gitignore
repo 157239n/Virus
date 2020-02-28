@@ -6,3 +6,5 @@ docker-compose.yml
 .env
 /mysql
 code/test.php
+code/composer.lock
+code/vendor

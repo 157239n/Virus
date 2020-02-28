@@ -1,7 +1,6 @@
 <?php /** @noinspection PhpIncludeInspection */
 
 // routes for UI
-use Kelvinho\Virus\Attack\PackageRegistrar;
 use Kelvinho\Virus\Singleton\Header;
 use function Kelvinho\Virus\goodPath;
 
@@ -36,15 +35,14 @@ $router->get("resources/images/*", function () use ($requestData) {
     } else Header::notFound();
 });
 
-// and scanning the system
-$router->get("scan", function () use ($requestData, $whitelistFactory, $mysqli) {
+// and cli stuff, only allowing local processes to invoke this
+$router->get("cli/*", function() use ($requestData, $whitelistFactory, $mysqli) {
     $whitelist = $whitelistFactory->new();
-    $whitelist->addIp($requestData->serverCheck("SERVER_ADDR"));
-    if (!$whitelist->allowed($requestData->serverCheck("REMOTE_ADDR")))
+    $whitelist->addIp("127.0.0.1");
+    if (!$whitelist->allowed($requestData->getRemoteIp()))
         $requestData->rightHost() ? Header::redirectToHome() : Header::notFound();
-    include(__DIR__ . "/../scan.php");
+    include(__DIR__ . "/../" . $requestData->getExplodedPath()[1] . ".php");
 });
-
-$router->get("test", function() {
+$router->get("test", function() use ($whitelistFactory, $requestData, $packageRegistrar) {
     include(__DIR__ . "/../test.php");
 });

@@ -50,9 +50,7 @@ namespace Kelvinho\Virus {
      * @return false|string The formatted time
      */
     function formattedTime(int $time = -1): string {
-        if ($time == -1) {
-            $time = time();
-        }
+        if ($time == -1) $time = time();
         return date("Y/m/d h:i:sa", $time);
     }
 
@@ -98,9 +96,7 @@ namespace Kelvinho\Virus {
      */
     function initializeArray(int $size, $element): array {
         $array = [];
-        for ($i = 0; $i < $size; $i++) {
-            $array[] = $element;
-        }
+        for ($i = 0; $i < $size; $i++) $array[] = $element;
         return $array;
     }
 

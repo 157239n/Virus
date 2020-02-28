@@ -19,6 +19,7 @@ class RequestData {
     private array $serverVariables;
     private array $fileVariables;
     private array $explodedPath;
+    private string $remoteIp = "93.184.216.34"; // ip address of example.com
 
     /** @noinspection PhpUnusedParameterInspection */
     public function __construct() {
@@ -36,10 +37,19 @@ class RequestData {
                 $params[$contents[0]] = $contents[1];
             }, $this->getVariables);
         }
+        if ($this->hasServer("HTTP_X_FORWARDED_FOR")) {
+            $this->remoteIp = explode(",", $this->serverCheck("HTTP_X_FORWARDED_FOR"))[0];
+        } else if($this->hasServer("REMOTE_ADDR")) {
+            $this->remoteIp = $this->serverCheck("REMOTE_ADDR");
+        }
     }
 
     public function getRequestMethod(): string {
         return $this->serverVariables["REQUEST_METHOD"];
+    }
+
+    public function getRemoteIp(): string {
+        return $this->remoteIp;
     }
 
     /**

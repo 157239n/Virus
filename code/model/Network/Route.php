@@ -24,7 +24,7 @@ class Route {
      * @param callable $callback Callback function, will be called when it's the right path
      */
     public function __construct(string $identifier, string $requestMethod, callable $callback) {
-        $this->fragments = explode("/", $identifier);
+        $this->fragments = explode("/", trim($identifier, "/"));
         $this->requestMethod = $requestMethod;
         $this->callback = $callback;
     }

@@ -1,0 +1,8 @@
+{
+  "require": {
+    "phpunit/phpunit": "^9",
+    "ext-mysqli": "*",
+    "ext-json": "*",
+    "ext-fileinfo": "*"
+  }
+}

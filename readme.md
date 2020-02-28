@@ -6,13 +6,20 @@ This is the server for a virus application I built at virus.kelvinho.org. You ca
 
 The project is managed using Docker and docker-compose. Here's what you need to do:
 - Pull this repo to your linux box
-- Create several environment variables. The samples are in .env-sample file. You can just copy that file into the file env. The default mysql values should work fine, but you have to change the domain values to yours.
+- Create several environment variables. The samples are in `.env-sample` file. You can just copy that file into the file `.env`. The default mysql values should work fine, but you have to change the domain values to yours.
 - Create docker-compose.yml file
   - Option 1: Put an SSL stripping reverse proxy container exposed to the internet, then redirect it to the main application container. Sample config: `docker-compose.sample.yml`
   - Option 2: If you don't know what the hell am I talking about, then copy `docker-compose.sample.standalone.yml` to `docker-compose.yml`
 - Run the application
   - run `docker-compose build`
   - run `docker-compose up -d`
+
+The project does not depend on any framework so it should work right out the box. There is an optional framework this uses, which is PHPUnit for unit and integration testing. If you want to use this, then do these:
+- Get into the main docker container. You should run something like `docker exec -it virus bash`
+- Navigate to the document root, which should be `/var/www/virus`
+- Run `composer install`, to install dependencies
+- Navigate to the `/var/www/virus/test` folder
+- Run `phpunit` and it will test the system
 
 Don't know what the hell am I talking about? Here's what to learn more before you can understand:
 - Linux, especially Ubuntu (Debian)

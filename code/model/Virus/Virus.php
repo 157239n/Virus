@@ -72,18 +72,10 @@ class Virus {
      */
     public static function getState(int $last_ping): int {
         $currentTime = time();
-        if ($last_ping === 0) {
-            return self::VIRUS_EXPECTING;
-        }
+        if ($last_ping === 0) return self::VIRUS_EXPECTING;
         $delta = $currentTime - $last_ping;
-        if ($delta <= VIRUS_PING_INTERVAL * 10) {
-            return self::VIRUS_ACTIVE;
-        }
-        if ($delta <= 2 * 24 * 3600) {
-            return self::VIRUS_DORMANT;
-        } else {
-            return self::VIRUS_LOST;
-        }
+        if ($delta <= VIRUS_PING_INTERVAL * 10) return self::VIRUS_ACTIVE;
+        return $delta <= 2 * 24 * 3600 ? self::VIRUS_DORMANT : self::VIRUS_LOST;
     }
 
     /**

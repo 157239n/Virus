@@ -33,10 +33,9 @@ class VirusFactoryImp implements VirusFactory {
 
     public function new(string $user_handle = null, bool $standalone = true): Virus {
         $virus_id = $this->idGenerator->newVirusId();
-        if ($user_handle == null) {
+        if ($user_handle == null)
             $user_handle = $this->session->get("user_handle");
-        }
-        $this->mysqli->query("insert into viruses (virus_id, user_handle, last_ping, name, active, type) values (\"$virus_id\", \"" . $user_handle . "\", 0, \"(not set)\", b'0', b'" . ($standalone ? "0" : "1") . "')");
+        $this->mysqli->query("insert into viruses (virus_id, user_handle, last_ping, name, active, type, class) values (\"$virus_id\", \"" . $user_handle . "\", 0, \"(not set)\", b'0', b'" . ($standalone ? "0" : "1") . "', \"\")");
         mkdir(DATA_FILE . "/viruses/$virus_id");
         touch(DATA_FILE . "/viruses/$virus_id/profile.txt");
 
@@ -50,12 +49,9 @@ class VirusFactoryImp implements VirusFactory {
 
     public function exists(string $virus_id): bool {
         $answer = $this->mysqli->query("select virus_id from viruses where virus_id = \"" . $this->mysqli->escape_string($virus_id) . "\"");
-        if ($answer) {
-            $row = $answer->fetch_assoc();
-            if ($row) {
+        if ($answer)
+            if ($row = $answer->fetch_assoc())
                 return true;
-            }
-        }
         return false;
     }
 }

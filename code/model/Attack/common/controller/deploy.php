@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Responds to being deleted
+ * Responds to being deployed
  */
 
 /** @var \Kelvinho\Virus\Attack\AttackBase $this */

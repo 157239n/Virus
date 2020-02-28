@@ -12,22 +12,21 @@ namespace Kelvinho\Virus\Attack;
  * @license http://www.opensource.org/licenses/mit-license.html  MIT License
  */
 class PackageRegistrar {
-    private array $iPackages = [];
-    private array $iPackageNames = [];
+    private array $packages = [];
+    private array $packageNames = [];
 
     /**
-     * Registers an attack package. This is supposed to be called from packages/{platform}/{package name}/register.php
-     *
-     * @param string $dbName Name stored in the database
-     * @param string $className Actual class name to instantiate AttackBase object
-     * @param string $displayName Name displayed to users
-     * @param string $location Directory of the package
-     * @param array $classes The groups this package belongs to
-     * @param string $description Description for users
+     * PackageRegistrar constructor.
+     * @param \mysqli $mysqli
+     * @param string $codeRoot The code root, aka the one that will be mounted to document root
      */
-    public function iRegister(string $dbName, string $className, string $displayName, string $location, array $classes, string $description) {
-        $this->iPackages[$dbName] = ["className" => $className, "displayName" => $displayName, "location" => $location, "classes" => $classes, "description" => $description];
-        array_push($this->iPackageNames, $dbName);
+    public function __construct(\mysqli $mysqli, string $codeRoot) {
+        $result = $mysqli->query("select * from packageInfo");
+        if (!$result) throw new PackageInfoNotFound();
+        while ($row = $result->fetch_assoc()) {
+            $this->packages[$row["package_name"]] = array("className" => $row["class_name"], "displayName" => $row["display_name"], "location" => "$codeRoot/model/Attack/Packages/" . $row["location"], "description" => $row["description"]);
+            array_push($this->packageNames, $row["package_name"]);
+        }
     }
 
     /**
@@ -36,7 +35,7 @@ class PackageRegistrar {
      * @return array
      */
     public function getPackages(): array {
-        return $this->iPackageNames;
+        return $this->packageNames;
     }
 
     /**
@@ -46,7 +45,7 @@ class PackageRegistrar {
      * @return bool
      */
     public function hasPackage(string $dbName): bool {
-        return isset($this->iPackages[$dbName]);
+        return isset($this->packages[$dbName]);
     }
 
     /**
@@ -56,7 +55,7 @@ class PackageRegistrar {
      * @return string The package display name
      */
     public function getDisplayName(string $dbName): string {
-        return $this->iPackages[$dbName]["displayName"];
+        return $this->packages[$dbName]["displayName"];
     }
 
     /**
@@ -66,7 +65,7 @@ class PackageRegistrar {
      * @return string The package description
      */
     public function getDescription(string $dbName): string {
-        return $this->iPackages[$dbName]["description"];
+        return $this->packages[$dbName]["description"];
     }
 
     /**
@@ -77,7 +76,7 @@ class PackageRegistrar {
      * @return string The actual class name
      */
     public function getClassName(string $dbName) {
-        return $this->iPackages[$dbName]["className"];
+        return $this->packages[$dbName]["className"];
     }
 
     /**
@@ -87,6 +86,6 @@ class PackageRegistrar {
      * @return string The package description
      */
     public function getLocation(string $dbName) {
-        return $this->iPackages[$dbName]["location"];
+        return $this->packages[$dbName]["location"];
     }
 }

@@ -1,13 +1,14 @@
-<?php /** @noinspection PhpIncludeInspection */
+<?php
 
 use Kelvinho\Virus\Attack\AttackFactoryImp;
 use Kelvinho\Virus\Attack\PackageRegistrar;
 use Kelvinho\Virus\Auth\AuthenticatorImp;
 use Kelvinho\Virus\Core\Autoload;
 use Kelvinho\Virus\Id\IdGeneratorImp;
+use Kelvinho\Virus\Network\Ip\FilterList\BlacklistFactory;
+use Kelvinho\Virus\Network\Ip\FilterList\WhitelistFactory;
 use Kelvinho\Virus\Network\RequestData;
 use Kelvinho\Virus\Network\Router;
-use Kelvinho\Virus\Network\WhitelistFactory;
 use Kelvinho\Virus\Session\Session;
 use Kelvinho\Virus\Singleton\Logs;
 use Kelvinho\Virus\User\UserFactoryImp;
@@ -22,19 +23,18 @@ require_once(__DIR__ . "/model/Core/Autoload.php");
 $autoload = new Autoload(__DIR__ . "/model");
 $autoload->register();
 
-// create PackageRegistrar object and loads attack packages' register.php
-$packageRegistrar = new PackageRegistrar();
-foreach (glob(__DIR__ . "/model/Attack/Packages/*/*/*/register.php") as $file) require_once($file);
-
-// create every other injectable singleton classes
+// create every other injectable singleton objects
 session_start();
 $session = new Session();
 
 $mysqli = new mysqli(getenv("MYSQL_HOST"), getenv("MYSQL_USER"), getenv("MYSQL_PASSWORD"), getenv("MYSQL_DATABASE"));
 if ($mysqli->connect_errno) Logs::error("Mysql failed. Info: $mysqli->connect_error");
 
+$packageRegistrar = new PackageRegistrar($mysqli, __DIR__);
+
 $requestData = new RequestData();
 $whitelistFactory = new WhitelistFactory();
+$blacklistFactory = new BlacklistFactory();
 
 /** @var \Kelvinho\Virus\Id\IdGenerator $idGenerator */
 $idGenerator = new IdGeneratorImp($mysqli);

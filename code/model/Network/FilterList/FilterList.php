@@ -1,21 +1,22 @@
 <?php
 
-namespace Kelvinho\Virus\Network;
+namespace Kelvinho\Virus\Network\Ip\FilterList;
 
 use Kelvinho\Virus\Network\Ip\IpSchemaConverter;
 
 /**
- * Class Whitelist. Represents a whitelist of ip address. You can add ip addresses and ranges and test if another ip
- * address passes the test.
+ * Class FilterList. Represents either a whitelist or a blacklist of ip address. You can add ip addresses and ranges and
+ * test if another ip address passes the test.
  *
  * @package Kelvinho\Virus\Network
  * @author Quang Ho <157239q@gmail.com>
  * @copyright Copyright (c) 2020 Quang Ho <https://github.com/157239n>
  * @license http://www.opensource.org/licenses/mit-license.html  MIT License
  */
-class Whitelist {
+abstract class FilterList {
     /** @var IpSchemaConverter[] */
     private array $ipSchemaConverters;
+    protected bool $isWhitelist = true;
 
     /** @var double[] */
     private array $whitelists = [];
@@ -25,7 +26,7 @@ class Whitelist {
     }
 
     /**
-     * Add ip address to whitelist
+     * Add ip address to list
      *
      * @param string $ipAddressRepresentation
      */
@@ -45,8 +46,8 @@ class Whitelist {
         $ip = ip2long($ipAddress);
 
         foreach ($this->whitelists as $whitelist)
-            if ($ip >= $whitelist[0] && $ip <= $whitelist[1]) return true;
+            if ($ip >= $whitelist[0] && $ip <= $whitelist[1]) return $this->isWhitelist;
 
-        return false;
+        return $this->isWhitelist;
     }
 }

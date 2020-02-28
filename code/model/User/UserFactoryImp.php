@@ -36,12 +36,9 @@ class UserFactoryImp implements UserFactory {
 
     public function exists(string $user_handle): bool {
         $answer = $this->mysqli->query("select user_handle from users where user_handle = \"" . $this->mysqli->escape_string($user_handle) . "\"");
-        $hasHandle = false;
-        if ($answer) {
-            while ($row = $answer->fetch_assoc()) {
-                $hasHandle = true;
-            }
-        }
-        return $hasHandle;
+        if ($answer)
+            if ($row = $answer->fetch_assoc())
+                return true;
+        return false;
     }
 }

@@ -71,18 +71,13 @@ class AuthenticatorImp implements Authenticator {
     public function authenticate(string $user_handle, string $password): bool {
         $authenticated = false;
         $answer = $this->mysqli->query("select password_salt, password_hash from users where user_handle = \"" . $this->mysqli->escape_string($user_handle) . "\"");
-        if ($answer) {
-            while ($row = $answer->fetch_assoc()) {
-                if (hash("sha256", $row["password_salt"] . $password) == $row["password_hash"]) {
+        if ($answer)
+            if ($row = $answer->fetch_assoc())
+                if (hash("sha256", $row["password_salt"] . $password) == $row["password_hash"])
                     $authenticated = true;
-                }
-            }
-        }
         if ($authenticated) {
             $this->session->set("user_handle", $user_handle);
             return true;
-        } else {
-            return false;
-        }
+        } else return false;
     }
 }

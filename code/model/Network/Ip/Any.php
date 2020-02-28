@@ -12,7 +12,7 @@ namespace Kelvinho\Virus\Network\Ip;
  */
 class Any implements IpSchemaConverter {
     public function valid(string $ipAddressRepresentation): bool {
-        return $ipAddressRepresentation === "*";
+        return ($ipAddressRepresentation === "*") || ($ipAddressRepresentation === "any");
     }
 
     public function convert(string $ipAddressRepresentation): array {
