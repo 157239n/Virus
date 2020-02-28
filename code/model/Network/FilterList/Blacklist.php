@@ -1,6 +1,6 @@
 <?php
 
-namespace Kelvinho\Virus\Network\Ip\FilterList;
+namespace Kelvinho\Virus\Network\FilterList;
 
 /**
  * Class Blacklist. Represents a blacklist. You can add ip addresses that you want to filter out, and check if an ip is valid.

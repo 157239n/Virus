@@ -1,6 +1,6 @@
 <?php
 
-namespace Kelvinho\Virus\Network\Ip\FilterList;
+namespace Kelvinho\Virus\Network\FilterList;
 
 use Kelvinho\Virus\Network\Ip\Any;
 use Kelvinho\Virus\Network\Ip\Cidr;
