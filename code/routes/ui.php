@@ -38,10 +38,10 @@ $router->get("resources/images/*", function () use ($requestData) {
 // and cli stuff, only allowing local processes to invoke this
 $router->get("cli/*", function() use ($requestData, $whitelistFactory, $mysqli) {
     $whitelist = $whitelistFactory->new();
-    $whitelist->addIp("127.0.0.1");
+    $whitelist->addIp("localhost");
     if (!$whitelist->allowed($requestData->getRemoteIp()))
         $requestData->rightHost() ? Header::redirectToHome() : Header::notFound();
-    include(__DIR__ . "/../" . $requestData->getExplodedPath()[1] . ".php");
+    include(__DIR__ . "/../cli/" . $requestData->getExplodedPath()[1] . ".php");
 });
 $router->get("test", function() use ($whitelistFactory, $requestData, $packageRegistrar) {
     include(__DIR__ . "/../test.php");

