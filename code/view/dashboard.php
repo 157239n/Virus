@@ -28,7 +28,7 @@ function displayTable(array $virus_ids, array $visibleFields, VirusFactory $viru
                 </tr>
                 <?php foreach ($virus_ids as $blob) {
                     $virus = $virusFactory->get($blob["virus_id"]);
-                    echo "<tr onclick = \"virusInfo('" . $virus->getVirusId() . "')\" style='cursor: pointer;" . ($virus->isStandalone() ? "" : "background: lightgrey;") . "'>";
+                    echo "<tr onclick = \"virusInfo('" . $virus->getVirusId() . "')\" style='cursor: pointer;' " . ($virus->isStandalone() ? "" : "class='w3-blue-grey w3-hover-dark-grey'") . ">";
                     echo in_array(0, $visibleFields) ? "<td>" . $virus->getName() . "</td>" : "";
                     echo in_array(1, $visibleFields) ? "<td>" . formattedHash($virus->getVirusId()) . "</td>" : "";
                     echo in_array(2, $visibleFields) ? "<td>" . formattedTime($virus->getLastPing() + Timezone::getUnixOffset($timezone)) . " UTC $timezone</td>" : "";
