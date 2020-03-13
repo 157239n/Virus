@@ -1,7 +1,7 @@
 <?php
 
-use Kelvinho\Virus\Network\Ip\FilterList\Blacklist;
-use Kelvinho\Virus\Network\Ip\FilterList\BlacklistFactory;
+use Kelvinho\Virus\Network\FilterList\Blacklist;
+use Kelvinho\Virus\Network\FilterList\BlacklistFactory;
 use PHPUnit\Framework\TestCase;
 
 class BlacklistTest extends TestCase {

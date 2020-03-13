@@ -73,4 +73,9 @@ move "%~pd0scst.exe" "%~pd0..\..\utils\scst.exe"
     protected function getState(): string {
         return json_encode([]);
     }
+
+    public function setStaticUsage() {
+        $this->usage->setDisk(1100000);
+        $this->usage->saveState();
+    }
 }

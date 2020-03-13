@@ -7,7 +7,7 @@ services:
     networks:
       - db
     volumes:
-      - ./code:/var/www/virus
+      - ./code:/var/www/html
       - ./data:/data
       - ./backup:/backup
     env_file:

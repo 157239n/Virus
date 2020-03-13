@@ -12,7 +12,7 @@ namespace Kelvinho\Virus\Network\Ip;
  */
 class Localhost extends Single {
     public function valid(string $ipAddressRepresentation): bool {
-        return $ipAddressRepresentation = "localhost";
+        return $ipAddressRepresentation == "localhost";
     }
 
     public function convert(string $ipAddressRepresentation): array {

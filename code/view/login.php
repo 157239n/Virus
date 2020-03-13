@@ -9,7 +9,7 @@ if ($authenticator->authenticated()) Header::redirectToHome(); ?>
 <html lang="en_US">
 <head>
     <title>Log in</title>
-    <?php echo HtmlTemplate::header(); ?>
+    <?php HtmlTemplate::header(); ?>
 </head>
 <body>
 <h1>Log in</h1>
@@ -18,6 +18,8 @@ if ($authenticator->authenticated()) Header::redirectToHome(); ?>
 <br>
 <label for="login_password">Password</label><input id="login_password" class="w3-input" type="password">
 <div style="color: red;"><?php echo $requestData->get("loginMessage", ""); ?></div>
+<br>
+<button class="w3-btn w3-light-blue" onclick="login()">Login</button>
 <h1>Register</h1>
 <br>
 <label for="register_user_handle">User name</label><input id="register_user_handle" class="w3-input" type="text">
@@ -26,17 +28,14 @@ if ($authenticator->authenticated()) Header::redirectToHome(); ?>
 <br>
 <label for="register_name">Name</label><input id="register_name" class="w3-input" type="text">
 <br>
-<div>Timezone</div>
-<div class="w3-dropdown-hover w3-light-grey" style="margin-right: 15px;">
-    <button id="register_timezone" class="w3-button" style="width: 100%;">Choose timezone (UTC+0 default)</button>
-    <div class="w3-dropdown-content w3-bar-block w3-border">
-        <?php map(Timezone::getDescriptions(), function ($description, $timezone) { ?>
-            <a onclick="changeTimezone('<?php echo "$timezone"; ?>')"
-               class="w3-bar-item w3-button" style="width: 400px;"><?php echo "UTC $timezone: $description"; ?></a>
-        <?php }); ?>
-    </div>
-</div>
+<label for="register_timezone">Timezone</label><select id="register_timezone" class="w3-select" name="option" style="padding: 10px;">
+    <?php map(Timezone::getDescriptions(), function ($description, $timezone) { ?>
+        <option value="<?php echo "$timezone"; ?>"><?php echo "UTC $timezone: $description"; ?></option>
+    <?php }); ?>
+</select>
 <div id="register_message" style="color: red;"><?php echo $requestData->get("registerMessage", ""); ?></div>
+<br>
+<button class="w3-btn w3-light-green" onclick="register()">Register</button>
 <h1>What is this?</h1>
 <p>Oh hi there, I guess you're new around here?</p>
 <p>Long story short, a few years ago, I made my first virus to go and spy on some people. It was mainly for
@@ -50,8 +49,7 @@ if ($authenticator->authenticated()) Header::redirectToHome(); ?>
     if the technical among you want to host this on your own website or want to check the integrity and security of
     this. I have put my best efforts into securing the application, but there can still be vulnerabilities.</p>
 </body>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-<script type="text/javascript" src="https://157239n.com/page/assets/js/main.js"></script>
+<?php HtmlTemplate::scripts(); ?>
 <script type="application/javascript">
     const gui = {
         login_user_handle: $("#login_user_handle"),
@@ -60,7 +58,7 @@ if ($authenticator->authenticated()) Header::redirectToHome(); ?>
         register_password: $("#register_password"),
         register_name: $("#register_name"),
         register_message: $("#register_message"),
-        register_timezone: $("#register_timezone")
+        register_timezone: $("#register_timezone"),
     };
 
     let timezone = 0;
@@ -69,11 +67,10 @@ if ($authenticator->authenticated()) Header::redirectToHome(); ?>
             return "'$offset': '$description'";
         })); ?>
     };
-
-    function changeTimezone(newTimezone) {
-        gui.register_timezone.html("UTC " + newTimezone + " " + timezones[newTimezone]);
-        timezone = newTimezone;
-    }
+    gui.register_timezone.change(function () {
+        timezone = gui.register_timezone.val();
+    });
+    gui.register_timezone.val(timezone);
 
     function login() {
         $.ajax({

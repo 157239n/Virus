@@ -25,6 +25,14 @@ $router->get("login", function () use ($requestData, $authenticator) {
     if (!$requestData->rightHost()) Header::notFound();
     include(__DIR__ . "/../view/login.php");
 });
+$router->get("shop", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory) {
+    if (!$requestData->rightHost()) Header::notFound();
+    include(__DIR__ . "/../view/shop.php");
+});
+$router->get("profile", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory) {
+    if (!$requestData->rightHost()) Header::notFound();
+    include(__DIR__ . "/../view/profile.php");
+});
 
 // and resources
 $router->get("resources/images/*", function () use ($requestData) {
@@ -36,7 +44,7 @@ $router->get("resources/images/*", function () use ($requestData) {
 });
 
 // and cli stuff, only allowing local processes to invoke this
-$router->get("cli/*", function() use ($requestData, $whitelistFactory, $mysqli) {
+$router->getMulti(["cli/*", "cli/*/*", "cli/*/*/*"], function() use ($requestData, $userFactory, $virusFactory, $attackFactory, $whitelistFactory, $mysqli) {
     $whitelist = $whitelistFactory->new();
     $whitelist->addIp("localhost");
     if (!$whitelist->allowed($requestData->getRemoteIp()))

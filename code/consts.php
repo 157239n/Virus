@@ -21,6 +21,8 @@ define("DOMAIN_LOGIN", DOMAIN . "/login");
 // inner workings related
 define("NAME_LENGTH_LIMIT", 20);
 
+define("MAINTENANCE", false);
+
 // all in seconds, original plan commented on the right
 define("VIRUS_PING_INTERVAL", 7); // 10 minutes
 define("ATTACK_UPLOAD_RETRY_INTERVAL", 5); // 1 minute

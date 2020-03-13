@@ -48,6 +48,6 @@ abstract class FilterList {
         foreach ($this->whitelists as $whitelist)
             if ($ip >= $whitelist[0] && $ip <= $whitelist[1]) return $this->isWhitelist;
 
-        return $this->isWhitelist;
+        return !$this->isWhitelist;
     }
 }

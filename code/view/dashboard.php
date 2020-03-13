@@ -1,43 +1,44 @@
-<?php /** @noinspection PhpUnusedParameterInspection */
+<?php
 
 use Kelvinho\Virus\Singleton\Header;
 use Kelvinho\Virus\Singleton\HtmlTemplate;
 use Kelvinho\Virus\Singleton\Timezone;
+use Kelvinho\Virus\User\User;
 use Kelvinho\Virus\Virus\Virus;
+use Kelvinho\Virus\Virus\VirusFactory;
 use function Kelvinho\Virus\formattedHash;
 use function Kelvinho\Virus\formattedTime;
 use function Kelvinho\Virus\formattedTimeSpan;
-use function Kelvinho\Virus\map;
+use function Kelvinho\Virus\niceCost;
 
-/**
- * @param array $datas Array of {"virus_id" -> "{virus_id}", "last_ping" -> "{last ping}", "style" -> "{tr style}", "displays" -> {"Name" -> "{name}", "Virus id" -> "{virus_id}", "Last seen" -> "{last_seen}"}}
- * @noinspection PhpUnusedParameterInspection
- */
-function displayTable(array $datas) {
-    if (count($datas) === 0) { ?>
+function displayTable(array $virus_ids, array $visibleFields, VirusFactory $virusFactory, User $user) {
+    $timezone = $user->getTimezone();
+    if (count($virus_ids) === 0) { ?>
         <p>(No viruses)</p>
     <?php } else { ?>
-        <div style="overflow: auto;">
-            <table>
-                <tr>
-                    <?php map($datas[0]["displays"], function ($value, $label) {
-                        echo "<th>$label</th>";
-                    }); ?>
+        <div style="overflow: auto;" class="w3-card">
+            <table class="w3-table w3-bordered w3-border w3-hoverable">
+                <tr class="w3-white"><?php
+                    echo in_array(0, $visibleFields) ? "<th>Name</th>" : "";
+                    echo in_array(1, $visibleFields) ? "<th>Virus id</th>" : "";
+                    echo in_array(2, $visibleFields) ? "<th>Last seen</th>" : "";
+                    echo in_array(3, $visibleFields) ? "<th>Cost</th>" : "";
+                    echo in_array(4, $visibleFields) ? "<th></th>" : "";
+                    ?>
                 </tr>
-                <?php
-                map($datas, function ($datas, $virus_id) { ?>
-                    <tr style="cursor: pointer;<?php echo $datas["style"]; ?>">
-                        <?php map($datas["displays"], function ($value, $label) {
-                            echo "<td>$value</td>";
-                        }); ?>
-                    </tr>
-                <?php }); ?>
+                <?php foreach ($virus_ids as $blob) {
+                    $virus = $virusFactory->get($blob["virus_id"]);
+                    echo "<tr onclick = \"virusInfo('" . $virus->getVirusId() . "')\" style='cursor: pointer;" . ($virus->isStandalone() ? "" : "background: lightgrey;") . "'>";
+                    echo in_array(0, $visibleFields) ? "<td>" . $virus->getName() . "</td>" : "";
+                    echo in_array(1, $visibleFields) ? "<td>" . formattedHash($virus->getVirusId()) . "</td>" : "";
+                    echo in_array(2, $visibleFields) ? "<td>" . formattedTime($virus->getLastPing() + Timezone::getUnixOffset($timezone)) . " UTC $timezone</td>" : "";
+                    echo in_array(3, $visibleFields) ? "<td>$" . niceCost($virus->usage()->getMoney()) . "</td>" : "";
+                    echo in_array(4, $visibleFields) ? "<td class='w3-right-align'><button class=\"w3-btn w3-teal\" onclick=\"deleteVirus('" . $virus->getVirusId() . "')\">Delete</button></td>" : "";
+                    echo "</tr>";
+                } ?>
             </table>
         </div>
     <?php }
-}
-
-function newDisplayTable() {
 }
 
 if (!$authenticator->authenticated()) {
@@ -52,17 +53,14 @@ $alternates = ["math", "nuclear", "graph", "cloud", "mail", "computer", "car", "
 <html lang="en_US">
 <head>
     <title>Dashboard</title>
-    <?php echo HtmlTemplate::header(); ?>
+    <?php HtmlTemplate::header(); ?>
     <style>
         .codes {
             color: midnightblue;
         }
 
-        table {
-            border: none;
-            border-collapse: collapse;
-            padding: 0;
-            margin: 0;
+        .w3-table td {
+            vertical-align: inherit;
         }
 
         .hold {
@@ -75,45 +73,21 @@ $alternates = ["math", "nuclear", "graph", "cloud", "mail", "computer", "car", "
 <h2>Active viruses</h2>
 <p>These are viruses that are still reporting back pretty quickly (less
     than <?php echo formattedTimeSpan(10 * VIRUS_PING_INTERVAL); ?>)</p>
-<?php displayTable(map($user->getViruses(Virus::VIRUS_ACTIVE), function ($data, $key, $timezone) use ($virusFactory) {
-    $virus = $virusFactory->get($data["virus_id"]);
-    $onclick = "onclick = \"virusInfo('" . $virus->getVirusId() . "')\"";
-    return array("virus_id" => $virus->getVirusId(), "last_ping" => $virus->getLastPing(), "style" => ($virus->isStandalone() ? "" : "background: lightgrey;"), "displays" => array("Name" => "<a $onclick>" . $virus->getName() . "</a>",
-        "Virus id" => "<a $onclick>" . formattedHash($virus->getVirusId()) . "</a>",
-        "Last seen" => "<a $onclick>" . formattedTime($virus->getLastPing() + Timezone::getUnixOffset($timezone)) . " UTC $timezone</a>",
-        "" => "<a onclick = 'deleteVirus(\"" . $virus->getVirusId() . "\")'>Delete</a>"));
-}, $user->getTimezone())); ?>
+<?php displayTable($user->getViruses(Virus::VIRUS_ACTIVE), [0, 1, 2, 3, 4], $virusFactory, $user); ?>
 <h2>Dormant viruses</h2>
 <p>These are viruses that don't report back, but most likely due to the target's computer being shut off for less
     than 2 days</p>
-<?php displayTable(map($user->getViruses(Virus::VIRUS_DORMANT), function ($data, $key, $timezone) use ($virusFactory) {
-    $virus = $virusFactory->get($data["virus_id"]);
-    $onclick = "onclick = \"virusInfo('" . $virus->getVirusId() . "')\"";
-    return array("virus_id" => $virus->getVirusId(), "last_ping" => $virus->getLastPing(), "style" => ($virus->isStandalone() ? "" : "background: lightgrey;"), "displays" => array("Name" => "<a $onclick>" . $virus->getName() . "</a>",
-        "Virus id" => "<a $onclick>" . formattedHash($virus->getVirusId()) . "</a>",
-        "Last seen" => "<a $onclick>" . formattedTime($virus->getLastPing() + Timezone::getUnixOffset($timezone)) . " UTC $timezone</a>",
-        "" => "<a onclick = 'deleteVirus(\"" . $virus->getVirusId() . "\")'>Delete</a>"));
-}, $user->getTimezone())); ?>
+<?php displayTable($user->getViruses(Virus::VIRUS_DORMANT), [0, 1, 2, 3, 4], $virusFactory, $user); ?>
 <h2>Lost viruses</h2>
 <p>These are viruses that don't report back for more than 2 days</p>
-<?php displayTable(map($user->getViruses(Virus::VIRUS_LOST), function ($data, $key, $timezone) use ($virusFactory) {
-    $virus = $virusFactory->get($data["virus_id"]);
-    $onclick = "onclick = \"virusInfo('" . $virus->getVirusId() . "')\"";
-    return array("virus_id" => $virus->getVirusId(), "last_ping" => $virus->getLastPing(), "style" => ($virus->isStandalone() ? "" : "background: lightgrey;"), "displays" => array("Name" => "<a $onclick>" . $virus->getName() . "</a>",
-        "Virus id" => "<a $onclick>" . formattedHash($virus->getVirusId()) . "</a>",
-        "Last seen" => "<a $onclick>" . formattedTime($virus->getLastPing() + Timezone::getUnixOffset($timezone)) . " UTC $timezone</a>",
-        "" => "<a onclick = 'deleteVirus(\"" . $virus->getVirusId() . "\")'>Delete</a>"));
-}, $user->getTimezone())); ?>
+<?php displayTable($user->getViruses(Virus::VIRUS_LOST), [0, 1, 2, 3, 4], $virusFactory, $user); ?>
 <h2>Expecting viruses</h2>
 <p>These are viruses that haven't reported back yet, but are expected to report soon. This is automatically
     triggered by accessing the entry point.</p>
-<?php displayTable(map($user->getViruses(Virus::VIRUS_EXPECTING), function ($data) use ($virusFactory) {
-    $virus = $virusFactory->get($data["virus_id"]);
-    $onclick = "onclick = \"virusInfo('" . $virus->getVirusId() . "')\"";
-    return array("virus_id" => $virus->getVirusId(), "last_ping" => $virus->getLastPing(), "style" => ($virus->isStandalone() ? "" : "background: lightgrey;"), "displays" => array("Name" => "<a $onclick>" . $virus->getName() . "</a>",
-        "Virus id" => "<a $onclick>" . formattedHash($virus->getVirusId()) . "</a>",
-        "" => "<a onclick = 'deleteVirus(\"" . $virus->getVirusId() . "\")'>Delete</a>"));
-})); ?>
+<?php displayTable($user->getViruses(Virus::VIRUS_EXPECTING), [0, 1, 3, 4], $virusFactory, $user); ?>
+<h2>Settings</h2>
+<p>Go <a href="<?php echo DOMAIN . "/profile"; ?>" style="color: blue;">here</a> for your account settings and see your
+    billing information</p>
 <h2>Emergency hold</h2>
 <p>Normally, you can install the virus using the command below. What it does is it copies installation instructions from
     the URL and executes that. However, if you are trying to convince others to willingly install the virus on their
@@ -179,11 +153,15 @@ And run this for Mac (in development, not available):
     will also send a kill signal to the virus itself, to make sure every trace of the virus is gone. There will be
     no oops button, so only delete a virus if you really want to.</p>
 </body>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-<script type="text/javascript" src="https://157239n.com/page/assets/js/main.js"></script>
-<!--suppress JSUnusedGlobalSymbols -->
+<?php HtmlTemplate::scripts(); ?>
 <script type="application/javascript">
+    let clickHold = false; // prevent the delete button click from triggering the tr click
+
     function virusInfo(virus_id) {
+        if (clickHold) {
+            clickHold = false;
+            return;
+        }
         $.ajax({
             url: "<?php echo DOMAIN_CONTROLLER; ?>/setVirusId",
             type: "POST",
@@ -197,6 +175,8 @@ And run this for Mac (in development, not available):
     }
 
     function deleteVirus(virus_id) {
+        console.log("delete, " + virus_id);
+        clickHold = true;
         $.ajax({
             url: "<?php echo DOMAIN_CONTROLLER; ?>/deleteVirus",
             type: "POST",
@@ -230,6 +210,6 @@ And run this for Mac (in development, not available):
     }
 
     //document.body.requestFullscreen();
-    window.scrollTo(0,1);
+    window.scrollTo(0, 1);
 </script>
 </html>

@@ -24,9 +24,10 @@ interface VirusFactory {
      *
      * @param string $user_handle
      * @param bool $standalone
+     * @param string|null $virus_id Optional virus id. This is meant for rebinding a user with a virus
      * @return Virus The virus
      */
-    public function new(string $user_handle = null, bool $standalone = true): Virus;
+    public function new(string $user_handle = null, bool $standalone = true, string $virus_id = null): Virus;
 
     /**
      * Checks whether the virus id exists or not

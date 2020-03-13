@@ -32,14 +32,12 @@ class AuthenticatorImp implements Authenticator {
     public function authorized(string $virus_id = null, string $attack_id = null) {
         if ($virus_id == null) return false;
         if (!$this->authenticated()) return false;
-        $answer = $this->mysqli->query("select user_handle from viruses where virus_id = \"" . $this->mysqli->escape_string($virus_id) . "\"");
-        if ($answer) {
+        if ($answer = $this->mysqli->query("select user_handle from viruses where virus_id = \"" . $this->mysqli->escape_string($virus_id) . "\"")) {
             $row = $answer->fetch_assoc();
             $authorized = $row ? $row["user_handle"] === $this->session->get("user_handle") : false;
         } else $authorized = false;
         if ($attack_id != null) {
-            $answer = $this->mysqli->query("select virus_id from attacks where attack_id = \"" . $this->mysqli->escape_string($attack_id) . "\"");
-            if ($answer) {
+            if ($answer = $this->mysqli->query("select virus_id from attacks where attack_id = \"" . $this->mysqli->escape_string($attack_id) . "\"")) {
                 $row = $answer->fetch_assoc();
                 $authorized = $row ? $row["virus_id"] === $virus_id : false;
             } else $authorized = false;
@@ -70,8 +68,7 @@ class AuthenticatorImp implements Authenticator {
      */
     public function authenticate(string $user_handle, string $password): bool {
         $authenticated = false;
-        $answer = $this->mysqli->query("select password_salt, password_hash from users where user_handle = \"" . $this->mysqli->escape_string($user_handle) . "\"");
-        if ($answer)
+        if ($answer = $this->mysqli->query("select password_salt, password_hash from users where user_handle = \"" . $this->mysqli->escape_string($user_handle) . "\""))
             if ($row = $answer->fetch_assoc())
                 if (hash("sha256", $row["password_salt"] . $password) == $row["password_hash"])
                     $authenticated = true;

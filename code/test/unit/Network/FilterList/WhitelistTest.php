@@ -1,7 +1,7 @@
 <?php
 
-use Kelvinho\Virus\Network\Ip\FilterList\Whitelist;
-use Kelvinho\Virus\Network\Ip\FilterList\WhitelistFactory;
+use Kelvinho\Virus\Network\FilterList\Whitelist;
+use Kelvinho\Virus\Network\FilterList\WhitelistFactory;
 use PHPUnit\Framework\TestCase;
 
 class WhitelistTest extends TestCase {

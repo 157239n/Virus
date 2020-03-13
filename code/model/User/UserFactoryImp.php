@@ -2,6 +2,8 @@
 
 namespace Kelvinho\Virus\User;
 
+use Kelvinho\Virus\Singleton\Logs;
+use Kelvinho\Virus\Usage\UsageFactory;
 use mysqli;
 
 /**
@@ -14,31 +16,40 @@ use mysqli;
  */
 class UserFactoryImp implements UserFactory {
     private mysqli $mysqli;
+    private UsageFactory $usageFactory;
 
-    public function __construct(mysqli $mysqli) {
+    public function __construct(mysqli $mysqli, UsageFactory $usageFactory) {
         $this->mysqli = $mysqli;
+        $this->usageFactory = $usageFactory;
     }
 
     public function new(string $user_handle, string $password, string $name, int $timezone = 0): User {
         $password_salt = substr(hash("sha256", rand()), 0, 5);
         $password_hash = hash("sha256", $password_salt . $password);
+        $usage = $this->usageFactory->new();
 
         mkdir(DATA_FILE . "/users/$user_handle");
-        $this->mysqli->query("insert into users (user_handle, password_hash, password_salt, name, timezone, hold) values (\"$user_handle\", \"$password_hash\", \"$password_salt\", \"" . $this->mysqli->escape_string($name) . "\", $timezone, b'0')");
+        if (!$this->mysqli->query("insert into users (user_handle, password_hash, password_salt, name, timezone, resource_usage_id) values (\"$user_handle\", \"$password_hash\", \"$password_salt\", \"" . $this->mysqli->escape_string($name) . "\", $timezone, " . $usage->getId() . ")")) Logs::error($this->mysqli->error);
 
-        return new User($user_handle, $this->mysqli);
+        return $this->get($user_handle);
     }
 
     public function get(string $user_handle): User {
         if (!$this->exists($user_handle)) throw new UserNotFound();
-        return new User($user_handle, $this->mysqli);
+        return new User($user_handle, $this->mysqli, $this->usageFactory);
     }
 
     public function exists(string $user_handle): bool {
-        $answer = $this->mysqli->query("select user_handle from users where user_handle = \"" . $this->mysqli->escape_string($user_handle) . "\"");
-        if ($answer)
-            if ($row = $answer->fetch_assoc())
-                return true;
-        return false;
+        if (!$answer = $this->mysqli->query("select user_handle from users where user_handle = \"" . $this->mysqli->escape_string($user_handle) . "\"")) return false;
+        if (!$row = $answer->fetch_assoc()) return false;
+        return true;
+    }
+
+    public function getAll(): array {
+        $user_handles = [];
+        if (!$answer = $this->mysqli->query("select user_handle from users")) return [];
+        while ($row = $answer->fetch_assoc())
+            $user_handles[] = $row["user_handle"];
+        return $user_handles;
     }
 }

@@ -3,29 +3,7 @@
 use Kelvinho\Virus\Attack\Packages\Windows\OneTime\ExploreDir\ExploreDir;
 use Kelvinho\Virus\Singleton\Logs;
 use function Kelvinho\Virus\map;
-
-/**
- * Returns a nice looking file size
- *
- * @param int $bytes
- * @return string
- */
-function niceSize(int $bytes): string {
-    $labels = ["TB", "GB", "MB", "KB", "bytes"];
-    $amounts = [1000000000000, 1000000000, 1000000, 1000, 1];
-    $index = 0;
-    if ($bytes == 0) {
-        return "0 bytes";
-    }
-    while (true) {
-        if ($bytes >= $amounts[$index]) {
-            return ($bytes / $amounts[$index]) . " " . $labels[$index];
-        }
-        $index += 1;
-    }
-    Logs::unreachableState("ExploreDir admin page, niceSize");
-    return "";
-}
+use function Kelvinho\Virus\niceFileSize;
 
 /*
 How the function below even work? I'm too lazy to explain, but this flow should give you a rough understanding:
@@ -119,7 +97,7 @@ function processLine($handle, int $givenDepth, array &$path, string $unprocessed
     switch ($contents[1]) {
         case "f": ?>
             <li>
-                <pre onclick="copyToClipboard('<?php echo join("\\\\", $path) . "\\\\" . $contents[4]; ?>')"><?php echo $contents[4]; ?>, size: <?php echo niceSize((int)$contents[2]); ?>, last updated: <?php echo $contents[3]; ?></pre>
+                <pre onclick="copyToClipboard('<?php echo join("\\\\", $path) . "\\\\" . $contents[4]; ?>')"><?php echo $contents[4]; ?>, size: <?php echo niceFileSize((int)$contents[2]); ?>, last updated: <?php echo $contents[3]; ?></pre>
             </li>
             <?php return "";
         case "d":
@@ -182,7 +160,7 @@ fgets($handle); // skips first line, cuz it's supposed to be empty
 <ul style="list-style-type: none;overflow: auto;">
     <?php
     $unprocessedLine = null;
-    $path = [str_replace("\\", "\\\\", $attack->getRootDir())];
+    $path = [str_replace("\\", "\\\\", trim($attack->getRootDir(), "\\"))];
     while (true) {
         $unprocessedLine = processLine($handle, 0, $path, $unprocessedLine);
         if ($unprocessedLine === null) {

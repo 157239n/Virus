@@ -51,4 +51,9 @@ class SystemInfo extends AttackBase {
         $state["systemInfo"] = $this->systemInfo;
         return json_encode($state);
     }
+
+    public function setStaticUsage() {
+        $this->usage->setDisk(3000);
+        $this->usage->saveState();
+    }
 }

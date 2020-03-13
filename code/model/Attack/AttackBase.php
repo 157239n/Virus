@@ -5,6 +5,8 @@ namespace Kelvinho\Virus\Attack;
 use Kelvinho\Virus\Network\RequestData;
 use Kelvinho\Virus\Session\Session;
 use Kelvinho\Virus\Singleton\Logs;
+use Kelvinho\Virus\Usage\Usage;
+use Kelvinho\Virus\Usage\UsageFactory;
 use Kelvinho\Virus\User\UserFactory;
 use Kelvinho\Virus\Virus\VirusFactory;
 use mysqli;
@@ -48,11 +50,13 @@ abstract class AttackBase {
     protected UserFactory $userFactory;
     private mysqli $mysqli;
     protected PackageRegistrar $packageRegistrar;
+    protected Usage $usage;
+    private UsageFactory $usageFactory;
 
     public function __construct() {
     }
 
-    function setContext(RequestData $requestData, Session $session, UserFactory $userFactory, VirusFactory $virusFactory, AttackFactory $attackFactory, mysqli $mysqli, PackageRegistrar $packageRegistrar) {
+    function setContext(RequestData $requestData, Session $session, UserFactory $userFactory, VirusFactory $virusFactory, AttackFactory $attackFactory, mysqli $mysqli, PackageRegistrar $packageRegistrar, UsageFactory $usageFactory) {
         $this->requestData = $requestData;
         $this->session = $session;
         $this->userFactory = $userFactory;
@@ -60,6 +64,7 @@ abstract class AttackBase {
         $this->attackFactory = $attackFactory;
         $this->mysqli = $mysqli;
         $this->packageRegistrar = $packageRegistrar;
+        $this->usageFactory = $usageFactory;
     }
 
     public function getAttackId(): string {
@@ -114,13 +119,16 @@ abstract class AttackBase {
         $this->virus_id = $virus_id;
     }
 
-    /**
-     * This will load the state of this attack using the file /data/attacks/{attack_id}/state.json
-     * Also loads the profile.
-     *
-     * @internal Should only be used by AttackFactory
-     */
-    public function loadFromDisk(): void {
+    public function loadState(): void {
+        if (!$answer = $this->mysqli->query("select name, virus_id, attack_package, status, executed_time, resource_usage_id from attacks where attack_id = \"$this->attack_id\"")) throw new AttackNotFound();
+        if (!$row = $answer->fetch_assoc()) throw new AttackNotFound();
+
+        $this->virus_id = $row["virus_id"];
+        $this->packageDbName = $row["attack_package"];
+        $this->name = $row["name"];
+        $this->status = $row["status"];
+        $this->executed_time = $row["executed_time"];
+        $this->usage = $this->usageFactory->get($row["resource_usage_id"]);
         $this->setState(file_get_contents(DATA_FILE . "/attacks/$this->attack_id/state.json"));
         $this->setProfile(file_get_contents(DATA_FILE . "/attacks/$this->attack_id/profile.txt"));
     }
@@ -138,7 +146,7 @@ abstract class AttackBase {
     public function saveState(): void {
         file_put_contents(DATA_FILE . "/attacks/$this->attack_id/state.json", $this->getState());
         file_put_contents(DATA_FILE . "/attacks/$this->attack_id/profile.txt", $this->getProfile());
-        $this->mysqli->query("update attacks set status = \"$this->status\", name = \"" . $this->mysqli->escape_string($this->name) . "\", status = \"$this->status\", executed_time = $this->executed_time where attack_id = \"$this->attack_id\"");
+        if (!$this->mysqli->query("update attacks set status = \"$this->status\", name = \"" . $this->mysqli->escape_string($this->name) . "\", executed_time = $this->executed_time where attack_id = \"$this->attack_id\"")) Logs::mysql($this->mysqli);
     }
 
     /**
@@ -233,7 +241,15 @@ abstract class AttackBase {
      * Deletes the attack permanently.
      */
     public function delete(): void {
-        $this->mysqli->query("delete from attacks where attack_id = \"$this->attack_id\"");
+        if (!$this->mysqli->query("delete from attacks where attack_id = \"$this->attack_id\"")) Logs::mysql($this->mysqli);
+        if (!$this->mysqli->query("delete from resource_usage where id = " . $this->usage->getId())) Logs::mysql($this->mysqli);
         exec("rm -r " . DATA_FILE . "/attacks/$this->attack_id");
+    }
+
+    public function usage(): Usage {
+        return $this->usage;
+    }
+
+    public function setStaticUsage() {
     }
 }

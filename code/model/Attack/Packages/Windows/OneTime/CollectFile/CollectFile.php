@@ -16,7 +16,7 @@ use function Kelvinho\Virus\map;
  * @license http://www.opensource.org/licenses/mit-license.html  MIT License
  */
 class CollectFile extends AttackBase {
-    public array $fileNames = [];
+    private array $fileNames = [];
 
     public function getFileNames(): array {
         return $this->fileNames;

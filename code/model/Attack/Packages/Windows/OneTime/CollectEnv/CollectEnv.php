@@ -52,4 +52,9 @@ class CollectEnv extends AttackBase {
         $state["data"] = $this->data;
         return json_encode($state);
     }
+
+    public function setStaticUsage() {
+        $this->usage->setDisk(3000);
+        $this->usage->saveState();
+    }
 }

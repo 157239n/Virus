@@ -37,4 +37,11 @@ interface UserFactory {
      * @return bool Whether it exists
      */
     public function exists(string $user_handle): bool;
+
+    /**
+     * Get all user handles
+     *
+     * @return array
+     */
+    public function getAll(): array;
 }

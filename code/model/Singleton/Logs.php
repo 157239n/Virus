@@ -48,8 +48,7 @@ class Logs {
      * @param string $message The message to log
      */
     public static function error(string $message): void {
-        Logs::log("Error: " . $message);
-        Header::badRequest();
+        throw new \RuntimeException("Error: " . $message);
     }
 
     /**
@@ -59,5 +58,9 @@ class Logs {
      */
     public static function log(string $message): void {
         file_put_contents(LOG_FILE, $message . "\n", FILE_APPEND);
+    }
+
+    public static function mysql(\mysqli $mysqli): void {
+        Logs::error("Mysql failed. Error: $mysqli->error");
     }
 }

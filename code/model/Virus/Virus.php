@@ -6,6 +6,8 @@ use Kelvinho\Virus\Attack\AttackBase;
 use Kelvinho\Virus\Attack\AttackFactory;
 use Kelvinho\Virus\Attack\PackageRegistrar;
 use Kelvinho\Virus\Singleton\Logs;
+use Kelvinho\Virus\Usage\Usage;
+use Kelvinho\Virus\Usage\UsageFactory;
 use mysqli;
 use function Kelvinho\Virus\map;
 
@@ -37,19 +39,25 @@ class Virus {
     private AttackFactory $attackFactory;
     private mysqli $mysqli;
     private PackageRegistrar $packageRegistrar;
+    private UsageFactory $usageFactory;
+    private Usage $usage;
 
     /**
      * Virus constructor.
+     *
      * @param string $virus_id
      * @param AttackFactory $attackFactory
      * @param mysqli $mysqli
+     * @param PackageRegistrar $packageRegistrar
+     * @param UsageFactory $usageFactory
      * @internal
      */
-    public function __construct(string $virus_id, AttackFactory $attackFactory, mysqli $mysqli, PackageRegistrar $packageRegistrar) {
+    public function __construct(string $virus_id, AttackFactory $attackFactory, mysqli $mysqli, PackageRegistrar $packageRegistrar, UsageFactory $usageFactory) {
         $this->virus_id = $virus_id;
         $this->attackFactory = $attackFactory;
         $this->mysqli = $mysqli;
         $this->packageRegistrar = $packageRegistrar;
+        $this->usageFactory = $usageFactory;
         $this->loadState();
     }
 
@@ -57,10 +65,12 @@ class Virus {
      * Fetch data to restore the state of the virus.
      */
     private function loadState() {
-        $row = $this->mysqli->query("select name, last_ping, type from viruses where virus_id = \"$this->virus_id\"")->fetch_assoc();
+        if (!$answer = $this->mysqli->query("select name, last_ping, type, resource_usage_id from viruses where virus_id = \"$this->virus_id\"")) throw new VirusNotFound();
+        if (!$row = $answer->fetch_assoc()) throw new VirusNotFound();
         $this->name = $row["name"];
         $this->last_ping = $row["last_ping"];
         $this->isStandalone = 1 - $row["type"];
+        $this->usage = $this->usageFactory->get($row["resource_usage_id"]);
         $this->profile = file_get_contents(DATA_FILE . "/viruses/$this->virus_id/profile.txt");
     }
 
@@ -82,7 +92,7 @@ class Virus {
      * The virus will use this to tell that it's still alive and listening.
      */
     public function ping(): void {
-        $this->mysqli->query("update viruses set last_ping = " . time() . " where virus_id = \"$this->virus_id\"");
+        if (!$this->mysqli->query("update viruses set last_ping = " . time() . " where virus_id = \"$this->virus_id\"")) Logs::mysql($this->mysqli);
     }
 
     public function getVirusId(): string {
@@ -120,8 +130,9 @@ class Virus {
         map($this->getAttacks(), function ($attack_id) {
             $this->attackFactory->get($attack_id)->delete();
         });
-        $this->mysqli->query("delete from viruses where virus_id = \"$this->virus_id\"");
-        $this->mysqli->query("delete from uptimes where virus_id = \"$this->virus_id\"");
+        if (!$this->mysqli->query("delete from viruses where virus_id = \"$this->virus_id\"")) Logs::mysql($this->mysqli);
+        if (!$this->mysqli->query("delete from uptimes where virus_id = \"$this->virus_id\"")) Logs::mysql($this->mysqli);
+        if (!$this->mysqli->query("delete from resource_usage where id = " . $this->usage->getId())) Logs::mysql($this->mysqli);
         $this->mysqli->close();
         exec("rm -r " . DATA_FILE . "/viruses/$this->virus_id");
     }
@@ -162,17 +173,29 @@ class Virus {
             }));
             $whereStatement .= ")";
         }
-        $answer = $this->mysqli->query("select attack_id from attacks $whereStatement order by executed_time desc");
-        $result = [];
-        if ($answer) while ($row = $answer->fetch_assoc()) $result[] = $row["attack_id"];
-        return $result;
+        $attackIds = [];
+        if (!$answer = $this->mysqli->query("select attack_id from attacks $whereStatement order by executed_time desc")) return [];
+        while ($row = $answer->fetch_assoc()) $attackIds[] = $row["attack_id"];
+        return $attackIds;
+    }
+
+    public function getAttacksByTime(int $low, int $high): array {
+        if (!$answer = $this->mysqli->query("select attack_id from attacks where executed_time >= $low and executed_time < $high")) return [];
+        $attackIds = [];
+        while ($row = $answer->fetch_assoc())
+            $attackIds[] = $row["attack_id"];
+        return $attackIds;
     }
 
     /**
      * Saves the virus state/representation
      */
     public function saveState(): void {
-        $this->mysqli->query("update viruses set name = \"" . $this->mysqli->escape_string($this->name) . "\" where virus_id = \"$this->virus_id\"");
+        if (!$this->mysqli->query("update viruses set name = \"" . $this->mysqli->escape_string($this->name) . "\" where virus_id = \"$this->virus_id\"")) Logs::mysql($this->mysqli);
         file_put_contents(DATA_FILE . "/viruses/$this->virus_id/profile.txt", $this->profile);
+    }
+
+    public function usage(): Usage {
+        return $this->usage;
     }
 }

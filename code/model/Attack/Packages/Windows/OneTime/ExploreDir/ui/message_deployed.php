@@ -1,1 +1,1 @@
-<p>If you wish to edit the directory and max depth, change it to dormant mode below.</p>
+<p>If you wish to edit the directory and max depth, cancel the attack.</p>

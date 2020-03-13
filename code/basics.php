@@ -3,7 +3,11 @@
 /**
  * These are functions that are so god damn simple that they don't warrant any OOP mechanisms and shall be loaded directly.
  */
+
 namespace Kelvinho\Virus {
+
+    use Kelvinho\Virus\Singleton\Logs;
+
     /**
      * Map.
      *
@@ -125,5 +129,39 @@ namespace Kelvinho\Virus {
             $url = str_replace($protocol, "", $url);
         }
         return $url;
+    }
+
+    /**
+     * Returns a nice looking file size
+     *
+     * @param int $bytes
+     * @return string
+     */
+    function niceFileSize(int $bytes): string {
+        $labels = ["TB", "GB", "MB", "KB", "bytes"];
+        $amounts = [1000000000000, 1000000000, 1000000, 1000, 1];
+        $index = 0;
+        if ($bytes == 0) {
+            return "0 bytes";
+        }
+        while (true) {
+            if ($bytes >= $amounts[$index]) {
+                return (int)($bytes / $amounts[$index] * 100) / 100 . " " . $labels[$index];
+            }
+            $index += 1;
+        }
+        Logs::unreachableState("ExploreDir admin page, niceSize");
+        return "";
+    }
+
+    /**
+     * Returns a nice looking cost
+     *
+     * @param $cents
+     * @return string
+     */
+    function niceCost(float $cents): string {
+        $cents = (int)$cents;
+        return $cents / 100;
     }
 }

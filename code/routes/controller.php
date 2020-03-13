@@ -2,7 +2,7 @@
 
 use Kelvinho\Virus\Singleton\Header;
 
-$router->getPost("controller/*", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory, $attackFactory) {
+$router->getPostMulti(["controller/*", "ctrls/*"], function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory, $attackFactory) {
     if (!$requestData->rightHost()) Header::notFound();
     include(__DIR__ . "/../controller/" . $requestData->getExplodedPath()[1] . ".php");
 });

@@ -21,12 +21,12 @@ class PackageRegistrar {
      * @param string $codeRoot The code root, aka the one that will be mounted to document root
      */
     public function __construct(\mysqli $mysqli, string $codeRoot) {
-        $result = $mysqli->query("select * from packageInfo");
-        if (!$result) throw new PackageInfoNotFound();
+        if (!$result = $mysqli->query("select * from packageInfo")) throw new PackageInfoNotFound();
         while ($row = $result->fetch_assoc()) {
             $this->packages[$row["package_name"]] = array("className" => $row["class_name"], "displayName" => $row["display_name"], "location" => "$codeRoot/model/Attack/Packages/" . $row["location"], "description" => $row["description"]);
             array_push($this->packageNames, $row["package_name"]);
         }
+        usort($this->packageNames, fn(string $x, string $y) => strcmp($this->packages[$x]["displayName"], $this->packages[$y]["displayName"]));
     }
 
     /**

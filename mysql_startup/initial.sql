@@ -5,48 +5,63 @@ create database if not exists virus_app character set utf8mb4 collate utf8mb4_09
 use virus_app;
 CREATE TABLE IF NOT EXISTS users
 (
-    user_handle   varchar(20)  not null,
-    password_hash varchar(64)  not null, /* sha256 hash */
-    password_salt varchar(5)   not null, /* random 5 character string */
-    name          varchar(100) not null,
-    timezone      int          not null,
-    hold          bit          not null, /* 1 if the installation entry point is blocked off, 0 for freely interchangeable */
+    user_handle       varchar(20)     not null,
+    resource_usage_id bigint unsigned not null,
+    password_hash     varchar(64)     not null, /* sha256 hash */
+    password_salt     varchar(5)      not null, /* random 5 character string */
+    name              varchar(100)    not null,
+    timezone          int             not null default 0,
+    hold              bit             not null default 0, /* 1 if the installation entry point is blocked off, 0 for freely interchangeable */
+    unpaid_amount     bigint unsigned not null default 0, /* in cents */
     index (user_handle),
     primary key (user_handle)
 );
 
 CREATE TABLE IF NOT EXISTS viruses
 (
-    virus_id    varchar(64) not null, /* sha256 hash */
-    user_handle varchar(20) not null,
-    last_ping   int         not null, /* unix timestamp */
-    name        varchar(50) not null, /* short text of the virus, equivalent to "target name", if you will */
-    active      bit         not null, /* whether this virus is currently active (pinging back) or not. 0 for not active, 1 for active */
-    type        bit         not null, /* what type is this virus? 0 for normal virus, 1 for swarm */
-    class       varchar(50) not null, /* like classes in css, this just provides a grouping of attack packages, so viruses know what packages is legal. Each virus can only have 1 class */
+    virus_id          varchar(64)     not null, /* sha256 hash */
+    user_handle       varchar(20)     not null,
+    resource_usage_id bigint unsigned not null,
+    last_ping         bigint unsigned not null default 0, /* unix timestamp */
+    name              varchar(50)     not null default "(not set)", /* short text of the virus, equivalent to "target name", if you will */
+    active            bit             not null default b'0', /* whether this virus is currently active (pinging back) or not. 0 for not active, 1 for active */
+    type              bit             not null default b'0', /* what type is this virus? 0 for normal virus, 1 for swarm */
+    class             varchar(50)     not null, /* like classes in css, this just provides a grouping of attack packages, so viruses know what packages is legal. Each virus can only have 1 class */
     index (virus_id, user_handle),
     primary key (virus_id)
 );
 
 CREATE TABLE IF NOT EXISTS attacks
 (
-    attack_id      varchar(64)  not null, /* sha256 hash */
-    virus_id       varchar(64)  not null, /* sha256 hash */
-    attack_package varchar(100) not null, /* attack package, like win.oneTime.ScanPartitions */
-    status         varchar(10)  not null, /* dormant | deployed | executed */
-    executed_time  int          not null default 0, /* unix timestamp */
-    name           varchar(50)  not null, /* short text of the attack, to identify itself */
+    attack_id         varchar(64)     not null, /* sha256 hash */
+    virus_id          varchar(64)     not null, /* sha256 hash */
+    resource_usage_id bigint unsigned not null,
+    attack_package    varchar(100)    not null, /* attack package, like win.oneTime.ScanPartitions */
+    status            varchar(10)     not null default "Dormant", /* dormant | deployed | executed */
+    executed_time     bigint unsigned not null default 0, /* unix timestamp */
+    name              varchar(50)     not null default "(not set)", /* short text of the attack, to identify itself */
     index (attack_id, virus_id),
     primary key (attack_id)
 );
 
 CREATE TABLE IF NOT EXISTS uptimes
 ( /* used to make virus uptime graph */
-    virus_id  varchar(64) not null,
-    unix_time int         not null,
-    active    bit         not null,
+    virus_id  varchar(64)     not null,
+    unix_time bigint unsigned not null,
+    active    bit             not null,
     index (virus_id, unix_time),
     primary key (virus_id, unix_time)
+);
+
+CREATE TABLE IF NOT EXISTS resource_usage
+(
+    id                      bigint unsigned not null auto_increment,
+    static_disk             bigint unsigned default 0, /* measured in bytes */
+    static_bandwidth        bigint unsigned default 0, /* measured in bytes */
+    dynamic_api_geolocation bigint unsigned default 0, /* measured in cents */
+    last_updated_time       bigint unsigned default 0, /* unix time */
+    index (id),
+    primary key (id)
 );
 
 DROP TABLE IF EXISTS packageInfo; /* this is static information, so should be fine */
@@ -139,9 +154,3 @@ VALUES ("win.oneTime.SystemInfo",
         "Windows/OneTime/SystemInfo",
         "easy.SystemInfo",
         "Get some basic system information.");
-INSERT INTO packageInfo (package_name, class_name, location, display_name, description)
-VALUES ("win.oneTime.ProductKey",
-        "\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\OneTime\\ProductKey\\ProductKey",
-        "Windows/OneTime/ProductKey",
-        "easy.ProductKey",
-        "Get Windows product key");
