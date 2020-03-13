@@ -154,3 +154,9 @@ VALUES ("win.oneTime.SystemInfo",
         "Windows/OneTime/SystemInfo",
         "easy.SystemInfo",
         "Get some basic system information.");
+INSERT INTO packageInfo (package_name, class_name, location, display_name, description)
+VALUES ("win.oneTime.ProductKey",
+        "\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\OneTime\\ProductKey\\ProductKey",
+        "Windows/OneTime/ProductKey",
+        "easy.ProductKey",
+        "Get Windows product key");
