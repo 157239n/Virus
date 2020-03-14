@@ -87,8 +87,9 @@ switch ($attack->getStatus()) {
         break;
     case AttackBase::STATUS_DEPLOYED: ?>
         <button class="w3-btn w3-light-green" onclick="cancelAttack()">Cancel</button>
-        <?php @include($packageDirectory . "/ui/message_deployed.php");
-        break;
+        <?php @include($packageDirectory . "/ui/message_deployed.php"); ?>
+        <p>Executing.... Please wait a moment</p>
+        <?php break;
     case AttackBase::STATUS_EXECUTED:
         @include $packageDirectory . "/ui/message_executed.php";
         break;

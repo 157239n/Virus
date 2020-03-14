@@ -15,6 +15,7 @@ use function Kelvinho\Virus\formattedTime;
 use function Kelvinho\Virus\initializeArray;
 use function Kelvinho\Virus\map;
 use function Kelvinho\Virus\niceCost;
+use function Kelvinho\Virus\niceFileSize;
 
 /** @var PackageRegistrar $packageRegistrar */
 
@@ -38,7 +39,7 @@ function displayTable(array $attack_ids, array $visibleFields, AttackFactory $at
                     echo in_array(1, $visibleFields) ? "<th>Package</th>" : "";
                     echo in_array(2, $visibleFields) ? "<th>Hash/id</th>" : "";
                     echo in_array(3, $visibleFields) ? "<th>Executed time</th>" : "";
-                    echo in_array(4, $visibleFields) ? "<th>Cost</th>" : "";
+                    echo in_array(4, $visibleFields) ? "<th>Usage</th>" : "";
                     echo in_array(5, $visibleFields) ? "<th></th>" : ""; ?>
                 </tr>
                 <?php foreach ($attack_ids as $attack_id) {
@@ -49,7 +50,7 @@ function displayTable(array $attack_ids, array $visibleFields, AttackFactory $at
                     echo in_array(1, $visibleFields) ? "<td>" . $packageRegistrar->getDisplayName($attack->getPackageDbName()) . "</td>" : "";
                     echo in_array(2, $visibleFields) ? "<td>" . formattedHash($attack->getAttackId()) . "</td>" : "";
                     echo in_array(3, $visibleFields) ? "<td>" . formattedTime($attack->getExecutedTime() + Timezone::getUnixOffset($timezone)) . " UTC $timezone</td>" : "";
-                    echo in_array(4, $visibleFields) ? "<td>$" . niceCost($attack->usage()->getMoney()) . "</td>" : "";
+                    echo in_array(4, $visibleFields) ? "<td>" . niceFileSize($attack->usage()->getStatic()) . "</td>" : "";
                     echo in_array(5, $visibleFields) ? "<td class='w3-right-align'><button class=\"w3-btn w3-teal\" onclick=\"deleteAttack('" . $attack->getAttackId() . "')\">Delete</button></td>" : "";
                     echo "</tr>";
                 } ?>

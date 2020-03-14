@@ -51,6 +51,6 @@ $router->getMulti(["cli/*", "cli/*/*", "cli/*/*/*"], function() use ($requestDat
         $requestData->rightHost() ? Header::redirectToHome() : Header::notFound();
     include(__DIR__ . "/../cli/" . $requestData->getExplodedPath()[1] . ".php");
 });
-$router->get("test", function() use ($whitelistFactory, $requestData, $packageRegistrar) {
+$router->get("test", function() use ($whitelistFactory, $requestData, $packageRegistrar, $mysqli) {
     include(__DIR__ . "/../test.php");
 });

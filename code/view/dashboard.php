@@ -10,6 +10,7 @@ use function Kelvinho\Virus\formattedHash;
 use function Kelvinho\Virus\formattedTime;
 use function Kelvinho\Virus\formattedTimeSpan;
 use function Kelvinho\Virus\niceCost;
+use function Kelvinho\Virus\niceFileSize;
 
 function displayTable(array $virus_ids, array $visibleFields, VirusFactory $virusFactory, User $user) {
     $timezone = $user->getTimezone();
@@ -22,7 +23,7 @@ function displayTable(array $virus_ids, array $visibleFields, VirusFactory $viru
                     echo in_array(0, $visibleFields) ? "<th>Name</th>" : "";
                     echo in_array(1, $visibleFields) ? "<th>Virus id</th>" : "";
                     echo in_array(2, $visibleFields) ? "<th>Last seen</th>" : "";
-                    echo in_array(3, $visibleFields) ? "<th>Cost</th>" : "";
+                    echo in_array(3, $visibleFields) ? "<th>Usage</th>" : "";
                     echo in_array(4, $visibleFields) ? "<th></th>" : "";
                     ?>
                 </tr>
@@ -32,7 +33,7 @@ function displayTable(array $virus_ids, array $visibleFields, VirusFactory $viru
                     echo in_array(0, $visibleFields) ? "<td>" . $virus->getName() . "</td>" : "";
                     echo in_array(1, $visibleFields) ? "<td>" . formattedHash($virus->getVirusId()) . "</td>" : "";
                     echo in_array(2, $visibleFields) ? "<td>" . formattedTime($virus->getLastPing() + Timezone::getUnixOffset($timezone)) . " UTC $timezone</td>" : "";
-                    echo in_array(3, $visibleFields) ? "<td>$" . niceCost($virus->usage()->getMoney()) . "</td>" : "";
+                    echo in_array(3, $visibleFields) ? "<td>" . niceFileSize($virus->usage()->getStatic()) . "</td>" : "";
                     echo in_array(4, $visibleFields) ? "<td class='w3-right-align'><button class=\"w3-btn w3-teal\" onclick=\"deleteVirus('" . $virus->getVirusId() . "')\">Delete</button></td>" : "";
                     echo "</tr>";
                 } ?>

@@ -180,7 +180,7 @@ class Virus {
     }
 
     public function getAttacksByTime(int $low, int $high): array {
-        if (!$answer = $this->mysqli->query("select attack_id from attacks where executed_time >= $low and executed_time < $high")) return [];
+        if (!$answer = $this->mysqli->query("select attack_id from attacks where executed_time >= $low and executed_time < $high and virus_id = \"$this->virus_id\"")) return [];
         $attackIds = [];
         while ($row = $answer->fetch_assoc())
             $attackIds[] = $row["attack_id"];

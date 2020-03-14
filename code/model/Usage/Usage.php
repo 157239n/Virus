@@ -24,7 +24,7 @@ class Usage {
     private int $static_bandwidth = 0; // in bytes
     private int $dynamic_api_geolocation = 0; // in polls
     private int $last_updated_time;
-    private float $static_disk_cents_per_byte = 1e-7; // $0.1/GB each month
+    private float $static_disk_cents_per_byte = 1e-6; // $10/GB each month
     private float $static_bandwidth_cents_per_byte = 5e-9; // $5/TB each month
     private float $dynamic_api_geolocation_cents_per_request = 0.5; // good for 2 targets
 
@@ -134,6 +134,10 @@ class Usage {
 
     public function setBandwidth(int $bandwidthInBytes): void {
         $this->static_bandwidth = $bandwidthInBytes;
+    }
+
+    public function getStatic(): int {
+        return $this->static_disk + $this->static_bandwidth;
     }
 
     public function getApi(): int {

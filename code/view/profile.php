@@ -13,6 +13,11 @@ $user = $userFactory->get($session->getCheck("user_handle"));
 <head>
     <title>Account</title>
     <?php HtmlTemplate::header(); ?>
+    <style>
+        select option {
+            height: 200px;
+        }
+    </style>
 </head>
 <body>
 <h1><a href="<?php echo DOMAIN_DASHBOARD; ?>">Account</a></h1>
