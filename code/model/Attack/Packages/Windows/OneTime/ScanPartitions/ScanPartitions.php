@@ -59,9 +59,4 @@ class ScanPartitions extends AttackBase {
         $state["available_drives"] = $this->availableDrives;
         return json_encode($state);
     }
-
-    public function setStaticUsage() {
-        $this->usage->setDisk(100);
-        $this->usage->saveState();
-    }
 }

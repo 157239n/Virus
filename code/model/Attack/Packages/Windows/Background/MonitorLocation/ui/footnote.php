@@ -15,8 +15,10 @@
     <div class="w3-col l1 m2 s3"><span style="font-size:20px;cursor:pointer"
                                        onclick="openStreamNav()">&#9776; Daily</span>
     </div>
-    <div class="w3-col l10 m8 s9"><input class="w3-input" id="streamNavName" type="text"
-                                         placeholder="A name meaningful to you"></div>
+    <div class="w3-col l10 m8 s9"><!--suppress HtmlFormInputWithoutLabel -->
+        <input class="w3-input" id="streamNavName" type="text"
+               placeholder="A name meaningful to you">
+    </div>
     <div class="w3-col l1 m2 w3-hide-small">
         <div class="w3-button w3-indigo" style="width: 100%" onclick="streamEvents.updateMapName()">Update</div>
     </div>
@@ -29,8 +31,10 @@
     <div class="w3-col l1 m2 s3"><span style="font-size:20px;cursor:pointer"
                                        onclick="openSavedNav()">&#9776; Saved</span>
     </div>
-    <div class="w3-col l10 m8 s9"><input class="w3-input" id="savedNavName" type="text"
-                                         placeholder="A name meaningful to you"></div>
+    <div class="w3-col l10 m8 s9"><!--suppress HtmlFormInputWithoutLabel -->
+        <input class="w3-input" id="savedNavName" type="text"
+               placeholder="A name meaningful to you">
+    </div>
     <div class="w3-col l1 m2 w3-hide-small">
         <div class="w3-button w3-indigo" style="width: 100%" onclick="savedEvents.updateMapName()">Update</div>
     </div>

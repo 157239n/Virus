@@ -28,7 +28,8 @@ if ($authenticator->authenticated()) Header::redirectToHome(); ?>
 <br>
 <label for="register_name">Name</label><input id="register_name" class="w3-input" type="text">
 <br>
-<label for="register_timezone">Timezone</label><select id="register_timezone" class="w3-select" name="option" style="padding: 10px;">
+<label for="register_timezone">Timezone</label><select id="register_timezone" class="w3-select" name="option"
+                                                       style="padding: 10px;">
     <?php map(Timezone::getDescriptions(), function ($description, $timezone) { ?>
         <option value="<?php echo "$timezone"; ?>"><?php echo "UTC $timezone: $description"; ?></option>
     <?php }); ?>
@@ -61,16 +62,7 @@ if ($authenticator->authenticated()) Header::redirectToHome(); ?>
         register_timezone: $("#register_timezone"),
     };
 
-    let timezone = 0;
-    const timezones = {
-        <?php echo join(",", map(Timezone::getDescriptions(), function ($description, $offset) {
-            return "'$offset': '$description'";
-        })); ?>
-    };
-    gui.register_timezone.change(function () {
-        timezone = gui.register_timezone.val();
-    });
-    gui.register_timezone.val(timezone);
+    gui.register_timezone.val(0);
 
     function login() {
         $.ajax({
@@ -80,12 +72,8 @@ if ($authenticator->authenticated()) Header::redirectToHome(); ?>
                 user_handle: gui.login_user_handle.val().trim(),
                 password: gui.login_password.val().trim()
             },
-            success: function () {
-                window.location = "<?php echo DOMAIN_LOGIN; ?>";
-            },
-            error: function () {
-                window.location = "<?php echo DOMAIN_LOGIN; ?>?loginMessage=User%20doesn't%20exist%20or%20password%20is%20wrong";
-            }
+            success: () => window.location = "<?php echo DOMAIN . "/login"; ?>",
+            error: () => window.location = "<?php echo DOMAIN . "/login"; ?>?loginMessage=User%20doesn't%20exist%20or%20password%20is%20wrong"
         });
     }
 
@@ -116,29 +104,18 @@ if ($authenticator->authenticated()) Header::redirectToHome(); ?>
                 user_handle: register_user_handle,
                 password: register_password,
                 name: register_name,
-                timezone: timezone
+                timezone: gui.register_timezone.val()
             },
-            success: function () {
-                window.location = "<?php echo DOMAIN_LOGIN; ?>?registerMessage=Register%20successful.%20Please%20log%20in%20now";
-            },
-            error: function () {
-                window.location = "<?php echo DOMAIN_LOGIN; ?>?registerMessage=Username%20already%20taken";
-            }
+            success: () => window.location = "<?php echo DOMAIN . "/login"; ?>?registerMessage=Register%20successful.%20Please%20log%20in%20now",
+            error: () => window.location = "<?php echo DOMAIN . "/login"; ?>?registerMessage=Username%20already%20taken"
         })
     }
 
-    const loginFunction = function (event) {
-        if (event.which === 13) {
-            login();
-        }
-    };
+    const loginFunction = (event) => event.which === 13 ? login() : 0;
     gui.login_user_handle.keydown(loginFunction);
     gui.login_password.keydown(loginFunction);
-    const registerFunction = function (event) {
-        if (event.which === 13) {
-            register();
-        }
-    };
+
+    const registerFunction = (event) => event.which === 13 ? register() : 0;
     gui.register_user_handle.keydown(registerFunction);
     gui.register_password.keydown(registerFunction);
     gui.register_name.keydown(registerFunction);

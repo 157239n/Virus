@@ -6,7 +6,7 @@ use function Kelvinho\Virus\goodPath;
 
 $router->get("", function () use ($requestData) {
     if (!$requestData->rightHost()) Header::notFound();
-    \header("Location: " . DOMAIN_DASHBOARD);
+    \header("Location: " . DOMAIN . "/dashboard");
     Header::redirect();
 });
 $router->get("dashboard", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory) {

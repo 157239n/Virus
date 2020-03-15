@@ -44,7 +44,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 </head>
 <body>
 
-<h1><a href="<?php echo DOMAIN_VIRUS_INFO; ?>">Attack info</a></h1>
+<h1><a href="<?php echo DOMAIN . "/virus"; ?>">Attack info</a></h1>
 <br>
 <div class="w3-row">
     <div class="w3-col l3 m4 s7">
@@ -108,10 +108,7 @@ switch ($attack->getStatus()) {
                 profile: $("#profile").val()
                 <?php @include($packageDirectory . "/ui/fields_js.php"); ?>
             },
-            success: function (response) {
-                console.log(response);
-                window.location = "<?php echo DOMAIN_ATTACK_INFO; ?>"
-            }
+            success: () => window.location = "<?php echo DOMAIN . "/attack"; ?>"
         });
     }
 
@@ -123,9 +120,7 @@ switch ($attack->getStatus()) {
                 virus_id: "<?php echo $attack->getVirusId(); ?>",
                 attack_id: "<?php echo $attack->getAttackId(); ?>"
             },
-            success: function () {
-                window.location = "<?php echo DOMAIN_ATTACK_INFO; ?>";
-            }
+            success: () => window.location = "<?php echo DOMAIN . "/attack"; ?>"
         });
     }
 
@@ -137,9 +132,7 @@ switch ($attack->getStatus()) {
                 virus_id: "<?php echo $attack->getVirusId(); ?>",
                 attack_id: "<?php echo $attack->getAttackId(); ?>"
             },
-            success: function () {
-                window.location = "<?php echo DOMAIN_ATTACK_INFO; ?>"
-            }
+            success: () => window.location = "<?php echo DOMAIN . "/attack"; ?>"
         })
     }
 
@@ -174,14 +167,24 @@ switch ($attack->getStatus()) {
                         data: {
                             attack_id: "<?php echo $attack->getAttackId(); ?>"
                         },
-                        success: function (response) {
-                            window.location = "<?php echo DOMAIN_ATTACK_INFO; ?>";
-                        }
+                        success: () => window.location = "<?php echo DOMAIN . "/attack"; ?>"
                     });
             }
         })
     }
-    <?php } ?>
+    <?php }
+    // these are for blinking the title if the user has not focused on the screen, as a way to notify them
+    if ($attack->getStatus() === AttackBase::STATUS_EXECUTED) { ?>
+    let state = 0;
+    blinkTitleInterval = setInterval(() => document.title = (state = 1 - state) === 0 ? "(Executed) Attack info" : "Attack info", 2000);
+
+    $(document).on("mousemove", function () {
+        clearInterval(blinkTitleInterval);
+        document.title = "Attack info";
+        $(document).off();
+    });
+    <?php }
+    ?>
 </script>
 <?php @include($packageDirectory . "/ui/js.php"); ?>
 </html>

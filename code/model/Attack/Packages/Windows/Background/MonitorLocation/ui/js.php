@@ -1,5 +1,6 @@
 <?php
 /** @var \Kelvinho\Virus\Attack\Packages\Windows\Background\MonitorLocation\MonitorLocation $attack */
+
 /** @var \Kelvinho\Virus\User\User $user */
 
 use Kelvinho\Virus\Singleton\Timezone;
@@ -20,27 +21,6 @@ use function Kelvinho\Virus\formattedTime;
         "streamNavName": $("#streamNavName"),
         "savedNavName": $("#savedNavName")
     };
-
-    function map(list, func) {
-        const answer = [];
-        for (let i = 0; i < list.length; i++) {
-            answer.push(func(list[i], i));
-        }
-        return answer;
-    }
-
-    function timeConverter(UNIX_timestamp) {
-        const a = new Date((UNIX_timestamp - (<?php echo Timezone::getUnixOffset($user->getTimezone()); ?>)) * 1000);
-        //const a = new Date(UNIX_timestamp * 1000);
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const year = a.getFullYear();
-        const month = months[a.getMonth()];
-        const date = a.getDate();
-        const hour = a.getHours();
-        const min = a.getMinutes();
-        const sec = a.getSeconds();
-        return date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec;
-    }
 
     class Event {
         constructor(unixTime, lat, lng, acc, name, displayTime) {
@@ -263,12 +243,8 @@ use function Kelvinho\Virus\formattedTime;
         closeSavedNav();
     });
 
-    gui.streamNavName.on('keypress',function(e) {
-        if(e.which === 13) streamEvents.updateMapName();
-    });
-    gui.savedNavName.on('keypress',function(e) {
-        if(e.which === 13) savedEvents.updateMapName();
-    });
+    gui.streamNavName.on('keypress', event => event.which === 13 ? streamEvents.updateMapName() : 0);
+    gui.savedNavName.on('keypress', event => event.which === 13 ? savedEvents.updateMapName() : 0);
 
     function uploadEvent(unixTime) {
         $.ajax({
@@ -281,19 +257,8 @@ use function Kelvinho\Virus\formattedTime;
         });
     }
 
-    function openStreamNav() {
-        gui.streamSidenav.removeClass("sidenavClosed");
-    }
-
-    function closeStreamNav() {
-        gui.streamSidenav.addClass("sidenavClosed");
-    }
-
-    function openSavedNav() {
-        gui.savedSidenav.removeClass("sidenavClosed");
-    }
-
-    function closeSavedNav() {
-        gui.savedSidenav.addClass("sidenavClosed");
-    }
+    const openStreamNav = () => gui.streamSidenav.removeClass("sidenavClosed");
+    const closeStreamNav = () => gui.streamSidenav.addClass("sidenavClosed");
+    const openSavedNav = () => gui.savedSidenav.removeClass("sidenavClosed");
+    const closeSavedNav = () => gui.savedSidenav.addClass("sidenavClosed");
 </script>

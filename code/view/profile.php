@@ -20,7 +20,7 @@ $user = $userFactory->get($session->getCheck("user_handle"));
     </style>
 </head>
 <body>
-<h1><a href="<?php echo DOMAIN_DASHBOARD; ?>">Account</a></h1>
+<h1><a href="<?php echo DOMAIN . "/dashboard"; ?>">Account</a></h1>
 <label for="user_handle">User name</label><input id="user_handle" class="w3-input" type="text"
                                                  value="<?php echo $user->getHandle(); ?>" disabled>
 <br>
@@ -44,11 +44,7 @@ $user = $userFactory->get($session->getCheck("user_handle"));
 <?php HtmlTemplate::scripts(); ?>
 <script>
     const gui = {timezone: $("#timezone"), name: $("#name")};
-    let timezone = <?php echo $user->getTimezone(); ?> +0;
-    gui.timezone.change(function () {
-        timezone = gui.timezone.val();
-    });
-    gui.timezone.val(timezone);
+    gui.timezone.val(<?php echo $user->getTimezone(); ?> +0);
 
     function update() {
         $.ajax({
@@ -58,9 +54,7 @@ $user = $userFactory->get($session->getCheck("user_handle"));
                 name: gui.name.val(),
                 timezone: gui.timezone.val()
             },
-            success: function () {
-                window.location = "<?php echo DOMAIN . "/profile"; ?>";
-            }
+            success: () => window.location = "<?php echo DOMAIN . "/profile"; ?>"
         });
     }
 

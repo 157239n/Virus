@@ -2,7 +2,7 @@
 
 namespace Kelvinho\Virus\Auth;
 
-use Kelvinho\Virus\Session\Session;
+use Kelvinho\Virus\Network\Session;
 use mysqli;
 
 /**

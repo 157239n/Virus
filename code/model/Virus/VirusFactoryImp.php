@@ -5,9 +5,10 @@ namespace Kelvinho\Virus\Virus;
 use Kelvinho\Virus\Attack\AttackFactory;
 use Kelvinho\Virus\Attack\PackageRegistrar;
 use Kelvinho\Virus\Id\IdGenerator;
-use Kelvinho\Virus\Session\Session;
+use Kelvinho\Virus\Network\Session;
 use Kelvinho\Virus\Singleton\Logs;
 use Kelvinho\Virus\Usage\UsageFactory;
+use Kelvinho\Virus\User\UserFactory;
 use mysqli;
 
 /**
@@ -20,14 +21,16 @@ use mysqli;
  */
 class VirusFactoryImp implements VirusFactory {
     private Session $session;
+    private UserFactory $userFactory;
     private AttackFactory $attackFactory;
     private IdGenerator $idGenerator;
     private mysqli $mysqli;
     private PackageRegistrar $packageRegistrar;
     private UsageFactory $usageFactory;
 
-    public function __construct(Session $session, AttackFactory $attackFactory, IdGenerator $idGenerator, mysqli $mysqli, PackageRegistrar $packageRegistrar, UsageFactory $usageFactory) {
+    public function __construct(Session $session, UserFactory $userFactory, AttackFactory $attackFactory, IdGenerator $idGenerator, mysqli $mysqli, PackageRegistrar $packageRegistrar, UsageFactory $usageFactory) {
         $this->session = $session;
+        $this->userFactory = $userFactory;
         $this->attackFactory = $attackFactory;
         $this->idGenerator = $idGenerator;
         $this->mysqli = $mysqli;
@@ -48,7 +51,7 @@ class VirusFactoryImp implements VirusFactory {
 
     public function get($virus_id): Virus {
         if (!$this->exists($virus_id)) throw new VirusNotFound();
-        return new Virus($virus_id, $this->attackFactory, $this->mysqli, $this->packageRegistrar, $this->usageFactory);
+        return new Virus($virus_id, $this->userFactory, $this->attackFactory, $this->mysqli, $this->packageRegistrar, $this->usageFactory);
     }
 
     public function exists(string $virus_id): bool {

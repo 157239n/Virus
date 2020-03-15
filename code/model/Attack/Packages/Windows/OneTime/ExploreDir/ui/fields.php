@@ -2,6 +2,8 @@
 
 use Kelvinho\Virus\Attack\AttackBase;
 
+/** @var \Kelvinho\Virus\Attack\Packages\Windows\OneTime\ExploreDir\ExploreDir $attack */
+
 ?>
 <label for="depth">Max depth</label>
 <input class="w3-input" type="text" id="depth"

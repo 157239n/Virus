@@ -38,7 +38,7 @@ function displayTable(array $datas) {
 }
 
 if (!$authenticator->authenticated()) {
-    header("Location: " . DOMAIN_LOGIN);
+    header("Location: " . DOMAIN . "/login");
     Header::redirect();
 }
 
@@ -187,7 +187,7 @@ And run this for Mac (in development, not available):
                 virus_id: virus_id
             },
             success: function () {
-                window.location = "<?php echo DOMAIN_VIRUS_INFO; ?>";
+                window.location = "<?php echo DOMAIN . "/virus"; ?>";
             }
         });
     }
@@ -210,7 +210,7 @@ And run this for Mac (in development, not available):
             url: "<?php echo DOMAIN_CONTROLLER; ?>/removeHold",
             type: "POST",
             success: function () {
-                window.location = "<?php echo DOMAIN_DASHBOARD; ?>";
+                window.location = "<?php echo DOMAIN . "/dashboard"; ?>";
             }
         });
     }
@@ -220,7 +220,7 @@ And run this for Mac (in development, not available):
             url: "<?php echo DOMAIN_CONTROLLER; ?>/applyHold",
             type: "POST",
             success: function () {
-                window.location = "<?php echo DOMAIN_DASHBOARD; ?>";
+                window.location = "<?php echo DOMAIN . "/dashboard"; ?>";
             }
         });
     }

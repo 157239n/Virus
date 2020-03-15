@@ -12,6 +12,5 @@ for ($i = 0; $i < $numberOfFiles; $i++) {
     $this->requestData->moveFile("file$i", $fileName);
     $size += filesize($fileName);
 }
-$this->usage()->setDisk($size);
-$this->usage()->saveState();
+$this->usage()->setDisk($size)->saveState();
 $this->setExecuted();

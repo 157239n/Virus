@@ -45,8 +45,6 @@ class MonitorLocation extends AttackBase {
     }
 
     public function saveEventFromIntercept(string $jsonEvent) {
-        $this->usage->setApiGeolocation($this->usage->getApiGeolocation() + 1);
-        $this->usage->saveState();
         $event = json_decode($jsonEvent, true);
         $this->events[time()] = array(
             "lat" => $event["location"]["lat"],

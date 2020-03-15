@@ -3,7 +3,7 @@
 namespace Kelvinho\Virus\Attack;
 
 use Kelvinho\Virus\Network\RequestData;
-use Kelvinho\Virus\Session\Session;
+use Kelvinho\Virus\Network\Session;
 use Kelvinho\Virus\Singleton\Logs;
 use Kelvinho\Virus\Usage\Usage;
 use Kelvinho\Virus\Usage\UsageFactory;
@@ -216,6 +216,7 @@ abstract class AttackBase {
     public function setExecuted(): void {
         $this->status = self::STATUS_EXECUTED;
         $this->executed_time = time();
+        $this->reportStaticUsage();
     }
 
     /**
@@ -243,6 +244,9 @@ abstract class AttackBase {
     public function delete(): void {
         if (!$this->mysqli->query("delete from attacks where attack_id = \"$this->attack_id\"")) Logs::mysql($this->mysqli);
         if (!$this->mysqli->query("delete from resource_usage where id = " . $this->usage->getId())) Logs::mysql($this->mysqli);
+        $virus = $this->virusFactory->get($this->virus_id);
+        $virus->usage()->minusStatic($this->usage)->saveState();
+        $this->userFactory->get($virus->getUserHandle())->usage()->minusStatic($this->usage)->saveState();
         exec("rm -r " . DATA_FILE . "/attacks/$this->attack_id");
     }
 
@@ -250,6 +254,24 @@ abstract class AttackBase {
         return $this->usage;
     }
 
-    public function setStaticUsage() {
+    /**
+     * Assumes the attack has the correct usages so far, and this should trickle the change upwards to viruses and users.
+     * Supposed to be called only once by the attack packages when they are finished.
+     */
+    public function reportStaticUsage(): void {
+        $virus = $this->virusFactory->get($this->virus_id);
+        $virus->usage()->addStatic($this->usage)->saveState();
+        $this->userFactory->get($virus->getUserHandle())->usage()->addStatic($this->usage)->saveState();
+    }
+
+    /**
+     * Assumes the attack has the correct usages so far, and this should trickle the change upwards to viruses and users.
+     * Supposed to be called multiple times during an intercept of a background attack.
+     */
+    public function reportDynamicUsage(): void {
+        $virus = $this->virusFactory->get($this->virus_id);
+        $virus->usage()->addDynamic($this->usage)->saveState();
+        $this->userFactory->get($virus->getUserHandle())->usage()->addDynamic($this->usage)->saveState();
+        $this->usage->resetDynamic()->saveState();
     }
 }

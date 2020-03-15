@@ -9,7 +9,7 @@ use Kelvinho\Virus\Network\FilterList\BlacklistFactory;
 use Kelvinho\Virus\Network\FilterList\WhitelistFactory;
 use Kelvinho\Virus\Network\RequestData;
 use Kelvinho\Virus\Network\Router;
-use Kelvinho\Virus\Session\Session;
+use Kelvinho\Virus\Network\Session;
 use Kelvinho\Virus\Singleton\Logs;
 use Kelvinho\Virus\Usage\UsageFactory;
 use Kelvinho\Virus\User\UserFactoryImp;
@@ -50,7 +50,7 @@ $userFactory = new UserFactoryImp($mysqli, $usageFactory);
 $attackFactory = new AttackFactoryImp();
 
 /** @var \Kelvinho\Virus\Virus\VirusFactory $virusFactory */
-$virusFactory = new VirusFactoryImp($session, $attackFactory, $idGenerator, $mysqli, $packageRegistrar, $usageFactory);
+$virusFactory = new VirusFactoryImp($session, $userFactory, $attackFactory, $idGenerator, $mysqli, $packageRegistrar, $usageFactory);
 
 /** @var \Kelvinho\Virus\Auth\Authenticator $authenticator */
 $authenticator = new AuthenticatorImp($session, $mysqli);
