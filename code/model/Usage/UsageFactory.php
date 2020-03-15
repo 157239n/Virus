@@ -24,7 +24,7 @@ class UsageFactory {
     }
 
     public function new(): Usage {
-        if (!$this->mysqli->query("insert into resource_usage (last_updated_time, static_disk, dynamic_bandwidth, dynamic_api_geolocation) values (0, 0, 0, 0)")) Logs::mysql($this->mysqli);
+        if (!$this->mysqli->query("insert into resource_usage (static_disk, dynamic_bandwidth, dynamic_api_geolocation) values (0, 0, 0)")) Logs::mysql($this->mysqli);
         return $this->get($this->mysqli->insert_id);
     }
 }
