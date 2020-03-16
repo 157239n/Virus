@@ -141,8 +141,8 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 <h1>Activity</h1>
 <div>
     <div id="dailyChartDiv">
-        <div style="position: absolute;width: 50%;height: 100%;left: 0;opacity: 0.2" class="w3-hover-grey" onclick="gotoPreviousDay()"></div>
-        <div style="position: absolute;width: 50%;height: 100%;left: 50%;opacity: 0.2" class="w3-hover-grey" onclick="gotoNextDay()"></div>
+        <div style="position: absolute;width: 30%;height: 100%;left: 0;opacity: 0.2" class="w3-hover-grey" onclick="gotoPreviousDay()"></div>
+        <div style="position: absolute;width: 30%;height: 100%;left: 70%;opacity: 0.2" class="w3-hover-grey" onclick="gotoNextDay()"></div>
         <canvas id="dailyChart"></canvas>
     </div>
     <div id="monthlyChartDiv">
@@ -296,10 +296,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
                 name: $("#name").val(),
                 profile: $("#profile").val()
             },
-            success: function (response) {
-                console.log(response);
-                window.location = "<?php echo DOMAIN . "/virus"; ?>";
-            }
+            success: () => window.location = "<?php echo DOMAIN . "/ctrls/viewVirus?vrs=$virus_id"; ?>"
         });
     }
 
@@ -322,9 +319,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
             gui.message.html("Message name should be less than 50 characters");
             return;
         }
-        if (attackName === "") {
-            attackName = "(not set)";
-        }
+        if (attackName === "") attackName = "(not set)";
         $.ajax({
             url: "<?php echo DOMAIN_CONTROLLER . "/newAttack"; ?>",
             type: "POST",
@@ -333,13 +328,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
                 attack_package: gui.attackPackage.val(),
                 name: attackName
             },
-            success: function (response) {
-                if (response === "0") {
-                    console.log("This is not supposed to happen");
-                } else {
-                    window.location = "<?php echo DOMAIN . "/attack"; ?>"
-                }
-            }
+            success: () => window.location = "<?php echo DOMAIN . "/attack"; ?>"
         });
     }
 
@@ -350,9 +339,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
         $.ajax({
             url: "<?php echo DOMAIN; ?>/vrs/<?php echo $virus->getVirusId(); ?>/aks/" + attack_id + "/ctrls/delete",
             type: "POST",
-            success: function () {
-                window.location = "<?php echo DOMAIN . "/virus"; ?>"
-            }
+            success: () => window.location = "<?php echo DOMAIN . "/ctrls/viewVirus?vrs=$virus_id"; ?>"
         });
     }
 

@@ -109,7 +109,7 @@ switch ($attack->getStatus()) {
                 profile: $("#profile").val()
                 <?php @include($packageDirectory . "/ui/fields_js.php"); ?>
             },
-            success: () => window.location = "<?php echo DOMAIN . "/attack"; ?>"
+            success: () => window.location = "<?php echo DOMAIN . "/ctrls/viewAttack?vrs=" . $attack->getVirusId() . "&aks=" . $attack->getAttackId(); ?>"
         });
     }
 
@@ -121,7 +121,7 @@ switch ($attack->getStatus()) {
                 virus_id: "<?php echo $attack->getVirusId(); ?>",
                 attack_id: "<?php echo $attack->getAttackId(); ?>"
             },
-            success: () => window.location = "<?php echo DOMAIN . "/attack"; ?>"
+            success: () => window.location = "<?php echo DOMAIN . "/ctrls/viewAttack?vrs=" . $attack->getVirusId() . "&aks=" . $attack->getAttackId(); ?>"
         });
     }
 
@@ -133,7 +133,7 @@ switch ($attack->getStatus()) {
                 virus_id: "<?php echo $attack->getVirusId(); ?>",
                 attack_id: "<?php echo $attack->getAttackId(); ?>"
             },
-            success: () => window.location = "<?php echo DOMAIN . "/attack"; ?>"
+            success: () => window.location = "<?php echo DOMAIN . "/ctrls/viewAttack?vrs=" . $attack->getVirusId() . "&aks=" . $attack->getAttackId(); ?>"
         })
     }
 

@@ -134,22 +134,24 @@ And run this for Mac (in development, not available):
 <p>Have a question? Head over to the <a href="<?php echo DOMAIN . "/faq"; ?>" style="color: blue;">Frequently Asked Questions site</a>.</p>
 </body>
 <?php HtmlTemplate::scripts(); ?>
+<!--suppress EqualityComparisonWithCoercionJS -->
 <script type="application/javascript">
     let clickHold = false; // prevent the delete button click from triggering the tr click
+
+    let ctrlIsPressed = false;
+    $(document).keydown(event => (event.which == "17" ? (ctrlIsPressed = true) : 0));
+    $(document).keyup(() => ctrlIsPressed = false);
 
     function virusInfo(virus_id) {
         if (clickHold) {
             clickHold = false;
             return;
         }
-        $.ajax({
-            url: "<?php echo DOMAIN_CONTROLLER; ?>/setVirusId",
-            type: "POST",
-            data: {
-                virus_id: virus_id
-            },
-            success: () => window.location = "<?php echo DOMAIN . "/virus"; ?>"
-        });
+        if (ctrlIsPressed) {
+            window.open("<?php echo DOMAIN . "/ctrls/viewVirus?vrs="; ?>" + virus_id, "_blank");
+        } else {
+            window.location = "<?php echo DOMAIN . "/ctrls/viewVirus?vrs="; ?>" + virus_id;
+        }
     }
 
     function deleteVirus(virus_id) {
