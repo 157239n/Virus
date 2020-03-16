@@ -1,6 +1,8 @@
 <?php
 
+namespace Kelvinho\Virus\Test\Network;
 
+use Exception;
 use Kelvinho\Virus\Network\Router;
 use PHPUnit\Framework\TestCase;
 

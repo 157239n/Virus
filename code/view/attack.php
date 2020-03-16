@@ -30,6 +30,7 @@ $attack_id = $session->getCheck("attack_id");
 
 if (!$authenticator->authorized($virus_id, $attack_id)) Header::redirectToHome();
 
+$virus = $virusFactory->get($virus_id);
 $attack = $attackFactory->get($attack_id);
 
 $packageDirectory = $packageRegistrar->getLocation($attack->getPackageDbName());
@@ -43,8 +44,8 @@ $user = $userFactory->get($session->get("user_handle")); ?>
     <?php @include($packageDirectory . "/ui/styles.php"); ?>
 </head>
 <body>
-
-<h1><a href="<?php echo DOMAIN . "/virus"; ?>">Attack info</a></h1>
+<?php HtmlTemplate::topNavigation($virus->getName(), $virus->getVirusId(), $attack->getAttackId(), $attackFactory); ?>
+<h1>Attack info</h1>
 <br>
 <div class="w3-row">
     <div class="w3-col l3 m4 s7">
@@ -159,17 +160,7 @@ switch ($attack->getStatus()) {
         $.ajax({
             url: "<?php echo DOMAIN . "/vrs/" . $attack->getVirusId() . "/aks/" . $attack->getAttackId() . "/ctrls/executed"; ?>",
             type: "POST",
-            success: function (response) {
-                if (response === "1")
-                    $.ajax({
-                        url: "<?php echo DOMAIN . "/ctrls/setAttackId"; ?>",
-                        type: "POST",
-                        data: {
-                            attack_id: "<?php echo $attack->getAttackId(); ?>"
-                        },
-                        success: () => window.location = "<?php echo DOMAIN . "/attack"; ?>"
-                    });
-            }
+            success: response => response === "1" ? window.location = "<?php echo DOMAIN . "/ctrls/viewAttack?vrs=" . $attack->getVirusId() . "&aks=" . $attack->getAttackId(); ?>" : 0
         })
     }
     <?php }

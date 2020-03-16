@@ -80,7 +80,7 @@ VALUES ("win.background.MonitorLocation",
         "\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\Background\\MonitorLocation\\MonitorLocation",
         "Windows/Background/MonitorLocation",
         "easy.background.MonitorLocation",
-        "Continuously monitors for the host's computer");
+        "Continuously monitors for the host computer's location");
 INSERT INTO packageInfo (package_name, class_name, location, display_name, description)
 VALUES ("win.oneTime.ActivateSwarm",
         "\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\OneTime\\ActivateSwarm\\ActivateSwarm",

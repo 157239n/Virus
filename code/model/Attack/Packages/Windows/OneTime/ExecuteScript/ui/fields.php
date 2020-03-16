@@ -20,6 +20,7 @@ use function Kelvinho\Virus\stripProtocol;
     so the virus will be able to see it and you will be able to use it in your attacks. You can use this to replace
     files. How it works is you first define a number of extras with a unique resource identifier (should be nice,
     simple, have no space and is alphanumeric). Then you can access the extra resource at:</p>
+<!--suppress HtmlFormInputWithoutLabel -->
 <textarea class="w3-input w3-border"
           id="extras-url"
           cols="80"

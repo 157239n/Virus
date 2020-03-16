@@ -9,7 +9,8 @@ class UserFactoryImpTest extends TestCase {
         $mysqli_result->method("fetch_assoc")->willReturn(array("user_handle" => "user_A"));
         $mysqli = $this->createMock("\mysqli");
         $mysqli->method("query")->willReturn($mysqli_result);
-        $userFactory = new UserFactoryImp($mysqli);
+        $usageFactory = $this->createMock("\Kelvinho\Virus\Usage\UsageFactory");
+        $userFactory = new UserFactoryImp($mysqli, $usageFactory);
         $this->assertTrue($userFactory->exists("user_A"));
     }
 }

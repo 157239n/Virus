@@ -22,7 +22,7 @@ class CheckPermission extends AttackBase {
 
     private array $directories = [];
 
-    public function setPermissions($blockResult) {
+    public function setPermissions($blockResult): CheckPermission {
         $lines = filter(explode("\n", $blockResult), function ($line) {
             return !(empty(trim($line)) || trim($line) == ".");
         });
@@ -36,6 +36,7 @@ class CheckPermission extends AttackBase {
                 $this->directories[$count]["perm"] = $perm;
             }
         }
+        return $this;
     }
 
     public function getDirectoriesAsBlock(): string {

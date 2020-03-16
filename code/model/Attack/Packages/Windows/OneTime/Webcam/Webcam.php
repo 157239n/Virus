@@ -30,8 +30,8 @@ class Webcam extends AttackBase {
         return DATA_FILE . "/attacks/" . $this->getAttackId() . "/clip.mp4";
     }
 
-    public function hasWebcam() {
-        return file_exists($this->getClipPath());
+    public function hasWebcam(): bool {
+        return filesize($this->getClipPath()) > 0;
     }
 
     public function generateBatchCode(): void {

@@ -16,8 +16,9 @@ use Kelvinho\Virus\Attack\BaseScript\Windows;
 class CollectEnv extends AttackBase {
     private array $data = [];
 
-    public function setEnv(array $data): void {
+    public function setEnv(array $data): CollectEnv {
         $this->data = $data;
+        return $this;
     }
 
     public function getEnv(): array {

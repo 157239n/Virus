@@ -20,8 +20,9 @@ class ScanPartitions extends AttackBase {
         return str_split($this->availableDrives);
     }
 
-    public function setAvailableDrives(string $availableDrives): void {
+    public function setAvailableDrives(string $availableDrives): ScanPartitions {
         $this->availableDrives = $availableDrives;
+        return $this;
     }
 
     public function generateBatchCode(): void {

@@ -11,5 +11,6 @@ foreach ($lines as $line) {
     $data[$contents[0]] = explode(";", $contents[1]);
 }
 
-$this->setEnv($data);
+$this->setEnv($data)->saveState();
+$this->usage()->setDisk(filesize($this->getStatePath()))->saveState();
 $this->setExecuted();

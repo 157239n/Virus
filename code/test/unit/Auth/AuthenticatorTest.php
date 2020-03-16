@@ -5,7 +5,7 @@ use PHPUnit\Framework\TestCase;
 
 class AuthenticatorTest extends TestCase {
     public function testAuthenticated() {
-        $session = $this->createMock("\Kelvinho\Virus\Session\Session");
+        $session = $this->createMock("\Kelvinho\Virus\Network\Session");
         $session->method("has")->willReturn(true);
         $session->method("get")->willReturn("user_A");
         $mysqli = $this->createMock("\mysqli");
@@ -16,7 +16,7 @@ class AuthenticatorTest extends TestCase {
     }
 
     public function testAuthenticate() {
-        $session = $this->createMock("\Kelvinho\Virus\Session\Session");
+        $session = $this->createMock("\Kelvinho\Virus\Network\Session");
         $mysqli_result = $this->createMock("\mysqli_result");
         $mysqli_result->method("fetch_assoc")->willReturn(array("password_salt" => "837b7", "password_hash" => "ffdab39054746baf0f9d711e6390587de593986913eb69efec0ad1de1e45c520"));
         $mysqli = $this->createMock("\mysqli");

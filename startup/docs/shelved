@@ -1,7 +1,7 @@
 
 @echo off
 
-setlocal enableDelayedExpansion
+SetLocal enableDelayedExpansion
 
 :getNumberOfVariables
 for /f "tokens=*" %%a in ('type "%~pd0text"') do (

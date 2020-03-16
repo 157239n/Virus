@@ -105,7 +105,7 @@ There are a few parameters you can tweak:
     detection. This is why you should choose the base location to be a place where the target never interacts with.
     If the user come across it, although they can't delete it because it will just auto-heal, this might make them
     suspicious of you of doing something to their computer, or they might try to take bigger precautions like
-    installing multiple antiviruses, which might hinder the virus more.</p>
+    installing multiple antivirus, which might hinder the virus more.</p>
 <p>There exists also another very subtle behavior of the swarm. If you repeatedly kill them one by one in like 5
     seconds, and they keep healing, they won't pick a random location to replicate into anymore. This is because
     picking a random location is a time consuming task which can take from 10 seconds to 4 minutes to a really wide

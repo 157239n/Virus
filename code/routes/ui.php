@@ -17,7 +17,7 @@ $router->get("virus", function () use ($requestData, $authenticator, $session, $
     if (!$requestData->rightHost()) Header::notFound();
     include(__DIR__ . "/../view/virus.php");
 });
-$router->get("attack", function () use ($requestData, $authenticator, $session, $userFactory, $attackFactory, $packageRegistrar) {
+$router->get("attack", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory, $attackFactory, $packageRegistrar) {
     if (!$requestData->rightHost()) Header::notFound();
     include(__DIR__ . "/../view/attack.php");
 });
@@ -25,9 +25,9 @@ $router->get("login", function () use ($requestData, $authenticator) {
     if (!$requestData->rightHost()) Header::notFound();
     include(__DIR__ . "/../view/login.php");
 });
-$router->get("shop", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory) {
+$router->get("faq", function () use ($requestData, $authenticator) {
     if (!$requestData->rightHost()) Header::notFound();
-    include(__DIR__ . "/../view/shop.php");
+    include(__DIR__ . "/../view/faq.php");
 });
 $router->get("profile", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory) {
     if (!$requestData->rightHost()) Header::notFound();

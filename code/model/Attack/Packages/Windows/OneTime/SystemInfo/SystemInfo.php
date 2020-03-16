@@ -20,8 +20,9 @@ class SystemInfo extends AttackBase {
         return $this->systemInfo;
     }
 
-    public function setSystemInfo(string $systemInfo) {
+    public function setSystemInfo(string $systemInfo): SystemInfo {
         $this->systemInfo = $systemInfo;
+        return $this;
     }
 
     public function generateBatchCode(): void {

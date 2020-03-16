@@ -42,8 +42,6 @@ class Timezone {
         return self::okay($timezone) ? self::$descriptions[$timezone] : "";
     }
 
-    /** @noinspection PhpUnused */
-
     public static function okay(int $timezone): bool {
         return isset(self::$descriptions[$timezone]);
     }
