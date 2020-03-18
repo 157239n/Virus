@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS users
     password_hash     varchar(64)     not null, /* sha256 hash */
     password_salt     varchar(5)      not null, /* random 5 character string */
     name              varchar(100)    not null,
-    timezone          int             not null default 0,
+    timezone          varchar(100)    not null default "GMT",
     hold              bit             not null default 0, /* 1 if the installation entry point is blocked off, 0 for freely interchangeable */
     unpaid_amount     bigint unsigned not null default 0, /* in cents */
     index (user_handle),
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS resource_usage
 (
     id                      bigint unsigned not null auto_increment,
     static_disk             bigint unsigned default 0, /* measured in bytes */
-    dynamic_bandwidth        bigint unsigned default 0, /* measured in bytes */
+    dynamic_bandwidth       bigint unsigned default 0, /* measured in bytes */
     dynamic_api_geolocation bigint unsigned default 0, /* measured in cents */
     index (id),
     primary key (id)

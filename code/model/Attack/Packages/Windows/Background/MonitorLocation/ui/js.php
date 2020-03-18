@@ -3,8 +3,7 @@
 
 /** @var \Kelvinho\Virus\User\User $user */
 
-use Kelvinho\Virus\Singleton\Timezone;
-use function Kelvinho\Virus\formattedTime;
+use Kelvinho\Virus\Timezone\Timezone;
 
 ?>
 
@@ -222,9 +221,9 @@ use function Kelvinho\Virus\formattedTime;
 
     // now let's load data
 
-    const events = {<?php echo implode(", ", \Kelvinho\Virus\map($attack->getEvents(), function ($values, $unixTime) use ($user) {
-            return $unixTime . ': new Event(' . $unixTime . ', "' . $values["lat"] . '", "' . $values["lng"] . '", "' . $values["acc"] . '", "' . $values["name"] . '", "' . formattedTime($unixTime + Timezone::getUnixOffset($user->getTimezone())) . '")';
-        })); ?>};
+    const events = {<?php echo implode(", ", \Kelvinho\Virus\map($attack->getEvents(), function ($values, int $unixTime, Timezone $timezone) use ($user) {
+            return $unixTime . ': new Event(' . $unixTime . ', "' . $values["lat"] . '", "' . $values["lng"] . '", "' . $values["acc"] . '", "' . $values["name"] . '", "' . $timezone->display($user->getTimezone(), $unixTime) . '")';
+        }, $timezone)); ?>};
     // all of these mess just because of type mismatch stuff. God damn I hate dynamic typing
     const eventKeysString = Object.keys(events);
     let eventKeys = [];

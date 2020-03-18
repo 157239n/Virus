@@ -4,7 +4,6 @@ namespace Kelvinho\Virus\Attack;
 
 use Kelvinho\Virus\Network\RequestData;
 use Kelvinho\Virus\Network\Session;
-use Kelvinho\Virus\Singleton\Header;
 use Kelvinho\Virus\Singleton\Logs;
 use Kelvinho\Virus\Usage\Usage;
 use Kelvinho\Virus\Usage\UsageFactory;

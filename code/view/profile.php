@@ -2,8 +2,6 @@
 
 use Kelvinho\Virus\Singleton\Header;
 use Kelvinho\Virus\Singleton\HtmlTemplate;
-use Kelvinho\Virus\Singleton\Timezone;
-use function Kelvinho\Virus\map;
 
 if (!$authenticator->authenticated()) Header::redirectToHome();
 $user = $userFactory->get($session->getCheck("user_handle"));
@@ -28,10 +26,11 @@ $user = $userFactory->get($session->getCheck("user_handle"));
 <label for="name">Name</label><input id="name" class="w3-input" type="text"
                                      value="<?php echo $user->getName(); ?>">
 <br>
-<label for="timezone">Timezone</label><select id="timezone" class="w3-select" name="option" style="padding: 10px;">
-    <?php map(Timezone::getDescriptions(), function ($description, $timezone) { ?>
-        <option value="<?php echo "$timezone"; ?>"><?php echo "UTC $timezone: $description"; ?></option>
-    <?php }); ?>
+<label for="timezone">Timezone</label><select id="timezone" class="w3-select" name="option"
+                                                       style="padding: 10px;">
+    <?php foreach ($timezone->getTimezones() as $timezoneString) { ?>
+        <option value="<?php echo $timezoneString; ?>"><?php echo $timezone->getDescription($timezoneString); ?></option>
+    <?php } ?>
 </select>
 <br><br>
 <button class="w3-btn w3-teal" onclick="update()">Update</button>
@@ -47,7 +46,7 @@ $user = $userFactory->get($session->getCheck("user_handle"));
 <?php HtmlTemplate::scripts(); ?>
 <script>
     const gui = {timezone: $("#timezone"), name: $("#name")};
-    gui.timezone.val(<?php echo $user->getTimezone(); ?> +0);
+    gui.timezone.val("<?php echo $user->getTimezone(); ?>");
 
     function update() {
         $.ajax({

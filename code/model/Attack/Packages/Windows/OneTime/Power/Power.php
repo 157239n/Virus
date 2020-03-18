@@ -30,13 +30,13 @@ class Power extends AttackBase {
     public function setType(string $type): void {
         switch (trim($type)) {
             case "Shutdown":
-                $this->setType(Power::POWER_SHUTDOWN);
+                $this->type = Power::POWER_SHUTDOWN;
                 break;
             case "Restart":
-                $this->setType(Power::POWER_RESTART);
+                $this->type = Power::POWER_RESTART;
                 break;
             default:
-                $this->setType(Power::POWER_RESTART);
+                $this->type = Power::POWER_RESTART;
         }
     }
 

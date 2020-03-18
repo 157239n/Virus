@@ -9,19 +9,19 @@ $router->get("", function () use ($requestData) {
     \header("Location: " . DOMAIN . "/dashboard");
     Header::redirect();
 });
-$router->get("dashboard", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory) {
+$router->get("dashboard", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory, $timezone) {
     if (!$requestData->rightHost()) Header::notFound();
     include(__DIR__ . "/../view/dashboard.php");
 });
-$router->get("virus", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory, $attackFactory, $mysqli, $packageRegistrar) {
+$router->get("virus", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory, $attackFactory, $mysqli, $packageRegistrar, $timezone) {
     if (!$requestData->rightHost()) Header::notFound();
     include(__DIR__ . "/../view/virus.php");
 });
-$router->get("attack", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory, $attackFactory, $packageRegistrar) {
+$router->get("attack", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory, $attackFactory, $packageRegistrar, $timezone) {
     if (!$requestData->rightHost()) Header::notFound();
     include(__DIR__ . "/../view/attack.php");
 });
-$router->get("login", function () use ($requestData, $authenticator) {
+$router->get("login", function () use ($requestData, $authenticator, $timezone) {
     if (!$requestData->rightHost()) Header::notFound();
     include(__DIR__ . "/../view/login.php");
 });
@@ -29,7 +29,7 @@ $router->get("faq", function () use ($requestData, $authenticator) {
     if (!$requestData->rightHost()) Header::notFound();
     include(__DIR__ . "/../view/faq.php");
 });
-$router->get("profile", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory) {
+$router->get("profile", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory, $timezone) {
     if (!$requestData->rightHost()) Header::notFound();
     include(__DIR__ . "/../view/profile.php");
 });

@@ -2,8 +2,6 @@
 
 use Kelvinho\Virus\Singleton\Header;
 use Kelvinho\Virus\Singleton\HtmlTemplate;
-use Kelvinho\Virus\Singleton\Timezone;
-use function Kelvinho\Virus\map;
 
 if ($authenticator->authenticated()) Header::redirectToHome(); ?>
 <html lang="en_US">
@@ -30,9 +28,9 @@ if ($authenticator->authenticated()) Header::redirectToHome(); ?>
 <br>
 <label for="register_timezone">Timezone</label><select id="register_timezone" class="w3-select" name="option"
                                                        style="padding: 10px;">
-    <?php map(Timezone::getDescriptions(), function ($description, $timezone) { ?>
-        <option value="<?php echo "$timezone"; ?>"><?php echo "UTC $timezone: $description"; ?></option>
-    <?php }); ?>
+    <?php foreach ($timezone->getTimezones() as $timezoneString) { ?>
+        <option value="<?php echo $timezoneString; ?>"><?php echo $timezone->getDescription($timezoneString); ?></option>
+    <?php } ?>
 </select>
 <div id="register_message" style="color: red;"><?php echo $requestData->get("registerMessage", ""); ?></div>
 <br>
@@ -62,7 +60,7 @@ if ($authenticator->authenticated()) Header::redirectToHome(); ?>
         register_timezone: $("#register_timezone"),
     };
 
-    gui.register_timezone.val(0);
+    //gui.register_timezone.val(0);
 
     function login() {
         $.ajax({

@@ -13,7 +13,8 @@ class UserTest extends TestCase {
         $mysqli = $this->createMock("\mysqli");
         $mysqli->method("query")->willReturn($mysqli_answer);
         $usageFactory = $this->createMock("\Kelvinho\Virus\Usage\UsageFactory");
-        $this->user = new Kelvinho\Virus\User\User("user_A", $mysqli, $usageFactory);
+        $timezone = $this->createMock("\Kelvinho\Virus\Timezone\Timezone");
+        $this->user = new Kelvinho\Virus\User\User("user_A", $mysqli, $usageFactory, $timezone);
     }
 
     public function testGetTimezone() {

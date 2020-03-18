@@ -3,6 +3,7 @@
 namespace Kelvinho\Virus\User;
 
 use Kelvinho\Virus\Singleton\Logs;
+use Kelvinho\Virus\Timezone\Timezone;
 use Kelvinho\Virus\Usage\Usage;
 use Kelvinho\Virus\Usage\UsageFactory;
 use Kelvinho\Virus\Virus\Virus;
@@ -23,7 +24,8 @@ use function Kelvinho\Virus\filter;
 class User {
     private string $user_handle;
     private string $name;
-    private int $timezone;
+    private string $timezone;
+    private Timezone $timezoneObject;
     private bool $hold;
     private mysqli $mysqli;
     private Usage $usage;
@@ -35,12 +37,14 @@ class User {
      * @param string $user_handle
      * @param mysqli $mysqli
      * @param UsageFactory $usageFactory
+     * @param Timezone $timezoneObject
      * @internal
      */
-    public function __construct(string $user_handle, mysqli $mysqli, UsageFactory $usageFactory) {
+    public function __construct(string $user_handle, mysqli $mysqli, UsageFactory $usageFactory, Timezone $timezoneObject) {
         $this->user_handle = $user_handle;
         $this->mysqli = $mysqli;
         $this->usageFactory = $usageFactory;
+        $this->timezoneObject = $timezoneObject;
         $this->loadState();
     }
 
@@ -54,11 +58,11 @@ class User {
         $this->unpaidAmount = $row["unpaid_amount"];
     }
 
-    public function getTimezone(): int {
+    public function getTimezone(): string {
         return $this->timezone;
     }
 
-    public function setTimezone(int $timezone): void {
+    public function setTimezone(string $timezone): void {
         $this->timezone = $timezone;
     }
 
@@ -107,7 +111,7 @@ class User {
      * Saves state of user.
      */
     public function saveState(): void {
-        if (!$this->mysqli->query("update users set name = \"" . $this->mysqli->escape_string($this->name) . "\", timezone = $this->timezone, hold = b'" . ($this->hold ? "1" : "0") . "' where user_handle = \"$this->user_handle\"")) Logs::mysql($this->mysqli);
+        if (!$this->mysqli->query("update users set name = \"" . $this->mysqli->escape_string($this->name) . "\", timezone = \"$this->timezone\", hold = b'" . ($this->hold ? "1" : "0") . "' where user_handle = \"$this->user_handle\"")) Logs::mysql($this->mysqli);
     }
 
     /**

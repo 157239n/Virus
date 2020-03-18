@@ -11,6 +11,7 @@ use Kelvinho\Virus\Network\RequestData;
 use Kelvinho\Virus\Network\Router;
 use Kelvinho\Virus\Network\Session;
 use Kelvinho\Virus\Singleton\Logs;
+use Kelvinho\Virus\Timezone\Timezone;
 use Kelvinho\Virus\Usage\UsageFactory;
 use Kelvinho\Virus\User\UserFactoryImp;
 use Kelvinho\Virus\Virus\VirusFactoryImp;
@@ -38,13 +39,15 @@ $requestData = new RequestData();
 $whitelistFactory = new WhitelistFactory();
 $blacklistFactory = new BlacklistFactory();
 
+$timezone = new Timezone();
+
 $usageFactory = new UsageFactory($mysqli);
 
 /** @var \Kelvinho\Virus\Id\IdGenerator $idGenerator */
 $idGenerator = new IdGeneratorImp($mysqli);
 
 /** @var \Kelvinho\Virus\User\UserFactory $userFactory */
-$userFactory = new UserFactoryImp($mysqli, $usageFactory);
+$userFactory = new UserFactoryImp($mysqli, $usageFactory, $timezone);
 
 /** @var \Kelvinho\Virus\Attack\AttackFactory $attackFactory */
 $attackFactory = new AttackFactoryImp();

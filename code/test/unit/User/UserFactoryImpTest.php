@@ -10,7 +10,8 @@ class UserFactoryImpTest extends TestCase {
         $mysqli = $this->createMock("\mysqli");
         $mysqli->method("query")->willReturn($mysqli_result);
         $usageFactory = $this->createMock("\Kelvinho\Virus\Usage\UsageFactory");
-        $userFactory = new UserFactoryImp($mysqli, $usageFactory);
+        $timezone = $this->createMock("\Kelvinho\Virus\Timezone\Timezone");
+        $userFactory = new UserFactoryImp($mysqli, $usageFactory, $timezone);
         $this->assertTrue($userFactory->exists("user_A"));
     }
 }

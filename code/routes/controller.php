@@ -2,12 +2,12 @@
 
 use Kelvinho\Virus\Singleton\Header;
 
-$router->getPostMulti(["controller/*", "ctrls/*"], function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory, $attackFactory) {
+$router->getPostMulti(["controller/*", "ctrls/*"], function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory, $attackFactory, $timezone) {
     if (!$requestData->rightHost()) Header::notFound();
     include(__DIR__ . "/../controller/" . $requestData->getExplodedPath()[1] . ".php");
 });
 // added redirection on the 2nd exploded path
-$router->get("controller/*/*", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory, $attackFactory) {
+$router->get("controller/*/*", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory, $attackFactory, $timezone) {
     if (!$requestData->rightHost()) Header::notFound();
     include(__DIR__ . "/../controller/" . $requestData->getExplodedPath()[1] . ".php"); ?>
     <script>window.location = "<?php echo base64_decode($requestData->getExplodedPath()[2]); ?>";</script><?php

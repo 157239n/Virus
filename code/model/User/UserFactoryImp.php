@@ -3,6 +3,7 @@
 namespace Kelvinho\Virus\User;
 
 use Kelvinho\Virus\Singleton\Logs;
+use Kelvinho\Virus\Timezone\Timezone;
 use Kelvinho\Virus\Usage\UsageFactory;
 use mysqli;
 
@@ -17,26 +18,28 @@ use mysqli;
 class UserFactoryImp implements UserFactory {
     private mysqli $mysqli;
     private UsageFactory $usageFactory;
+    private Timezone $timezone;
 
-    public function __construct(mysqli $mysqli, UsageFactory $usageFactory) {
+    public function __construct(mysqli $mysqli, UsageFactory $usageFactory, Timezone $timezone) {
         $this->mysqli = $mysqli;
         $this->usageFactory = $usageFactory;
+        $this->timezone = $timezone;
     }
 
-    public function new(string $user_handle, string $password, string $name, int $timezone = 0): User {
+    public function new(string $user_handle, string $password, string $name, string $timezone = "GMT"): User {
         $password_salt = substr(hash("sha256", rand()), 0, 5);
         $password_hash = hash("sha256", $password_salt . $password);
         $usage = $this->usageFactory->new();
 
         mkdir(DATA_FILE . "/users/$user_handle");
-        if (!$this->mysqli->query("insert into users (user_handle, password_hash, password_salt, name, timezone, resource_usage_id) values (\"$user_handle\", \"$password_hash\", \"$password_salt\", \"" . $this->mysqli->escape_string($name) . "\", $timezone, " . $usage->getId() . ")")) Logs::error($this->mysqli->error);
+        if (!$this->mysqli->query("insert into users (user_handle, password_hash, password_salt, name, timezone, resource_usage_id) values (\"$user_handle\", \"$password_hash\", \"$password_salt\", \"" . $this->mysqli->escape_string($name) . "\", \"$timezone\", " . $usage->getId() . ")")) Logs::error($this->mysqli->error);
 
         return $this->get($user_handle);
     }
 
     public function get(string $user_handle): User {
         if (!$this->exists($user_handle)) throw new UserNotFound();
-        return new User($user_handle, $this->mysqli, $this->usageFactory);
+        return new User($user_handle, $this->mysqli, $this->usageFactory, $this->timezone);
     }
 
     public function exists(string $user_handle): bool {

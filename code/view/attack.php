@@ -5,8 +5,6 @@ use Kelvinho\Virus\Attack\PackageRegistrar;
 use Kelvinho\Virus\Singleton\Header;
 use Kelvinho\Virus\Singleton\HtmlTemplate;
 use Kelvinho\Virus\Singleton\Logs;
-use Kelvinho\Virus\Singleton\Timezone;
-use function Kelvinho\Virus\formattedTime;
 
 /** @var PackageRegistrar $packageRegistrar */
 
@@ -67,7 +65,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
     <div class="w3-col l4 m5 s7" style="padding-left: 8px">
         <label for="status">Status</label>
         <input id="status" class="w3-input" type="text" disabled value="<?php echo $attack->getStatus();
-        if ($attack->getStatus() === AttackBase::STATUS_EXECUTED) echo ", " . formattedTime($attack->getExecutedTime() + Timezone::getUnixOffset($user->getTimezone())) . " UTC " . $user->getTimezone(); ?>">
+        if ($attack->getStatus() === AttackBase::STATUS_EXECUTED) echo ", " . $timezone->display($user->getTimezone(), $attack->getExecutedTime()); ?>">
     </div>
 </div>
 <br>
