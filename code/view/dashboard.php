@@ -58,11 +58,6 @@ $alternates = ["math", "nuclear", "graph", "cloud", "mail", "computer", "car", "
         .codes {
             color: midnightblue;
         }
-
-        .hold {
-            color: blue;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
@@ -183,7 +178,7 @@ And run this for Mac (in development, not available):
         });
     }
 
-    setInterval(() => window.location = "<?php echo DOMAIN . "/dashboard"; ?>", 60000);
+    setInterval(() => location.reload(true), 60000);
 
     //document.body.requestFullscreen();
     window.scrollTo(0, 1);

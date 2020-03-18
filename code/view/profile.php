@@ -21,7 +21,7 @@ $user = $userFactory->get($session->getCheck("user_handle"));
 </head>
 <body>
 <?php HtmlTemplate::topNavigation(null, null, null, null, $user->isHold()); ?>
-<h1><a href="<?php echo DOMAIN . "/dashboard"; ?>">Account</a></h1>
+<h2>Account</h2>
 <label for="user_handle">User name</label><input id="user_handle" class="w3-input" type="text"
                                                  value="<?php echo $user->getHandle(); ?>" disabled>
 <br>
@@ -45,4 +45,20 @@ $user = $userFactory->get($session->getCheck("user_handle"));
 <div id="paypal-button-2"></div>
 </body>
 <?php HtmlTemplate::scripts(); ?>
+<script>
+    const gui = {timezone: $("#timezone"), name: $("#name")};
+    gui.timezone.val(<?php echo $user->getTimezone(); ?> +0);
+
+    function update() {
+        $.ajax({
+            url: "<?php echo DOMAIN_CONTROLLER; ?>/updateUser",
+            type: "POST",
+            data: {
+                name: gui.name.val(),
+                timezone: gui.timezone.val()
+            },
+            success: () => window.location = "<?php echo DOMAIN . "/profile"; ?>"
+        });
+    }
+</script>
 </html>

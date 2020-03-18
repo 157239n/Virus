@@ -4,7 +4,7 @@
         width: 30%;
         position: fixed;
         z-index: 1;
-        top: 0;
+        top: 38px;
         left: 0;
         background-color: #111;
         overflow-x: hidden;

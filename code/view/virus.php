@@ -117,7 +117,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 </head>
 <body>
 <?php HtmlTemplate::topNavigation($virus->getName(), $virus->getVirusId(), null, null, $user->isHold()); ?>
-<h1>Virus info</h1>
+<h2>Virus info</h2>
 <div class="w3-row">
     <div class="w3-col l4 m4 s6" style="padding-right: 8px;">
         <label for="name">Name</label>
@@ -138,7 +138,7 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 <textarea id="profile" cols="80" class="w3-input"><?php echo $virus->getProfile(); ?></textarea>
 <br>
 <button class="w3-btn w3-red" onclick="updateVirus()">Update</button>
-<h1>Activity</h1>
+<h2>Activity</h2>
 <div>
     <div id="dailyChartDiv">
         <div style="position: absolute;width: 30%;height: 100%;left: 0;opacity: 0.2" class="w3-hover-grey" onclick="gotoPreviousDay()"></div>
@@ -152,7 +152,6 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 <p>The daily active view shows at which times the virus reports back indicating that it is still alive and still
     listening, while the monthly frequency view shows how many hours the virus is active in a particular hour (ex.
     from 03:00 to 04:00) for a whole month. The two actually is kinda similar, not much different there.</p>
-<h1>Attacks</h1>
 <h2>New attack</h2>
 <label for="attackName">Name. This is an optional short name to help you stay organized</label>
 <input id="attackName" class="w3-input" type="text">
@@ -259,22 +258,6 @@ $user = $userFactory->get($session->get("user_handle")); ?>
     consequences. If it is not, that means that it is easy to screw things up, and you might accidentally remove the
     virus from existence, or you have to know more about what you are planning to do to understand how to deploy it
     successfully.</p>
-<h2>Random bits of information that I don't know where it fits in</h2>
-<p>The attack name has a pretty limited character limit, and it's supposed to be. If you need a bigger space to note
-    things down then in every viruses and attacks, you can write it in the "profile" section.</p>
-<p>If an attack is occurring and the host computer shuts down, then when the computer reboots, the virus itself
-    will start up, but the attack will not continue and no answer will be given back to the application. So if this
-    happens, your only option is to delete that attack, and initiate another attack with the same parameters.</p>
-<p>A nice little trick throughout the application is that you can click on the first header in a site to go
-    backwards to the parent screen. Meaning, clicking on the attack info page will redirect to the virus info page,
-    and clicking on the virus info page will redirect to the dashboard.</p>
-<p>You can look to previous days using the daily active view graph. Just click on the graph anywhere on the left to
-    move back 1 day, and on the graph to the right to move forward 1 day.</p>
-<p>Note that once you have deployed the attack, the virus most likely will have noticed that new payload (less
-    than <?php echo VIRUS_PING_INTERVAL; ?> seconds) before you can press cancel. This means you shouldn't rely on
-    the feature much, and it's there to cancel attacks when the host computer is shutdown only.</p>
-<p>When you deploy an attack, it takes time for the virus to execute the attack, so be patient with it, and
-    refreshes the screen to see whether it has reported back or not.</p>
 </body>
 <?php HtmlTemplate::scripts(); ?>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
