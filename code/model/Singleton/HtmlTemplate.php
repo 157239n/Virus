@@ -90,7 +90,7 @@ class HtmlTemplate {
             <a href="<?php echo DOMAIN; ?>" class="w3-bar-item w3-button">Dashboard</a>
             <?php if ($virusName !== null) { ?>
                 <a href="<?php echo DOMAIN . "/ctrls/viewVirus?vrs=$virus_id"; ?>"
-                   class="w3-bar-item w3-button w3-border-left">Virus: <?php echo $virusName; ?></a>
+                   class="w3-bar-item w3-button w3-border-left"><span class="w3-hide-small">Virus: </span><?php echo $virusName; ?></a>
             <?php }
             if ($attack_id !== null) {
                 $attack = $attackFactory->get($attack_id);
@@ -110,8 +110,12 @@ class HtmlTemplate {
                     <?php } ?>
                 </div>
             <?php } ?>
-            <a href="<?php echo DOMAIN . "/profile"; ?>" class="w3-bar-item w3-button w3-right" style="height: 38px;"><i
-                        class="material-icons">person</i></a>
+            <div class="w3-bar-item w3-button w3-right w3-dropdown-hover" style="height: 38px;"><i class="material-icons">settings</i>
+                <div class="w3-dropdown-content w3-bar-block w3-card-4" style="position: fixed;right: 0; top: 38px;">
+                    <a href="<?php echo DOMAIN . "/profile"; ?>" class="w3-bar-item w3-button">Profile</a>
+                    <a href="<?php echo DOMAIN . "/logout"; ?>" class="w3-bar-item w3-button">Sign out</a>
+                </div>
+            </div>
             <?php
             if ($holding !== null) { ?>
                 <a onclick="<?php echo $holding ? "topNavToggleHold(true)" : "topNavToggleHold(false)"; ?>"

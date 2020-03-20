@@ -44,7 +44,6 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 <body>
 <?php HtmlTemplate::topNavigation($virus->getName(), $virus->getVirusId(), $attack->getAttackId(), $attackFactory); ?>
 <h2>Attack info</h2>
-<br>
 <div class="w3-row">
     <div class="w3-col l3 m4 s7">
         <label for="name">Name</label>

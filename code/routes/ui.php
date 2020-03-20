@@ -33,6 +33,10 @@ $router->get("profile", function () use ($requestData, $authenticator, $session,
     if (!$requestData->rightHost()) Header::notFound();
     include(__DIR__ . "/../view/profile.php");
 });
+$router->get("logout", function () {
+    session_destroy();
+    echo "<script>window.location = '" . DOMAIN . "'</script>";
+});
 
 // and resources
 $router->get("resources/images/*", function () use ($requestData) {

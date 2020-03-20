@@ -10,16 +10,14 @@ if ($authenticator->authenticated()) Header::redirectToHome(); ?>
     <?php HtmlTemplate::header(); ?>
 </head>
 <body>
-<h1>Log in</h1>
-<br>
+<h2>Log in</h2>
 <label for="login_user_handle">User name</label><input id="login_user_handle" class="w3-input" type="text">
 <br>
 <label for="login_password">Password</label><input id="login_password" class="w3-input" type="password">
 <div style="color: red;"><?php echo $requestData->get("loginMessage", ""); ?></div>
 <br>
 <button class="w3-btn w3-light-blue" onclick="login()">Login</button>
-<h1>Register</h1>
-<br>
+<h2>Register</h2>
 <label for="register_user_handle">User name</label><input id="register_user_handle" class="w3-input" type="text">
 <br>
 <label for="register_password">Password</label><input id="register_password" class="w3-input" type="password">
@@ -35,7 +33,7 @@ if ($authenticator->authenticated()) Header::redirectToHome(); ?>
 <div id="register_message" style="color: red;"><?php echo $requestData->get("registerMessage", ""); ?></div>
 <br>
 <button class="w3-btn w3-light-green" onclick="register()">Register</button>
-<h1>What is this?</h1>
+<h2>What is this?</h2>
 <p>Oh hi there, I guess you're new around here?</p>
 <p>Long story short, a few years ago, I made my first virus to go and spy on some people. It was mainly for
     curiosity and it felt really awesome to be doing stuff you're not supposed to be doing. But maintaining
