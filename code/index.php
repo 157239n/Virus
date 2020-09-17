@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpIncludeInspection */
 
 use Kelvinho\Virus\Attack\AttackFactoryImp;
 use Kelvinho\Virus\Attack\PackageRegistrar;
@@ -10,6 +10,7 @@ use Kelvinho\Virus\Network\FilterList\WhitelistFactory;
 use Kelvinho\Virus\Network\RequestData;
 use Kelvinho\Virus\Network\Router;
 use Kelvinho\Virus\Network\Session;
+use Kelvinho\Virus\Singleton\Demos;
 use Kelvinho\Virus\Singleton\Logs;
 use Kelvinho\Virus\Timezone\Timezone;
 use Kelvinho\Virus\Usage\UsageFactory;
@@ -40,8 +41,8 @@ $whitelistFactory = new WhitelistFactory();
 $blacklistFactory = new BlacklistFactory();
 
 $timezone = new Timezone();
-
 $usageFactory = new UsageFactory($mysqli);
+$demos = new Demos($session);
 
 /** @var \Kelvinho\Virus\Id\IdGenerator $idGenerator */
 $idGenerator = new IdGeneratorImp($mysqli);

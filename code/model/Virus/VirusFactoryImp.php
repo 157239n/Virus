@@ -42,20 +42,20 @@ class VirusFactoryImp implements VirusFactory {
         $virus_id = $virus_id ?? $this->idGenerator->newVirusId();
         $usage = $this->usageFactory->new();
         $user_handle = $user_handle ?? $this->session->get("user_handle");
-        if (!$this->mysqli->query("insert into viruses (virus_id, user_handle, last_ping, name, active, type, class, resource_usage_id) values (\"$virus_id\", \"" . $user_handle . "\", 0, \"(not set)\", b'0', b'" . ($standalone ? "0" : "1") . "', \"\", " . $usage->getId() . ")")) Logs::mysql($this->mysqli);
+        if (!$this->mysqli->query("insert into viruses (virus_id, user_handle, last_ping, name, active, type, resource_usage_id) values ('$virus_id', '" . $user_handle . "', 0, '(not set)', b'0', b'" . ($standalone ? "0" : "1") . "', " . $usage->getId() . ")")) Logs::mysql($this->mysqli);
         mkdir(DATA_FILE . "/viruses/$virus_id");
         touch(DATA_FILE . "/viruses/$virus_id/profile.txt");
 
         return $this->get($virus_id);
     }
 
-    public function get($virus_id): Virus {
+    public function get(string $virus_id): Virus {
         if (!$this->exists($virus_id)) throw new VirusNotFound();
         return new Virus($virus_id, $this->userFactory, $this->attackFactory, $this->mysqli, $this->packageRegistrar, $this->usageFactory);
     }
 
     public function exists(string $virus_id): bool {
-        if (!$answer = $this->mysqli->query("select virus_id from viruses where virus_id = \"" . $this->mysqli->escape_string($virus_id) . "\"")) return false;
+        if (!$answer = $this->mysqli->query("select virus_id from viruses where virus_id = '" . $this->mysqli->escape_string($virus_id) . "'")) return false;
         if (!$row = $answer->fetch_assoc()) return false;
         return true;
     }

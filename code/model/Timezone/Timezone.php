@@ -15,7 +15,7 @@ use DateTimeZone;
  */
 class Timezone {
     /** @var String[] */
-    private array $timezones = [];
+    private array $timezones;
     private array $niceLookingTimezones = []; // associative array of timezone string => nice looking name
     private array $offsetsInSeconds = []; // associative array of timezone string => offset in seconds
 

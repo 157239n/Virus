@@ -5,6 +5,8 @@ use Kelvinho\Virus\Attack\BaseScript\Windows;
 use Kelvinho\Virus\Singleton\Header;
 use Kelvinho\Virus\Singleton\Logs;
 
+global $router, $requestData, $virusFactory, $attackFactory;
+
 // routes for viruses
 $router->getMulti(["vrs/*/aks", "viruses/*/attacks"], function () use ($requestData, $virusFactory) {
     $virus_id = $requestData->getExplodedPath()[1];

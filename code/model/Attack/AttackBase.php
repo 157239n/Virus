@@ -118,7 +118,7 @@ abstract class AttackBase {
     }
 
     public function loadState(): void {
-        if (!$answer = $this->mysqli->query("select name, virus_id, attack_package, status, executed_time, resource_usage_id from attacks where attack_id = \"$this->attack_id\"")) throw new AttackNotFound();
+        if (!$answer = $this->mysqli->query("select name, virus_id, attack_package, status, executed_time, resource_usage_id from attacks where attack_id = '$this->attack_id'")) throw new AttackNotFound();
         if (!$row = $answer->fetch_assoc()) throw new AttackNotFound();
 
         $this->virus_id = $row["virus_id"];
@@ -144,7 +144,7 @@ abstract class AttackBase {
     public function saveState(): void {
         file_put_contents(DATA_FILE . "/attacks/$this->attack_id/state.json", $this->getState());
         file_put_contents(DATA_FILE . "/attacks/$this->attack_id/profile.txt", $this->getProfile());
-        if (!$this->mysqli->query("update attacks set status = \"$this->status\", name = \"" . $this->mysqli->escape_string($this->name) . "\", executed_time = $this->executed_time where attack_id = \"$this->attack_id\"")) Logs::mysql($this->mysqli);
+        if (!$this->mysqli->query("update attacks set status = '$this->status', name = '" . $this->mysqli->escape_string($this->name) . "', executed_time = $this->executed_time where attack_id = '$this->attack_id'")) Logs::mysql($this->mysqli);
     }
 
     /**
@@ -230,7 +230,7 @@ abstract class AttackBase {
      * Deletes the attack permanently.
      */
     public function delete(): void {
-        if (!$this->mysqli->query("delete from attacks where attack_id = \"$this->attack_id\"")) Logs::mysql($this->mysqli);
+        if (!$this->mysqli->query("delete from attacks where attack_id = '$this->attack_id'")) Logs::mysql($this->mysqli);
         if (!$this->mysqli->query("delete from resource_usage where id = " . $this->usage->getId())) Logs::mysql($this->mysqli);
         $virus = $this->virusFactory->get($this->virus_id);
         $virus->usage()->minusStatic($this->usage)->saveState();
@@ -240,6 +240,16 @@ abstract class AttackBase {
 
     public function usage(): Usage {
         return $this->usage;
+    }
+
+    /**
+     * Assumes the attack, the virus and user above has the correct but outdated usages, so remove the outdated usages
+     * from the virus and the user.
+     */
+    public function resetStaticUsage(): void {
+        $virus = $this->virusFactory->get($this->virus_id);
+        $virus->usage()->minusStatic($this->usage)->saveState();
+        $this->userFactory->get($virus->getUserHandle())->usage()->minusStatic($this->usage)->saveState();
     }
 
     /**
@@ -270,9 +280,9 @@ abstract class AttackBase {
      */
     public function getAround(): array {
         $around = [null, null];
-        if (!$answer = $this->mysqli->query("select attack_id from attacks where virus_id=\"$this->virus_id\" and executed_time > " . $this->executed_time . " order by executed_time limit 1")) Logs::mysql($this->mysqli);
+        if (!$answer = $this->mysqli->query("select attack_id from attacks where virus_id='$this->virus_id' and executed_time > " . $this->executed_time . " order by executed_time limit 1")) Logs::mysql($this->mysqli);
         if ($row = $answer->fetch_assoc()) $around[1] = $row["attack_id"];
-        if (!$answer = $this->mysqli->query("select attack_id from attacks where virus_id=\"$this->virus_id\" and executed_time < " . $this->executed_time . " order by executed_time desc limit 1")) Logs::mysql($this->mysqli);
+        if (!$answer = $this->mysqli->query("select attack_id from attacks where virus_id='$this->virus_id' and executed_time < " . $this->executed_time . " order by executed_time desc limit 1")) Logs::mysql($this->mysqli);
         if ($row = $answer->fetch_assoc()) $around[0] = $row["attack_id"];
         return $around;
     }

@@ -37,11 +37,8 @@ class RequestData {
                 $params[$contents[0]] = $contents[1];
             }, $this->getVariables);
         }
-        if ($this->hasServer("HTTP_X_FORWARDED_FOR")) {
-            $this->remoteIp = explode(",", $this->serverCheck("HTTP_X_FORWARDED_FOR"))[0];
-        } else if($this->hasServer("REMOTE_ADDR")) {
-            $this->remoteIp = $this->serverCheck("REMOTE_ADDR");
-        }
+        if ($this->hasServer("HTTP_X_FORWARDED_FOR")) $this->remoteIp = explode(",", $this->serverCheck("HTTP_X_FORWARDED_FOR"))[0];
+        else if ($this->hasServer("REMOTE_ADDR")) $this->remoteIp = $this->serverCheck("REMOTE_ADDR");
     }
 
     public function getRequestMethod(): string {
@@ -59,12 +56,7 @@ class RequestData {
      * @return string
      */
     public function getCheck(string $key): string {
-        if ($this->hasGet($key)) {
-            return $this->get($key);
-        } else {
-            Header::badRequest();
-            return null;
-        }
+        return $this->hasGet($key) ? $this->get($key) : (Header::badRequest() && "");
     }
 
     /**
@@ -99,7 +91,7 @@ class RequestData {
             return $this->post($key);
         } else {
             Header::badRequest();
-            return null;
+            return "";
         }
     }
 
@@ -207,7 +199,7 @@ class RequestData {
             return $this->server($key);
         } else {
             Header::badRequest();
-            return null;
+            return "";
         }
     }
 

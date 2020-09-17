@@ -54,9 +54,10 @@ class MonitorLocation extends AttackBase {
         );
     }
 
-    public function updateEventFromController(string $jsonEvent, string $unixTime) {
+    public function updateEventFromController(string $jsonEvent, string $unixTime): MonitorLocation {
         $event = json_decode($jsonEvent);
         $this->events[$unixTime] = $event;
+        return $this;
     }
 
     /**
@@ -66,8 +67,9 @@ class MonitorLocation extends AttackBase {
         return $this->savedEvents;
     }
 
-    public function setSavedEvents(string $jsonSavedEvents) {
+    public function setSavedEvents(string $jsonSavedEvents): MonitorLocation {
         $this->savedEvents = json_decode($jsonSavedEvents, true);
+        return $this;
     }
 
     public function generateBatchCode(): void {

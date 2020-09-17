@@ -2,6 +2,8 @@
 
 use Kelvinho\Virus\Singleton\Header;
 
+global $requestData, $authenticator, $session, $virusFactory, $attackFactory;
+
 $virus_id = $requestData->getCheck("vrs");
 $attack_id = $requestData->getCheck("aks");
 

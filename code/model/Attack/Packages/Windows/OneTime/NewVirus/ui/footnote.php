@@ -1,5 +1,7 @@
 <?php
 
+global $userFactory, $session;
+
 $user = $userFactory->get($session->get("user_handle"));
 if ($user->isHold()) { ?>
     <p>You are currently holding, which means you can't install a new virus until you remove the hold. Click <a

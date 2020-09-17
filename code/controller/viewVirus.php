@@ -2,6 +2,8 @@
 
 use Kelvinho\Virus\Singleton\Header;
 
+global $requestData, $authenticator, $session, $virusFactory;
+
 $virus_id = $requestData->getCheck("vrs");
 
 if (!$virusFactory->exists($virus_id)) Header::badRequest();

@@ -2,6 +2,8 @@
 
 use Kelvinho\Virus\Attack\AttackBase;
 
+/** @var \Kelvinho\Virus\Attack\Packages\Windows\OneTime\NewVirus\NewVirus $attack */
+
 ?>
 <label for="newVirusId">New virus id</label>
 <input class="w3-input" type="text" id="newVirusId"

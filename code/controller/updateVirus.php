@@ -2,6 +2,8 @@
 
 use Kelvinho\Virus\Singleton\Header;
 
+global $requestData, $authenticator, $virusFactory;
+
 $virus_id = $requestData->postCheck("virus_id");
 $name = $requestData->postCheck("name");
 $profile = $requestData->postCheck("profile");

@@ -3,6 +3,8 @@
 use Kelvinho\Virus\Attack\Packages\Windows\OneTime\CheckPermission\CheckPermission;
 use function Kelvinho\Virus\map;
 
+/** @var CheckPermission $attack */
+
 ?>
 <p>Allowed directories:</p>
 <ul>

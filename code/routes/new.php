@@ -4,6 +4,8 @@
 use Kelvinho\Virus\Attack\BaseScript\Windows;
 use Kelvinho\Virus\Singleton\Header;
 
+global $requestData, $userFactory, $virusFactory, $router;
+
 $router->get("new/*", function () use ($requestData, $userFactory, $virusFactory) {
     $user_handle = $requestData->getExplodedPath()[1];
     if (!$userFactory->exists($user_handle)) Header::notFound();

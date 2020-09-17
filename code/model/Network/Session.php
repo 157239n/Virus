@@ -32,7 +32,7 @@ class Session {
     public function getCheck(string $key): string {
         if ($this->has($key)) return $this->get($key);
         Header::notFound();
-        return null;
+        return "";
     }
 
     /**

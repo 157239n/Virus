@@ -6,6 +6,8 @@
 
 use Kelvinho\Virus\Usage\Usage;
 
+global $userFactory;
+
 foreach ($userFactory->getAll() as $user_handle) {
     $user = $userFactory->get($user_handle);
     $usage = $user->usage();

@@ -2,14 +2,20 @@
 
 use Kelvinho\Virus\Singleton\HtmlTemplate;
 
+global $session, $userFactory, $authenticator;
+
+$user_handle = $session->get("user_handle", null);
+$darkMode = $user_handle === null ? false : $userFactory->get($user_handle)->isDarkMode();
+
 ?>
 <html lang="en_US">
 <head>
     <title>Frequently asked questions</title>
-    <?php HtmlTemplate::header(); ?>
+    <?php HtmlTemplate::header($darkMode); ?>
 </head>
 <body>
-<?php if ($authenticator->authenticated()) HtmlTemplate::topNavigation(); ?>
+<?php if ($authenticator->authenticated()) HtmlTemplate::topNavigation();
+HtmlTemplate::body(); ?>
 <h2>Frequently asked questions</h2>
 <h3>What happens when you delete an attack?</h3>
 <p>It's gone, never to be seen again. We make a commitment to discard every information you really want to delete.</p>
@@ -34,6 +40,10 @@ use Kelvinho\Virus\Singleton\HtmlTemplate;
     cancel <?php echo VIRUS_PING_INTERVAL * 0.9; ?> seconds after you deployed, there is a 90% chance that it has
     already begin executing it. This means that you shouldn't rely on this feature much, and it's there to cancel
     attacks when the target computer is shutdown only.</p>
+<h3>I want more control over everything. What can I do?</h3>
+<p>If you don't agree that I control your spying data then you can rebuild this entire web application. The project is
+    open sourced (under the MIT license) and available <a href="<?php echo GITHUB_PAGE; ?>" class="link">here</a>. The
+    installation details are way too technical here, but there are plenty of guide on the github page.</p>
 </body>
 <?php HtmlTemplate::scripts(); ?>
 </html>

@@ -77,7 +77,7 @@ class Usage {
         $dynamic_api_geolocation_cents = $this->dynamic_api_geolocation * $this->dynamic_api_geolocation_cents_per_request;
         ?>
         <table class="w3-table w3-bordered w3-border w3-hoverable w3-card-2">
-            <tr class="w3-white">
+            <tr class="w3-white table-heads">
                 <th>Resource</th>
                 <th>Amount</th>
             </tr>
@@ -95,7 +95,7 @@ class Usage {
                 <td><?php echo $this->dynamic_api_geolocation; ?> requests,
                     $<?php echo niceCost($dynamic_api_geolocation_cents); ?></td>
             </tr>
-            <tr class="w3-light-grey">
+            <tr class="w3-dark-grey">
                 <td>Total</td>
                 <td>
                     $<?php echo niceCost($static_disk_cents + $dynamic_bandwidth_cents + $dynamic_api_geolocation_cents) ?></td>
@@ -116,6 +116,16 @@ class Usage {
 
     public function setDisk(int $diskInBytes): Usage {
         $this->static_disk = $diskInBytes;
+        return $this;
+    }
+
+    public function addDisk(int $diskInBytes): Usage {
+        $this->static_disk += $diskInBytes;
+        return $this;
+    }
+
+    public function minusDisk(int $diskInBytes): Usage {
+        $this->static_disk -= $diskInBytes;
         return $this;
     }
 

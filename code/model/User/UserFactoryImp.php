@@ -32,7 +32,7 @@ class UserFactoryImp implements UserFactory {
         $usage = $this->usageFactory->new();
 
         mkdir(DATA_FILE . "/users/$user_handle");
-        if (!$this->mysqli->query("insert into users (user_handle, password_hash, password_salt, name, timezone, resource_usage_id) values (\"$user_handle\", \"$password_hash\", \"$password_salt\", \"" . $this->mysqli->escape_string($name) . "\", \"$timezone\", " . $usage->getId() . ")")) Logs::error($this->mysqli->error);
+        if (!$this->mysqli->query("insert into users (user_handle, password_hash, password_salt, name, timezone, resource_usage_id) values ('$user_handle', '$password_hash', '$password_salt', '" . $this->mysqli->escape_string($name) . "', '$timezone', " . $usage->getId() . ")")) Logs::error($this->mysqli->error);
 
         return $this->get($user_handle);
     }
@@ -43,7 +43,7 @@ class UserFactoryImp implements UserFactory {
     }
 
     public function exists(string $user_handle): bool {
-        if (!$answer = $this->mysqli->query("select user_handle from users where user_handle = \"" . $this->mysqli->escape_string($user_handle) . "\"")) return false;
+        if (!$answer = $this->mysqli->query("select user_handle from users where user_handle = '" . $this->mysqli->escape_string($user_handle) . "'")) return false;
         if (!$row = $answer->fetch_assoc()) return false;
         return true;
     }
@@ -51,8 +51,7 @@ class UserFactoryImp implements UserFactory {
     public function getAll(): array {
         $user_handles = [];
         if (!$answer = $this->mysqli->query("select user_handle from users")) return [];
-        while ($row = $answer->fetch_assoc())
-            $user_handles[] = $row["user_handle"];
+        while ($row = $answer->fetch_assoc()) $user_handles[] = $row["user_handle"];
         return $user_handles;
     }
 }

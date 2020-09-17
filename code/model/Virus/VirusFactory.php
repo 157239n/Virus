@@ -17,12 +17,12 @@ interface VirusFactory {
      * @param string $virus_id The virus id
      * @return Virus|null THe virus
      */
-    public function get($virus_id): Virus;
+    public function get(string $virus_id): Virus;
 
     /**
      * Creates a new virus under the current user
      *
-     * @param string $user_handle
+     * @param string|null $user_handle
      * @param bool $standalone
      * @param string|null $virus_id Optional virus id. This is meant for rebinding a user with a virus
      * @return Virus The virus

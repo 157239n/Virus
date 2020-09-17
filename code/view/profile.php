@@ -3,6 +3,8 @@
 use Kelvinho\Virus\Singleton\Header;
 use Kelvinho\Virus\Singleton\HtmlTemplate;
 
+global $authenticator, $session, $userFactory, $timezone;
+
 if (!$authenticator->authenticated()) Header::redirectToHome();
 $user = $userFactory->get($session->getCheck("user_handle"));
 ?>
@@ -10,7 +12,7 @@ $user = $userFactory->get($session->getCheck("user_handle"));
 <html lang="en_US">
 <head>
     <title>Account</title>
-    <?php HtmlTemplate::header(); ?>
+    <?php HtmlTemplate::header($user->isDarkMode()); ?>
     <style>
         select option {
             height: 200px;
@@ -18,7 +20,8 @@ $user = $userFactory->get($session->getCheck("user_handle"));
     </style>
 </head>
 <body>
-<?php HtmlTemplate::topNavigation(null, null, null, null, $user->isHold()); ?>
+<?php HtmlTemplate::topNavigation(null, null, null, null, $user->isHold());
+HtmlTemplate::body(); ?>
 <h2>Account</h2>
 <label for="user_handle">User name</label><input id="user_handle" class="w3-input" type="text"
                                                  value="<?php echo $user->getHandle(); ?>" disabled>
@@ -26,8 +29,13 @@ $user = $userFactory->get($session->getCheck("user_handle"));
 <label for="name">Name</label><input id="name" class="w3-input" type="text"
                                      value="<?php echo $user->getName(); ?>">
 <br>
+<label for="theme">Theme</label><select name="theme" id="theme" class="w3-select">
+    <option value="0">Light</option>
+    <option value="1">Dark</option>
+</select>
+<br><br>
 <label for="timezone">Timezone</label><select id="timezone" class="w3-select" name="option"
-                                                       style="padding: 10px;">
+                                              style="padding: 10px;">
     <?php foreach ($timezone->getTimezones() as $timezoneString) { ?>
         <option value="<?php echo $timezoneString; ?>"><?php echo $timezone->getDescription($timezoneString); ?></option>
     <?php } ?>
@@ -45,8 +53,9 @@ $user = $userFactory->get($session->getCheck("user_handle"));
 </body>
 <?php HtmlTemplate::scripts(); ?>
 <script>
-    const gui = {timezone: $("#timezone"), name: $("#name")};
+    const gui = {timezone: $("#timezone"), name: $("#name"), theme: $("#theme")};
     gui.timezone.val("<?php echo $user->getTimezone(); ?>");
+    gui.theme.val(<?php echo $user->isDarkMode() ? "1" : "0"; ?>)
 
     function update() {
         $.ajax({
@@ -54,7 +63,8 @@ $user = $userFactory->get($session->getCheck("user_handle"));
             type: "POST",
             data: {
                 name: gui.name.val(),
-                timezone: gui.timezone.val()
+                timezone: gui.timezone.val(),
+                theme: gui.theme.val()
             },
             success: () => window.location = "<?php echo DOMAIN . "/profile"; ?>"
         });

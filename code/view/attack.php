@@ -6,6 +6,8 @@ use Kelvinho\Virus\Singleton\Header;
 use Kelvinho\Virus\Singleton\HtmlTemplate;
 use Kelvinho\Virus\Singleton\Logs;
 
+global $session, $authenticator, $userFactory, $virusFactory, $attackFactory, $timezone;
+
 /** @var PackageRegistrar $packageRegistrar */
 
 /**
@@ -38,11 +40,12 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 <html lang="en_US">
 <head>
     <title>Attack info</title>
-    <?php HtmlTemplate::header(); ?>
+    <?php HtmlTemplate::header($user->isDarkMode()); ?>
     <?php @include($packageDirectory . "/ui/styles.php"); ?>
 </head>
 <body>
-<?php HtmlTemplate::topNavigation($virus->getName(), $virus->getVirusId(), $attack->getAttackId(), $attackFactory); ?>
+<?php HtmlTemplate::topNavigation($virus->getName(), $virus->getVirusId(), $attack->getAttackId(), $attackFactory);
+HtmlTemplate::body(); ?>
 <h2>Attack info</h2>
 <div class="w3-row">
     <div class="w3-col l3 m4 s7">
@@ -69,11 +72,11 @@ $user = $userFactory->get($session->get("user_handle")); ?>
 </div>
 <br>
 <label for="package_description">Package description</label>
-<textarea id="package_description" class="w3-input"
+<textarea id="package_description" class="w3-input" style="resize: vertical"
           disabled><?php echo $packageRegistrar->getDescription($attack->getPackageDbName()); ?></textarea>
 <br>
 <label for="profile">Profile</label>
-<textarea id="profile" class="w3-input"><?php echo $attack->getProfile(); ?></textarea>
+<textarea id="profile" class="w3-input" style="resize: vertical"><?php echo $attack->getProfile(); ?></textarea>
 <br>
 <?php @include($packageDirectory . "/ui/fields.php"); ?>
 <button class="w3-btn w3-blue-grey" onclick="update()">Update</button>
@@ -106,7 +109,8 @@ switch ($attack->getStatus()) {
                 profile: $("#profile").val()
                 <?php @include($packageDirectory . "/ui/fields_js.php"); ?>
             },
-            success: () => window.location = "<?php echo DOMAIN . "/ctrls/viewAttack?vrs=" . $attack->getVirusId() . "&aks=" . $attack->getAttackId(); ?>"
+            success: () => window.location = "<?php echo DOMAIN . "/ctrls/viewAttack?vrs=" . $attack->getVirusId() . "&aks=" . $attack->getAttackId(); ?>",
+            error: () => toast.displayOfflineMessage("Can't update this attack.")
         });
     }
 
@@ -118,7 +122,8 @@ switch ($attack->getStatus()) {
                 virus_id: "<?php echo $attack->getVirusId(); ?>",
                 attack_id: "<?php echo $attack->getAttackId(); ?>"
             },
-            success: () => window.location = "<?php echo DOMAIN . "/ctrls/viewAttack?vrs=" . $attack->getVirusId() . "&aks=" . $attack->getAttackId(); ?>"
+            success: () => window.location = "<?php echo DOMAIN . "/ctrls/viewAttack?vrs=" . $attack->getVirusId() . "&aks=" . $attack->getAttackId(); ?>",
+            error: () => toast.displayOfflineMessage("Can't deploy attack.")
         });
     }
 
@@ -130,25 +135,13 @@ switch ($attack->getStatus()) {
                 virus_id: "<?php echo $attack->getVirusId(); ?>",
                 attack_id: "<?php echo $attack->getAttackId(); ?>"
             },
-            success: () => window.location = "<?php echo DOMAIN . "/ctrls/viewAttack?vrs=" . $attack->getVirusId() . "&aks=" . $attack->getAttackId(); ?>"
+            success: () => window.location = "<?php echo DOMAIN . "/ctrls/viewAttack?vrs=" . $attack->getVirusId() . "&aks=" . $attack->getAttackId(); ?>",
+            error: () => toast.displayOfflineMessage("Can't cancel attack")
         })
     }
 
-    // make the #profile textarea auto adjust the height
-    $('#profile').each(function () {
-        this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;resize:none;');
-    }).on('input', function () {
-        this.style.height = 'auto';
-        this.style.height = (this.scrollHeight) + 'px';
-    });
-    // make the #package_description textarea auto adjust the height
-    $('#package_description').each(function () {
-        this.setAttribute('style', 'height:' + (this.scrollHeight) + 'px;overflow-y:hidden;resize:none;');
-    }).on('input', function () {
-        this.style.height = 'auto';
-        this.style.height = (this.scrollHeight) + 'px';
-    });
-
+    autoAdjustHeight($('#profile'));
+    autoAdjustHeight($('#package_description'));
     <?php if ($attack->getStatus() === AttackBase::STATUS_DEPLOYED && $attack->getType() !== AttackBase::TYPE_BACKGROUND) { ?>
     // if results are ready, then refreshes the page
     setInterval(checkExecuted, 3000);

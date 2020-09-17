@@ -6,8 +6,6 @@
 
 namespace Kelvinho\Virus {
 
-    use Kelvinho\Virus\Singleton\Logs;
-
     /**
      * Map.
      *
@@ -18,9 +16,7 @@ namespace Kelvinho\Virus {
      */
     function map(array $list, callable $function, $data = null): array {
         $newList = [];
-        foreach ($list as $key => $value) {
-            $newList[$key] = $function($value, $key, $data);
-        }
+        foreach ($list as $key => $value) $newList[$key] = $function($value, $key, $data);
         return $newList;
     }
 
@@ -37,11 +33,8 @@ namespace Kelvinho\Virus {
         $newList = [];
         foreach ($list as $key => $value) {
             if ($predicate($value, $key, $data)) {
-                if ($ordered) {
-                    $newList[] = $value;
-                } else {
-                    $newList[$key] = $value;
-                }
+                if ($ordered) $newList[] = $value;
+                else $newList[$key] = $value;
             }
         }
         return $newList;
@@ -71,11 +64,7 @@ namespace Kelvinho\Virus {
         $pluralIntervals = ["days", "hours", "minutes", "seconds"];
         for ($i = 0; $i < count($intervals); $i++) {
             $wholeAmount = intdiv($seconds, $intervals[$i]);
-            if ($wholeAmount == 1) {
-                $answer .= $wholeAmount . " " . $singularIntervals[$i] . " ";
-            } else if ($wholeAmount > 1) {
-                $answer .= $wholeAmount . " " . $pluralIntervals[$i] . " ";
-            }
+            $answer .= ($wholeAmount > 0) ? ($wholeAmount . " " . ($wholeAmount > 1 ? $pluralIntervals[$i] : $singularIntervals[$i]) . " ") : "";
             $seconds = $seconds % $intervals[$i];
         }
         return trim($answer);
@@ -89,19 +78,6 @@ namespace Kelvinho\Virus {
      */
     function formattedHash(string $hash): string {
         return substr($hash, 0, 10) . "...";
-    }
-
-    /**
-     * Initializing an array with size with default values
-     *
-     * @param int $size
-     * @param $element
-     * @return array
-     */
-    function initializeArray(int $size, $element): array {
-        $array = [];
-        for ($i = 0; $i < $size; $i++) $array[] = $element;
-        return $array;
     }
 
     /**
@@ -125,9 +101,7 @@ namespace Kelvinho\Virus {
      */
     function stripProtocol(string $url): string {
         $protocols = ["http://", "https://", "ftp://", "sftp://", "ssh://"];
-        foreach ($protocols as $protocol) {
-            $url = str_replace($protocol, "", $url);
-        }
+        foreach ($protocols as $protocol) $url = str_replace($protocol, "", $url);
         return $url;
     }
 
@@ -141,17 +115,11 @@ namespace Kelvinho\Virus {
         $labels = ["TB", "GB", "MB", "KB", "bytes"];
         $amounts = [1000000000000, 1000000000, 1000000, 1000, 1];
         $index = 0;
-        if ($bytes == 0) {
-            return "0 bytes";
-        }
+        if ($bytes == 0) return "0 bytes";
         while (true) {
-            if ($bytes >= $amounts[$index]) {
-                return (int)($bytes / $amounts[$index] * 100) / 100 . " " . $labels[$index];
-            }
+            if ($bytes >= $amounts[$index]) return (int)($bytes / $amounts[$index] * 100) / 100 . " " . $labels[$index];
             $index += 1;
         }
-        Logs::unreachableState("ExploreDir admin page, niceSize");
-        return "";
     }
 
     /**
@@ -163,5 +131,17 @@ namespace Kelvinho\Virus {
     function niceCost(float $cents): string {
         $cents = (int)$cents;
         return $cents / 100;
+    }
+
+    /**
+     * Turns an array's values to a set of ones.
+     *
+     * @param array $array
+     * @return array
+     */
+    function set(array $array): array {
+        $answer = [];
+        foreach ($array as $value) $answer[$value] = 1;
+        return $answer;
     }
 }

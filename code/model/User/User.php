@@ -27,6 +27,7 @@ class User {
     private string $timezone;
     private Timezone $timezoneObject;
     private bool $hold;
+    private bool $darkMode;
     private mysqli $mysqli;
     private Usage $usage;
     private UsageFactory $usageFactory;
@@ -49,13 +50,14 @@ class User {
     }
 
     private function loadState(): void {
-        if (!$answer = $this->mysqli->query("select name, timezone, hold, resource_usage_id, unpaid_amount from users where user_handle = \"$this->user_handle\"")) throw new UserNotFound();
+        if (!$answer = $this->mysqli->query("select name, timezone, hold, resource_usage_id, unpaid_amount, dark_mode from users where user_handle = '$this->user_handle'")) throw new UserNotFound();
         if (!$row = $answer->fetch_assoc()) throw new UserNotFound();
         $this->name = $row["name"];
         $this->timezone = $row["timezone"];
         $this->hold = $row["hold"];
         $this->usage = $this->usageFactory->get($row["resource_usage_id"]);
         $this->unpaidAmount = $row["unpaid_amount"];
+        $this->darkMode = $row["dark_mode"];
     }
 
     public function getTimezone(): string {
@@ -98,6 +100,14 @@ class User {
         $this->unpaidAmount = $cents;
     }
 
+    public function setTheme(bool $dark = false) {
+        $this->darkMode = $dark;
+    }
+
+    public function isDarkMode(): bool {
+        return $this->darkMode;
+    }
+
     /**
      * Whether this user is allowed to launch new attacks. If not then the user must pay before he/she can continue.
      *
@@ -111,7 +121,7 @@ class User {
      * Saves state of user.
      */
     public function saveState(): void {
-        if (!$this->mysqli->query("update users set name = \"" . $this->mysqli->escape_string($this->name) . "\", timezone = \"$this->timezone\", hold = b'" . ($this->hold ? "1" : "0") . "' where user_handle = \"$this->user_handle\"")) Logs::mysql($this->mysqli);
+        if (!$this->mysqli->query("update users set name = '" . $this->mysqli->escape_string($this->name) . "', timezone = '$this->timezone', hold = b'" . ($this->hold ? "1" : "0") . "', dark_mode = b'" . ($this->darkMode ? "1" : "0") . "' where user_handle = '$this->user_handle'")) Logs::mysql($this->mysqli);
     }
 
     /**
@@ -124,7 +134,7 @@ class User {
         switch ($virusStatus) {
             case Virus::VIRUS_ALL:
                 $viruses = [];
-                if (!$answer = $this->mysqli->query("select virus_id, last_ping from viruses where user_handle = \"$this->user_handle\"")) return [];
+                if (!$answer = $this->mysqli->query("select virus_id, last_ping from viruses where user_handle = '$this->user_handle'")) return [];
                 while ($row = $answer->fetch_assoc())
                     array_push($viruses, array("virus_id" => $row["virus_id"], "last_ping" => $row["last_ping"]));
                 return $viruses;

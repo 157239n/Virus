@@ -22,7 +22,7 @@ interface Authenticator {
     /**
      * See whether this user is authorized to access this virus and this attack.
      *
-     * @param string $virus_id The virus id
+     * @param string|null $virus_id The virus id
      * @param string|null $attack_id The attack id, optional
      * @return bool Whether this user is authorized to access this virus and this attack
      */

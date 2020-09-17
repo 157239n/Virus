@@ -32,7 +32,7 @@ class Virus {
     public const VIRUS_DORMANT = 2;
     public const VIRUS_LOST = 3;
     public const VIRUS_EXPECTING = 4;
-    private string $virus_id = ""; // all viruses
+    private string $virus_id; // all viruses
     private string $user_handle;
     private string $name = ""; // viruses that are alive, and pings back quite often
     private int $last_ping; // viruses that are sort of alive, but because the target computer is turned off, it has not pinged back in a while
@@ -70,7 +70,7 @@ class Virus {
      * Fetch data to restore the state of the virus.
      */
     private function loadState() {
-        if (!$answer = $this->mysqli->query("select user_handle, name, last_ping, type, resource_usage_id from viruses where virus_id = \"$this->virus_id\"")) throw new VirusNotFound();
+        if (!$answer = $this->mysqli->query("select user_handle, name, last_ping, type, resource_usage_id from viruses where virus_id = '$this->virus_id'")) throw new VirusNotFound();
         if (!$row = $answer->fetch_assoc()) throw new VirusNotFound();
         $this->user_handle = $row["user_handle"];
         $this->name = $row["name"];
@@ -98,7 +98,7 @@ class Virus {
      * The virus will use this to tell that it's still alive and listening.
      */
     public function ping(): void {
-        if (!$this->mysqli->query("update viruses set last_ping = " . time() . " where virus_id = \"$this->virus_id\"")) Logs::mysql($this->mysqli);
+        if (!$this->mysqli->query("update viruses set last_ping = " . time() . " where virus_id = '$this->virus_id'")) Logs::mysql($this->mysqli);
     }
 
     public function getVirusId(): string {
@@ -140,8 +140,8 @@ class Virus {
         map($this->getAttacks(), function ($attack_id) {
             $this->attackFactory->get($attack_id)->delete();
         });
-        if (!$this->mysqli->query("delete from viruses where virus_id = \"$this->virus_id\"")) Logs::mysql($this->mysqli);
-        if (!$this->mysqli->query("delete from uptimes where virus_id = \"$this->virus_id\"")) Logs::mysql($this->mysqli);
+        if (!$this->mysqli->query("delete from viruses where virus_id = '$this->virus_id'")) Logs::mysql($this->mysqli);
+        if (!$this->mysqli->query("delete from uptimes where virus_id = '$this->virus_id'")) Logs::mysql($this->mysqli);
         if (!$this->mysqli->query("delete from resource_usage where id = " . $this->usage->getId())) Logs::mysql($this->mysqli);
         $this->mysqli->close();
         exec("rm -r " . DATA_FILE . "/viruses/$this->virus_id");
@@ -190,10 +190,9 @@ class Virus {
     }
 
     public function getAttacksByTime(int $low, int $high): array {
-        if (!$answer = $this->mysqli->query("select attack_id from attacks where executed_time >= $low and executed_time < $high and virus_id = \"$this->virus_id\"")) return [];
+        if (!$answer = $this->mysqli->query("select attack_id from attacks where executed_time >= $low and executed_time < $high and virus_id = '$this->virus_id'")) return [];
         $attackIds = [];
-        while ($row = $answer->fetch_assoc())
-            $attackIds[] = $row["attack_id"];
+        while ($row = $answer->fetch_assoc()) $attackIds[] = $row["attack_id"];
         return $attackIds;
     }
 
@@ -201,7 +200,7 @@ class Virus {
      * Saves the virus state/representation
      */
     public function saveState(): void {
-        if (!$this->mysqli->query("update viruses set name = \"" . $this->mysqli->escape_string($this->name) . "\" where virus_id = \"$this->virus_id\"")) Logs::mysql($this->mysqli);
+        if (!$this->mysqli->query("update viruses set name = '" . $this->mysqli->escape_string($this->name) . "' where virus_id = '$this->virus_id'")) Logs::mysql($this->mysqli);
         file_put_contents(DATA_FILE . "/viruses/$this->virus_id/profile.txt", $this->profile);
     }
 

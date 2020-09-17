@@ -2,6 +2,8 @@
 
 use Kelvinho\Virus\Singleton\Header;
 
+global $requestData, $timezone, $userFactory;
+
 $user_handle = $requestData->postCheck("user_handle");
 $password = $requestData->postCheck("password");
 $name = $requestData->postCheck("name");

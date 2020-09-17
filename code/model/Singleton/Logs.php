@@ -63,4 +63,10 @@ class Logs {
     public static function mysql(\mysqli $mysqli): void {
         Logs::error("Mysql failed. Error: $mysqli->error");
     }
+
+    public static function dump($object): void {
+        ob_start();
+        var_dump($object);
+        Logs::log(ob_get_clean());
+    }
 }

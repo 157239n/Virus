@@ -1,3 +1,6 @@
+<?php
+/** @var \Kelvinho\Virus\Attack\Packages\Windows\OneTime\Power\Power $attack */
+?>
 <label for="type">Current style</label>
 <input id="type" class="w3-input" type="text" value="<?php echo($attack->isShutdown() ? "Shutdown" : "Restart"); ?>"
        disabled>
