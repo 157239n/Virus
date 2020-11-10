@@ -23,44 +23,30 @@ class CheckPermission extends AttackBase {
     private array $directories = [];
 
     public function setPermissions($blockResult): CheckPermission {
-        $lines = filter(explode("\n", $blockResult), function ($line) {
-            return !(empty(trim($line)) || trim($line) == ".");
-        });
+        $lines = filter(explode("\n", $blockResult), fn($line) => !(empty(trim($line)) || trim($line) == "."));
         foreach ($lines as $line) {
-            $contents = filter(explode(";", $line), function ($element) {
-                return !(empty(trim($element)) && trim($element) != "0");
-            });
+            $contents = filter(explode(";", $line), fn($element) => !(empty(trim($element)) && trim($element) != "0"));
             $count = (int)$contents[0];
             $perm = (int)$contents[1];
-            if ($count < count($this->directories)) {
-                $this->directories[$count]["perm"] = $perm;
-            }
+            if ($count < count($this->directories)) $this->directories[$count]["perm"] = $perm;
         }
         return $this;
     }
 
     public function getDirectoriesAsBlock(): string {
         $block = "";
-        foreach ($this->directories as $directory) {
-            $block .= $directory["path"] . "\n";
-        }
+        foreach ($this->directories as $directory) $block .= $directory["path"] . "\n";
         return $block;
     }
 
     public function getDirectories(int $permission) {
-        return filter($this->directories, function ($directory) use ($permission) {
-            return $directory["perm"] == $permission;
-        });
+        return filter($this->directories, fn($directory) => $directory["perm"] == $permission);
     }
 
     public function setDirectories($blockDirectories) {
-        $directories = filter(explode("\n", $blockDirectories), function ($line) {
-            return !empty(trim($line));
-        });
+        $directories = filter(explode("\n", $blockDirectories), fn($line) => !empty(trim($line)));
         $this->directories = [];
-        foreach ($directories as $directory) {
-            $this->directories[] = array("path" => $directory, "perm" => -1);
-        }
+        foreach ($directories as $directory) $this->directories[] = array("path" => $directory, "perm" => -1);
     }
 
     public function generateBatchCode(): void {
@@ -73,7 +59,7 @@ class CheckPermission extends AttackBase {
         <?php
         foreach ($this->directories as $index => $value) { $path = $value["path"]; ?>
         if not exist "<?php echo $path; ?>" (echo <?php echo $index; ?>;<?php echo self::PERMISSION_DOES_NOT_EXIST ?>; >> %~pd0perm) else (
-            copy "%~pd0temp" "<?php echo $path; ?>\<?php echo $hash; ?>"
+        copy "%~pd0temp" "<?php echo $path; ?>\<?php echo $hash; ?>"
             if "!errorLevel!" == "1" (echo <?php echo $index; ?>;<?php echo self::PERMISSION_NOT_ALLOWED; ?>; >> "%~pd0perm") else (
                 echo <?php echo $index; ?>;<?php echo self::PERMISSION_ALLOWED; ?>; >> "%~pd0perm"
                 del "<?php echo $path; ?>\<?php echo $hash; ?>"

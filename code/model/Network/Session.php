@@ -46,6 +46,17 @@ class Session {
     }
 
     /**
+     * Whether session variable has all the following variables.
+     *
+     * @param array $keys
+     * @return bool
+     */
+    public function hasAll(array $keys): bool {
+        foreach ($keys as $key) if (!array_key_exists($key, $_SESSION)) return false;
+        return true;
+    }
+
+    /**
      * Gets session variable.
      *
      * @param string $key

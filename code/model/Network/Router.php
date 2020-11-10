@@ -3,6 +3,7 @@
 namespace Kelvinho\Virus\Network;
 
 use Kelvinho\Virus\Singleton\Header;
+use Kelvinho\Virus\Singleton\Logs;
 
 /**
  * Class Router. Contains multiple routes and will route to the correct location.
@@ -14,6 +15,7 @@ use Kelvinho\Virus\Singleton\Header;
  */
 class Router {
     private RequestData $requestData;
+    /** @var Route[] */
     private array $routes;
 
     /**
@@ -41,9 +43,7 @@ class Router {
      * @param callable $callback
      */
     public function getMulti(array $identifiers, callable $callback) {
-        foreach ($identifiers as $identifier) {
-            $this->routes[] = new Route($identifier, "GET", $callback);
-        }
+        foreach ($identifiers as $identifier) $this->routes[] = new Route($identifier, "GET", $callback);
     }
 
     /**
@@ -63,9 +63,7 @@ class Router {
      * @param callable $callback
      */
     public function postMulti(array $identifiers, callable $callback) {
-        foreach ($identifiers as $identifier) {
-            $this->routes[] = new Route($identifier, "POST", $callback);
-        }
+        foreach ($identifiers as $identifier) $this->routes[] = new Route($identifier, "POST", $callback);
     }
 
     /**
@@ -93,14 +91,9 @@ class Router {
     /**
      * Look for the good route and execute it.
      */
-    public function run(): void {
-        foreach ($this->routes as $route) {
-            /** @var Route $route */
-            if (!$route->matches($this->requestData->getExplodedPath(), $this->requestData->getRequestMethod())) continue;
-            $route->run();
-            return;
-        }
-        $this->requestData->rightHost() ? Header::redirectToHome() : Header::notFound();
-        //\header("Location: http://google.com", true, 308);
+    public function run() {
+        foreach ($this->routes as $route) if ($route->matches($this->requestData->getExplodedPath(), $this->requestData->getRequestMethod())) return $route->run();
+        Logs::strayPath($this->requestData->getPath());
+        return $this->requestData->rightHost() ? Header::redirectToHome() : Header::notFound();
     }
 }

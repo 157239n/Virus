@@ -23,12 +23,26 @@ interface UserFactory {
     public function new(string $user_handle, string $password, string $name, string $timezone): User;
 
     /**
+     * Gets the current logged in user. Null if not logged in.
+     *
+     * @return User|null
+     */
+    public function current(): ?User;
+
+    /**
+     * Gets the current logged in user. Throws an error if not logged in.
+     *
+     * @return User
+     */
+    public function currentChecked(): User;
+
+    /**
      * Get a user from a user handle. Returns null if not found
      *
      * @param string $user_handle The user handle
      * @return User|null
      */
-    public function get(string $user_handle): User;
+    public function get(string $user_handle): ?User;
 
     /**
      * Checks whether a particular user handle exists.

@@ -32,9 +32,9 @@ class HtmlTemplate {
             function topNavDeleteAttack(virus_id, attack_id, redirect_attack_id) {
                 $.ajax({
                     url: "<?php echo DOMAIN; ?>/vrs/" + virus_id + "/aks/" + attack_id + "/ctrls/delete", type: "POST",
-                    success: () => window.location = "<?php echo DOMAIN . "/ctrls/viewAttack?vrs=" ?>" + virus_id + "<?php echo "&aks="; ?>" + redirect_attack_id,
+                    success: () => window.location = redirect_attack_id ? ("<?php echo DOMAIN . "/ctrls/viewAttack?vrs=" ?>" + virus_id + "<?php echo "&aks="; ?>" + redirect_attack_id) : "<?php echo DOMAIN . "/ctrls/viewVirus?vrs="; ?>" + virus_id,
                     error: () => toast.displayOfflineMessage("Can't delete attack.")
-                })
+                });
             }
 
             function topNavToggleHold(isHolding) {
@@ -178,6 +178,11 @@ class HtmlTemplate {
                     this.style.height = (this.scrollHeight) + 'px';
                 });
             }
+
+            setInterval(() => $.ajax({
+                url: "<?php echo DOMAIN . "/ping"; ?>",
+                error: () => toast.display("No internet connection")
+            }), 1000 * 60 * 5);
         </script>
     <?php }
 }

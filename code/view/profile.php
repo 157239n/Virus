@@ -6,12 +6,12 @@ use Kelvinho\Virus\Singleton\HtmlTemplate;
 global $authenticator, $session, $userFactory, $timezone;
 
 if (!$authenticator->authenticated()) Header::redirectToHome();
-$user = $userFactory->get($session->getCheck("user_handle"));
+$user = $userFactory->currentChecked();
 ?>
 <!DOCTYPE html>
 <html lang="en_US">
 <head>
-    <title>Account</title>
+    <title>Account - Virs</title>
     <?php HtmlTemplate::header($user->isDarkMode()); ?>
     <style>
         select option {
@@ -59,13 +59,8 @@ HtmlTemplate::body(); ?>
 
     function update() {
         $.ajax({
-            url: "<?php echo DOMAIN_CONTROLLER; ?>/updateUser",
-            type: "POST",
-            data: {
-                name: gui.name.val(),
-                timezone: gui.timezone.val(),
-                theme: gui.theme.val()
-            },
+            url: "<?php echo DOMAIN_CONTROLLER; ?>/updateUser", type: "POST",
+            data: {name: gui.name.val(), timezone: gui.timezone.val(), theme: gui.theme.val()},
             success: () => window.location = "<?php echo DOMAIN . "/profile"; ?>"
         });
     }

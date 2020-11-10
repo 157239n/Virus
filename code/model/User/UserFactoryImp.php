@@ -2,6 +2,7 @@
 
 namespace Kelvinho\Virus\User;
 
+use Kelvinho\Virus\Network\Session;
 use Kelvinho\Virus\Singleton\Logs;
 use Kelvinho\Virus\Timezone\Timezone;
 use Kelvinho\Virus\Usage\UsageFactory;
@@ -19,11 +20,14 @@ class UserFactoryImp implements UserFactory {
     private mysqli $mysqli;
     private UsageFactory $usageFactory;
     private Timezone $timezone;
+    private Session $session;
+    private ?User $currentUser = null;
 
-    public function __construct(mysqli $mysqli, UsageFactory $usageFactory, Timezone $timezone) {
+    public function __construct(mysqli $mysqli, UsageFactory $usageFactory, Timezone $timezone, Session $session) {
         $this->mysqli = $mysqli;
         $this->usageFactory = $usageFactory;
         $this->timezone = $timezone;
+        $this->session = $session;
     }
 
     public function new(string $user_handle, string $password, string $name, string $timezone = "GMT"): User {
@@ -31,13 +35,22 @@ class UserFactoryImp implements UserFactory {
         $password_hash = hash("sha256", $password_salt . $password);
         $usage = $this->usageFactory->new();
 
-        mkdir(DATA_FILE . "/users/$user_handle");
+        mkdir(DATA_DIR . "/users/$user_handle");
         if (!$this->mysqli->query("insert into users (user_handle, password_hash, password_salt, name, timezone, resource_usage_id) values ('$user_handle', '$password_hash', '$password_salt', '" . $this->mysqli->escape_string($name) . "', '$timezone', " . $usage->getId() . ")")) Logs::error($this->mysqli->error);
 
         return $this->get($user_handle);
     }
 
-    public function get(string $user_handle): User {
+    public function current(): ?User {
+        return isset($this->currentUser) ? $this->currentUser : ($this->currentUser = $this->get($this->session->get("user_handle")));
+    }
+
+    public function currentChecked(): User {
+        return isset($this->currentUser) ? $this->currentUser : ($this->currentUser = $this->get($this->session->getCheck("user_handle")));
+    }
+
+    public function get(?string $user_handle): ?User {
+        if ($user_handle === null) return null;
         if (!$this->exists($user_handle)) throw new UserNotFound();
         return new User($user_handle, $this->mysqli, $this->usageFactory, $this->timezone);
     }

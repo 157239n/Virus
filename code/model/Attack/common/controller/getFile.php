@@ -12,7 +12,7 @@ use function Kelvinho\Virus\goodPath;
 $file = $this->requestData->getCheck("file");
 $desiredName = $this->requestData->get("desiredName", "file");
 
-$absPath = goodPath(DATA_FILE, "/attacks/" . $this->getAttackId() . "/$file");
+$absPath = goodPath(DATA_DIR, "/attacks/" . $this->getAttackId() . "/$file");
 if (!$absPath) Header::notFound();
 
 \header("Content-type: " . mime_content_type($absPath));

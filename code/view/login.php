@@ -8,7 +8,7 @@ global $authenticator, $requestData, $timezone;
 if ($authenticator->authenticated()) Header::redirectToHome(); ?>
 <html lang="en_US">
 <head>
-    <title>Log in</title>
+    <title>Log in - Virs</title>
     <?php HtmlTemplate::header(false); ?>
 </head>
 <body>

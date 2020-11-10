@@ -1,6 +1,7 @@
 # a line in front
-* * * * * curl localhost/cli/uptimeScan 1>>/var/log/cron/output.log 2>>/var/log/cron/error.log
-0 0 * * * /backup/backup.sh 1>>/var/log/cron/output.log 2>>/var/log/cron/error.log
-#0 1 * * * curl localhost/cli/usageScan 1>>/var/log/cron/output.log 2>>/var/log/cron/error.log
-#0 0 1 * * curl localhost/cli/monthlyUsageScan 1>>/var/log/cron/output.log 2>>/var/log/cron/error.log
+* * * * * curl localhost/cli/uptimeScan 1>>/data/logs/cron/output 2>>/data/logs/cron/error
+0 */4 * * * /backup/4hour/backup.sh 1>>/data/logs/cron/output 2>>/data/logs/cron/error
+0 0 * * * /backup/day/backup.sh 1>>/data/logs/cron/output 2>>/data/logs/cron/error
+#0 1 * * * curl localhost/cli/usageScan 1>>/data/logs/cron/output 2>>/data/logs/cron/error
+#0 0 1 * * curl localhost/cli/monthlyUsageScan 1>>/data/logs/cron/output 2>>/data/logs/cron/error
 # and an empty line

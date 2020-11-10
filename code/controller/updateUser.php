@@ -5,11 +5,6 @@ use Kelvinho\Virus\Singleton\Header;
 global $authenticator, $session, $userFactory, $timezone, $requestData;
 
 if (!$authenticator->authenticated()) Header::forbidden();
-$user = $userFactory->get($session->getCheck("user_handle"));
-$user->setName($requestData->postCheck("name"));
-$timezoneString = $requestData->postCheck("timezone");
+if (!$timezone->hasTimezone($timezoneString = $requestData->postCheck("timezone"))) Header::badRequest();
 $theme = $requestData->postCheck("theme") === "0" ? false : true;
-if (!$timezone->hasTimezone($timezoneString)) Header::badRequest();
-$user->setTimezone($timezoneString);
-$user->setTheme($theme);
-$user->saveState();
+$userFactory->currentChecked()->setName($requestData->postCheck("name"))->setTimezone($timezoneString)->setTheme($theme)->saveState();

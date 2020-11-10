@@ -6,17 +6,5 @@ use function Kelvinho\Virus\map;
 
 ?>
 <p>This attack is executed. The environmental variables are:</p>
-<ul style="overflow: auto;">
-    <?php map($attack->getEnv(), function ($values, $key) { ?>
-        <li>
-            <pre><?php echo $key; ?></pre>
-            <ul>
-                <?php map($values, function ($value) { ?>
-                    <li>
-                        <pre><?php echo $value; ?></pre>
-                    </li>
-                <?php }); ?>
-            </ul>
-        </li>
-    <?php }); ?>
-</ul>
+<ul style="overflow: auto; background-color: var(--surface)"><?php echo implode(map($attack->getEnv(),
+        fn($values, $key) => "<li><pre>$key</pre><ul>" . implode(map($values, fn($value) => "<li><pre>$value</pre></li>")) . "</ul></li>")); ?></ul>

@@ -1,6 +1,6 @@
 #!/bin/bash
 
 echo ----------- error -----------
-cat /var/log/cron/error.log
+cat /data/logs/cron/error
 echo ----------- output -----------
-cat /var/log/cron/output.log
+cat /data/logs/cron/output

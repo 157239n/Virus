@@ -3,7 +3,7 @@
 namespace Kelvinho\Virus\Network;
 
 use Kelvinho\Virus\Singleton\Header;
-use function Kelvinho\Virus\map;
+use function Kelvinho\Virus\filter;
 
 /**
  * Class RequestData. Wrapper for request data coming in and have convenience methods.
@@ -16,27 +16,17 @@ use function Kelvinho\Virus\map;
 class RequestData {
     private array $getVariables;
     private array $postVariables;
-    private array $serverVariables;
+    public array $serverVariables;
     private array $fileVariables;
     private array $explodedPath;
     private string $remoteIp = "93.184.216.34"; // ip address of example.com
 
-    /** @noinspection PhpUnusedParameterInspection */
     public function __construct() {
         $this->getVariables = $_GET;
         $this->postVariables = $_POST;
         $this->serverVariables = $_SERVER;
         $this->fileVariables = $_FILES;
-        if (!strpos($this->serverVariables["REQUEST_URI"], "?")) {
-            $this->explodedPath = explode("/", trim($this->serverVariables["REQUEST_URI"], "/"));
-        } else {
-            $this->explodedPath = explode("/", trim(explode("?", $this->serverVariables["REQUEST_URI"])[0], "/"));
-            $params = explode("&", trim(explode("?", $this->serverVariables["REQUEST_URI"])[1], "/"));
-            map($params, function ($value, $key, $params) {
-                $contents = explode("=", $value);
-                $params[$contents[0]] = $contents[1];
-            }, $this->getVariables);
-        }
+        $this->explodedPath = array_values(filter(explode("/", $this->serverVariables["PHP_SELF"]), fn($el) => $el));
         if ($this->hasServer("HTTP_X_FORWARDED_FOR")) $this->remoteIp = explode(",", $this->serverCheck("HTTP_X_FORWARDED_FOR"))[0];
         else if ($this->hasServer("REMOTE_ADDR")) $this->remoteIp = $this->serverCheck("REMOTE_ADDR");
     }
@@ -56,7 +46,7 @@ class RequestData {
      * @return string
      */
     public function getCheck(string $key): string {
-        return $this->hasGet($key) ? $this->get($key) : (Header::badRequest() && "");
+        return $this->hasGet($key) ? $this->get($key) : Header::badRequest();
     }
 
     /**
@@ -87,12 +77,7 @@ class RequestData {
      * @return string
      */
     public function postCheck(string $key): string {
-        if ($this->hasPost($key)) {
-            return $this->post($key);
-        } else {
-            Header::badRequest();
-            return "";
-        }
+        return ($this->hasPost($key)) ? $this->post($key) : Header::badRequest();
     }
 
     /**
@@ -126,6 +111,15 @@ class RequestData {
     }
 
     /**
+     * Gets the original path.
+     *
+     * @return string
+     */
+    public function getPath(): string {
+        return $this->serverVariables["PHP_SELF"];
+    }
+
+    /**
      * Make sure the domain registered using the environment variable is the same as the one detected.
      * This is to avoid alt sites like cloud.kelvinho.org to actually redirect to the main site. This is to avoid reverse engineering attempts on the alt site
      *
@@ -143,7 +137,7 @@ class RequestData {
      */
     public function fileCheck(string $fileName): string {
         if (!$this->hasFile($fileName)) Header::badRequest();
-        return $this->file($fileName);
+        return $this->readfile($fileName);
     }
 
     /**
@@ -163,8 +157,12 @@ class RequestData {
      * @param string|null $default
      * @return string
      */
-    public function file(string $fileName, string $default = null): string {
+    public function readfile(string $fileName, string $default = null): string {
         return $this->hasFile($fileName) ? file_get_contents($this->fileVariables[$fileName]["tmp_name"]) : $default;
+    }
+
+    public function filePath(string $fileName): string {
+        return $this->fileVariables[$fileName]["tmp_name"];
     }
 
     /**
@@ -195,12 +193,7 @@ class RequestData {
      * @return string
      */
     public function serverCheck(string $key): string {
-        if ($this->hasServer($key)) {
-            return $this->server($key);
-        } else {
-            Header::badRequest();
-            return "";
-        }
+        return $this->hasServer($key) ? $this->server($key) : Header::badRequest();
     }
 
     /**

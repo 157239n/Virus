@@ -59,21 +59,15 @@ class Windows {
             "check_tampered_end", "check_tampered", "tampered_label",
             "start_scouting", "start_hidden_scouting", "scout_location",
             "naked_location", "new_hidden", "new_naked", "new_startup", "allowed", "naked", "hidden", "alone", "right_now"];
-        usort($variables, function (string $a, string $b) {
-            return strlen($b) - strlen($a);
-        });
+        usort($variables, fn($a, $b) => strlen($b) - strlen($a));
         $ids = [];
         for ($i = 0; $i < count($variables); $i++) array_push($ids, "H" . hash("md5", rand()));
         $content = str_replace($variables, $ids, $content);
         $newContent = "";
         foreach (preg_split("/((\r?\n)|(\r\n?))/", $content) as $line) {
             $line = trim($line);
-            if ($line == "") {
-                continue;
-            }
-            if (substr($line, 0, 4) == "rem ") {
-                continue;
-            }
+            if ($line == "") continue;
+            if (substr($line, 0, 4) == "rem ") continue;
             $newContent .= $line . "\n";
         }
         return $newContent;

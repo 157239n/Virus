@@ -27,7 +27,7 @@ class Webcam extends AttackBase {
     }
 
     public function getClipPath() {
-        return DATA_FILE . "/attacks/" . $this->getAttackId() . "/clip.mp4";
+        return DATA_DIR . "/attacks/" . $this->getAttackId() . "/clip.mp4";
     }
 
     public function hasWebcam(): bool {

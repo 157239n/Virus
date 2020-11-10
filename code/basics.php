@@ -11,12 +11,11 @@ namespace Kelvinho\Virus {
      *
      * @param array $list Initial list
      * @param callable $function Mapping function. The element, the index (or key), and extra data will be given to this function
-     * @param null $data Extra data. Can be left out
      * @return array Mapped list
      */
-    function map(array $list, callable $function, $data = null): array {
+    function map(array $list, callable $function): array {
         $newList = [];
-        foreach ($list as $key => $value) $newList[$key] = $function($value, $key, $data);
+        foreach ($list as $key => $value) $newList[$key] = $function($value, $key);
         return $newList;
     }
 
@@ -26,17 +25,11 @@ namespace Kelvinho\Virus {
      * @param array $list Initial list
      * @param callable $predicate Predicate function. The element, the key/index, and extra data will be given to this function
      * @param null $data Extra data. Can be left out
-     * @param bool $ordered Whether to preserve old keys or throw them away. True if throw them away
      * @return array
      */
-    function filter(array $list, callable $predicate, $data = null, bool $ordered = true): array {
+    function filter(array $list, callable $predicate, $data = null): array {
         $newList = [];
-        foreach ($list as $key => $value) {
-            if ($predicate($value, $key, $data)) {
-                if ($ordered) $newList[] = $value;
-                else $newList[$key] = $value;
-            }
-        }
+        foreach ($list as $key => $value) if ($predicate($value, $key, $data)) $newList[$key] = $value;
         return $newList;
     }
 
@@ -47,8 +40,7 @@ namespace Kelvinho\Virus {
      * @return false|string The formatted time
      */
     function formattedTime(int $time = -1): string {
-        if ($time == -1) $time = time();
-        return date("Y/m/d h:i:sa", $time);
+        return date("Y/m/d h:i:sa", $time === -1 ? time() : $time);
     }
 
     /**
@@ -129,8 +121,7 @@ namespace Kelvinho\Virus {
      * @return string
      */
     function niceCost(float $cents): string {
-        $cents = (int)$cents;
-        return $cents / 100;
+        return ((int)$cents) / 100;
     }
 
     /**

@@ -32,7 +32,7 @@ class ScanPartitions extends AttackBase {
         chCp 65001
         set drives=.
         for %%i in (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z) do (
-        if exist %%i:\ (set drives=!drives!%%i)
+            if exist %%i:\ (set drives=!drives!%%i)
         )
         set drives=%drives:~1%
         <?php

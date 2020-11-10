@@ -3,9 +3,7 @@
 define("GITHUB_PAGE", "https://github.com/157239n/Virus");
 
 // logging and persistent states
-define("LOG_FILE", "/var/log/apache2/error.log");
-define("STRAY_VIRUS_LOG_FILE", "/var/log/apache2/strayViruses.log");
-define("DATA_FILE", "/data"); // where all of the persistent state outside of the database lives
+define("DATA_DIR", "/data"); // where all of the persistent state outside of the database lives
 
 // domain related
 define("DOMAIN", getenv("DOMAIN"));

@@ -60,17 +60,14 @@ class AttackFactoryImp implements AttackFactory {
         $classname = $this->packageRegistrar->getClassName($attack_package);
         $usage = $this->usageFactory->new();
 
-        mkdir(DATA_FILE . "/attacks/$attack_id");
-        touch(DATA_FILE . "/attacks/$attack_id/profile.txt");
-        touch(DATA_FILE . "/attacks/$attack_id/state.json");
+        mkdir(DATA_DIR . "/attacks/$attack_id");
+        touch(DATA_DIR . "/attacks/$attack_id/profile.txt");
+        touch(DATA_DIR . "/attacks/$attack_id/state.json");
 
         $attack = new $classname();
         /** @var AttackBase $attack */
         $attack->setContext($this->requestData, $this->session, $this->userFactory, $this->virusFactory, $this, $this->mysqli, $this->packageRegistrar, $this->usageFactory);
-        $attack->setAttackId($attack_id);
-        $attack->setVirusId($virus_id);
-        $attack->setPackageDbName($attack_package);
-        $attack->setName($name);
+        $attack->setAttackId($attack_id)->setVirusId($virus_id)->setPackageDbName($attack_package)->setName($name);
 
         if (!$this->mysqli->query("insert into attacks (attack_id, virus_id, attack_package, resource_usage_id) values ('$attack_id', '$virus_id', '$attack_package', " . $usage->getId() . ")")) Logs::mysql($this->mysqli);
         $attack->saveState();
@@ -85,7 +82,7 @@ class AttackFactoryImp implements AttackFactory {
      * @return AttackBase The attack
      */
     public function get(string $attack_id): AttackBase {
-        if (!$answer = $this->mysqli->query("select attack_package from attacks where attack_id = '$attack_id'")) throw new AttackNotFound();
+        if (!$answer = $this->mysqli->query("select attack_package from attacks where attack_id = '" . $this->mysqli->escape_string($attack_id) . "'")) throw new AttackNotFound();
         if (!$row = $answer->fetch_assoc()) throw new AttackNotFound();
 
         $packageDbName = $row["attack_package"];
@@ -95,8 +92,7 @@ class AttackFactoryImp implements AttackFactory {
         $attack = new $classname();
 
         $attack->setContext($this->requestData, $this->session, $this->userFactory, $this->virusFactory, $this, $this->mysqli, $this->packageRegistrar, $this->usageFactory);
-        $attack->setAttackId($attack_id);
-        $attack->loadState();
+        $attack->setAttackId($attack_id)->loadState();
         return $attack;
     }
 

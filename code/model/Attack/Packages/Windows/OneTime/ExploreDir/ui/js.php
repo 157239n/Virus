@@ -1,11 +1,8 @@
 <script>
     function toggle(id) {
         const element = $("#" + id);
-        if (element.css("display") === "block") {
-            element.css("display", "none");
-        } else {
-            element.css("display", "block");
-        }
+        if (element.css("display") === "block") element.css("display", "none");
+        else element.css("display", "block");
     }
 
     function collapseAll() {
@@ -21,5 +18,6 @@
         copyPlace.select();
         document.execCommand("copy");
         tmpCopyPlace.css("display", "none");
+        toast.display("Copied!");
     }
 </script>

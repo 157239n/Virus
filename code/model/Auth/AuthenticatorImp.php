@@ -52,11 +52,7 @@ class AuthenticatorImp implements Authenticator {
      * @return bool Whether the user is authenticated
      */
     public function authenticated(string $user_handle = null): bool {
-        if (empty($user_handle)) {
-            return $this->session->has("user_handle");
-        } else {
-            return $this->session->get("user_handle") === $user_handle;
-        }
+        return empty($user_handle) ? $this->session->has("user_handle") : ($this->session->get("user_handle") === $user_handle);
     }
 
     /**
@@ -70,11 +66,8 @@ class AuthenticatorImp implements Authenticator {
         $authenticated = false;
         if ($answer = $this->mysqli->query("select password_salt, password_hash from users where user_handle = '" . $this->mysqli->escape_string($user_handle) . "'"))
             if ($row = $answer->fetch_assoc())
-                if (hash("sha256", $row["password_salt"] . $password) == $row["password_hash"])
-                    $authenticated = true;
-        if ($authenticated) {
-            $this->session->set("user_handle", $user_handle);
-            return true;
-        } else return false;
+                if (hash("sha256", $row["password_salt"] . $password) == $row["password_hash"]) $authenticated = true;
+        if ($authenticated) return $this->session->set("user_handle", $user_handle) or true;
+        else return false;
     }
 }

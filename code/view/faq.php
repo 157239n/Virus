@@ -4,14 +4,11 @@ use Kelvinho\Virus\Singleton\HtmlTemplate;
 
 global $session, $userFactory, $authenticator;
 
-$user_handle = $session->get("user_handle", null);
-$darkMode = $user_handle === null ? false : $userFactory->get($user_handle)->isDarkMode();
-
 ?>
 <html lang="en_US">
 <head>
-    <title>Frequently asked questions</title>
-    <?php HtmlTemplate::header($darkMode); ?>
+    <title>Frequently asked questions - Virs</title>
+    <?php HtmlTemplate::header($darkMode = ($user = $userFactory->current()) === null ? false : $user->isDarkMode()); ?>
 </head>
 <body>
 <?php if ($authenticator->authenticated()) HtmlTemplate::topNavigation();

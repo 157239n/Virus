@@ -22,7 +22,7 @@ class ExploreDir extends AttackBase {
 
     public function __construct() {
         parent::__construct();
-        $this->rootDir = "C:\\Users";
+        $this->rootDir = "C:\\Users\\";
         $this->maxDepth = self::DEFAULT_DEPTH;
     }
 
@@ -30,8 +30,9 @@ class ExploreDir extends AttackBase {
         return $this->rootDir;
     }
 
-    public function setRootDir(string $rootDir): void {
+    public function setRootDir(string $rootDir): ExploreDir {
         $this->rootDir = $rootDir . (substr(str_replace("\\\\", "\\", $rootDir), -1) === "\\" ? "" : "\\");
+        return $this;
     }
 
     public function getMaxDepth(): int {

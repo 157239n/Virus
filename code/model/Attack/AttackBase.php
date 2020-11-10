@@ -69,8 +69,9 @@ abstract class AttackBase {
         return $this->attack_id;
     }
 
-    function setAttackId(string $attack_id): void {
+    function setAttackId(string $attack_id): AttackBase {
         $this->attack_id = $attack_id;
+        return $this;
     }
 
     public function getStatus(): string {
@@ -93,32 +94,35 @@ abstract class AttackBase {
         return $this->name;
     }
 
-    public function setName(string $name): void {
+    public function setName(string $name): AttackBase {
         $this->name = $name;
+        return $this;
     }
 
     public function getPackageDbName(): string {
         return $this->packageDbName;
     }
 
-    public function setPackageDbName(string $packageDbName): void {
+    public function setPackageDbName(string $packageDbName): AttackBase {
         $this->packageDbName = $packageDbName;
+        return $this;
     }
 
     public function getVirusId(): string {
         return $this->virus_id;
     }
 
-    public function setVirusId(string $virus_id): void {
+    public function setVirusId(string $virus_id): AttackBase {
         $this->virus_id = $virus_id;
+        return $this;
     }
 
     public function getStatePath(): string {
-        return DATA_FILE . "/attacks/$this->attack_id/state.json";
+        return DATA_DIR . "/attacks/$this->attack_id/state.json";
     }
 
     public function loadState(): void {
-        if (!$answer = $this->mysqli->query("select name, virus_id, attack_package, status, executed_time, resource_usage_id from attacks where attack_id = '$this->attack_id'")) throw new AttackNotFound();
+        if (!$answer = $this->mysqli->query("select name, virus_id, attack_package, status, executed_time, resource_usage_id from attacks where attack_id = '" . $this->mysqli->escape_string($this->attack_id) . "'")) throw new AttackNotFound();
         if (!$row = $answer->fetch_assoc()) throw new AttackNotFound();
 
         $this->virus_id = $row["virus_id"];
@@ -128,7 +132,7 @@ abstract class AttackBase {
         $this->executed_time = $row["executed_time"];
         $this->usage = $this->usageFactory->get($row["resource_usage_id"]);
         $this->setState(file_get_contents($this->getStatePath()));
-        $this->setProfile(file_get_contents(DATA_FILE . "/attacks/$this->attack_id/profile.txt"));
+        $this->setProfile(file_get_contents(DATA_DIR . "/attacks/$this->attack_id/profile.txt"));
     }
 
     /**
@@ -142,9 +146,9 @@ abstract class AttackBase {
      * This will save the state of everything about this attack.
      */
     public function saveState(): void {
-        file_put_contents(DATA_FILE . "/attacks/$this->attack_id/state.json", $this->getState());
-        file_put_contents(DATA_FILE . "/attacks/$this->attack_id/profile.txt", $this->getProfile());
-        if (!$this->mysqli->query("update attacks set status = '$this->status', name = '" . $this->mysqli->escape_string($this->name) . "', executed_time = $this->executed_time where attack_id = '$this->attack_id'")) Logs::mysql($this->mysqli);
+        file_put_contents(DATA_DIR . "/attacks/$this->attack_id/state.json", $this->getState());
+        file_put_contents(DATA_DIR . "/attacks/$this->attack_id/profile.txt", $this->getProfile());
+        if (!$this->mysqli->query("update attacks set status = '$this->status', name = '" . $this->mysqli->escape_string($this->name) . "', executed_time = $this->executed_time where attack_id = '" . $this->mysqli->escape_string($this->attack_id) . "'")) Logs::mysql($this->mysqli);
     }
 
     /**
@@ -158,8 +162,9 @@ abstract class AttackBase {
         return $this->profile;
     }
 
-    public function setProfile(string $profile): void {
+    public function setProfile(string $profile): AttackBase {
         $this->profile = $profile;
+        return $this;
     }
 
     /**
@@ -190,22 +195,25 @@ abstract class AttackBase {
     /**
      * This will include the correct intercept script
      */
-    public function includeIntercept(): void {
+    public function includeIntercept(): AttackBase {
         include($this->packageRegistrar->getLocation($this->packageDbName) . "/intercept.php");
+        return $this;
     }
 
     /**
      * Deploys the attack.
      */
-    public function deploy(): void {
+    public function deploy(): AttackBase {
         $this->status = self::STATUS_DEPLOYED;
+        return $this;
     }
 
     /**
      * Cancels the attack.
      */
-    public function cancel(): void {
+    public function cancel(): AttackBase {
         $this->status = self::STATUS_DORMANT;
+        return $this;
     }
 
     /**
@@ -230,12 +238,12 @@ abstract class AttackBase {
      * Deletes the attack permanently.
      */
     public function delete(): void {
-        if (!$this->mysqli->query("delete from attacks where attack_id = '$this->attack_id'")) Logs::mysql($this->mysqli);
+        if (!$this->mysqli->query("delete from attacks where attack_id = '" . $this->mysqli->escape_string($this->attack_id) . "'")) Logs::mysql($this->mysqli);
         if (!$this->mysqli->query("delete from resource_usage where id = " . $this->usage->getId())) Logs::mysql($this->mysqli);
         $virus = $this->virusFactory->get($this->virus_id);
         $virus->usage()->minusStatic($this->usage)->saveState();
         $this->userFactory->get($virus->getUserHandle())->usage()->minusStatic($this->usage)->saveState();
-        exec("rm -r " . DATA_FILE . "/attacks/$this->attack_id");
+        exec("rm -r " . DATA_DIR . "/attacks/$this->attack_id");
     }
 
     public function usage(): Usage {
@@ -256,21 +264,23 @@ abstract class AttackBase {
      * Assumes the attack has the correct usages so far, and this should trickle the change upwards to viruses and users.
      * Supposed to be called only once by the attack packages when they are finished.
      */
-    public function reportStaticUsage(): void {
+    public function reportStaticUsage(): AttackBase {
         $virus = $this->virusFactory->get($this->virus_id);
         $virus->usage()->addStatic($this->usage)->saveState();
         $this->userFactory->get($virus->getUserHandle())->usage()->addStatic($this->usage)->saveState();
+        return $this;
     }
 
     /**
      * Assumes the attack has the correct usages so far, and this should trickle the change upwards to viruses and users.
      * Supposed to be called multiple times during an intercept of a background attack.
      */
-    public function reportDynamicUsage(): void {
+    public function reportDynamicUsage(): AttackBase {
         $virus = $this->virusFactory->get($this->virus_id);
         $virus->usage()->addDynamic($this->usage)->saveState();
         $this->userFactory->get($virus->getUserHandle())->usage()->addDynamic($this->usage)->saveState();
         $this->usage->resetDynamic()->saveState();
+        return $this;
     }
 
     /**
@@ -280,9 +290,9 @@ abstract class AttackBase {
      */
     public function getAround(): array {
         $around = [null, null];
-        if (!$answer = $this->mysqli->query("select attack_id from attacks where virus_id='$this->virus_id' and executed_time > " . $this->executed_time . " order by executed_time limit 1")) Logs::mysql($this->mysqli);
+        if (!$answer = $this->mysqli->query("select attack_id from attacks where virus_id='" . $this->mysqli->escape_string($this->virus_id) . "' and executed_time > " . $this->executed_time . " order by executed_time limit 1")) Logs::mysql($this->mysqli);
         if ($row = $answer->fetch_assoc()) $around[1] = $row["attack_id"];
-        if (!$answer = $this->mysqli->query("select attack_id from attacks where virus_id='$this->virus_id' and executed_time < " . $this->executed_time . " order by executed_time desc limit 1")) Logs::mysql($this->mysqli);
+        if (!$answer = $this->mysqli->query("select attack_id from attacks where virus_id='" . $this->mysqli->escape_string($this->virus_id) . "' and executed_time < " . $this->executed_time . " order by executed_time desc limit 1")) Logs::mysql($this->mysqli);
         if ($row = $answer->fetch_assoc()) $around[0] = $row["attack_id"];
         return $around;
     }

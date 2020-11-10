@@ -4,5 +4,4 @@
 
 $this->saveEventFromIntercept($this->requestData->fileCheck("geoFile"));
 $this->usage()->incApiGeolocation()->saveState();
-$this->reportDynamicUsage();
-$this->purgeEvents();
+$this->reportDynamicUsage()->purgeEvents();

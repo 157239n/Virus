@@ -27,4 +27,8 @@ class Torch {
         for ($i = 0; $i < $n; $i++) $answer[] = 0;
         return $answer;
     }
+
+    public static function end(array $array) {
+        return end($array);
+    }
 }

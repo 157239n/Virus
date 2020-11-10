@@ -6,5 +6,4 @@
 
 /** @var \Kelvinho\Virus\Attack\AttackBase $this */
 
-$this->deploy();
-$this->saveState();
+$this->deploy()->saveState();

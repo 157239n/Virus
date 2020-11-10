@@ -42,6 +42,7 @@ class Usage {
     }
 
     public function saveState(): void {
+        $this->static_disk = max($this->static_disk, 0);
         if (!$this->mysqli->query("update resource_usage set static_disk = $this->static_disk, dynamic_bandwidth = $this->dynamic_bandwidth, dynamic_api_geolocation = $this->dynamic_api_geolocation where id = $this->usage_id")) Logs::mysql($this->mysqli);
     }
 

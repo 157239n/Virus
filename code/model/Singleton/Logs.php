@@ -2,6 +2,8 @@
 
 namespace Kelvinho\Virus\Singleton;
 
+use mysqli;
+use RuntimeException;
 use function Kelvinho\Virus\formattedTime;
 
 /**
@@ -17,20 +19,35 @@ class Logs {
      * Logs when a virus pings back but is not recognized.
      *
      * @param string $virus_id The virus id
+     * @return int Dummy response
      */
-    public static function strayVirus(string $virus_id): void {
-        file_put_contents(STRAY_VIRUS_LOG_FILE, "Virus $virus_id pings at " . time() . " (" . formattedTime() . ")\n", FILE_APPEND);
+    public static function strayVirus(string $virus_id): int {
+        file_put_contents(DATA_DIR . "/logs/strayViruses", "Virus $virus_id pings at " . time() . " (" . formattedTime() . ")\n", FILE_APPEND);
         Header::notFound();
+        return 0;
     }
 
     /**
      * Logs when an attack pings back but is not recognized. Actually for now I'm just lazy implementing this
      *
      * @param string $attack_id
+     * @return int Dummy response
      */
-    public static function strayAttack(string $attack_id): void {
+    public static function strayAttack(string $attack_id): int {
         Header::forbidden();
         echo $attack_id;
+        return 0;
+    }
+
+    /**
+     * Logs when a path is not recognized.
+     *
+     * @param string $path
+     * @return int Dummy response
+     */
+    public static function strayPath(string $path): int {
+        file_put_contents(DATA_DIR . "/logs/strayPaths", "\n$path", FILE_APPEND);
+        return 0;
     }
 
     /**
@@ -48,7 +65,7 @@ class Logs {
      * @param string $message The message to log
      */
     public static function error(string $message): void {
-        throw new \RuntimeException("Error: " . $message);
+        throw new RuntimeException("Error: " . $message);
     }
 
     /**
@@ -57,10 +74,10 @@ class Logs {
      * @param string $message The message to log
      */
     public static function log(string $message): void {
-        file_put_contents(LOG_FILE, $message . "\n", FILE_APPEND);
+        file_put_contents("/var/log/apache2/error.log", $message . "\n", FILE_APPEND);
     }
 
-    public static function mysql(\mysqli $mysqli): void {
+    public static function mysql(mysqli $mysqli): void {
         Logs::error("Mysql failed. Error: $mysqli->error");
     }
 

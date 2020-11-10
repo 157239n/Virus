@@ -20,8 +20,9 @@ class ProductKey extends AttackBase {
         return $this->productKey;
     }
 
-    public function setProductKey(string $productKey): void {
+    public function setProductKey(string $productKey): ProductKey {
         $this->productKey = explode("\n", $productKey)[3];
+        return $this;
     }
 
     public function generateBatchCode(): void {

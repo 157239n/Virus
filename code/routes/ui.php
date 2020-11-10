@@ -6,43 +6,16 @@ use function Kelvinho\Virus\goodPath;
 
 global $router, $requestData, $authenticator, $session, $userFactory, $virusFactory, $attackFactory, $timezone, $mysqli, $packageRegistrar, $whitelistFactory, $demos;
 
-$router->get("", function () use ($requestData) {
-    if (!$requestData->rightHost()) Header::notFound();
-    \header("Location: " . DOMAIN . "/dashboard");
-    Header::redirect();
-});
-$router->get("dashboard", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory, $timezone, $demos) {
-    if (!$requestData->rightHost()) Header::notFound();
-    include(__DIR__ . "/../view/dashboard.php");
-});
-$router->get("virus", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory, $attackFactory, $mysqli, $packageRegistrar, $timezone, $demos) {
-    if (!$requestData->rightHost()) Header::notFound();
-    include(__DIR__ . "/../view/virus.php");
-});
-$router->get("attack", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory, $attackFactory, $packageRegistrar, $timezone) {
-    if (!$requestData->rightHost()) Header::notFound();
-    include(__DIR__ . "/../view/attack.php");
-});
-$router->get("login", function () use ($requestData, $authenticator, $timezone) {
-    if (!$requestData->rightHost()) Header::notFound();
-    include(__DIR__ . "/../view/login.php");
-});
-$router->get("faq", function () use ($requestData, $authenticator) {
-    if (!$requestData->rightHost()) Header::notFound();
-    include(__DIR__ . "/../view/faq.php");
-});
-$router->get("tutorials", function () use ($requestData, $authenticator) {
-    if (!$requestData->rightHost()) Header::notFound();
-    include(__DIR__ . "/../view/tutorial.php");
-});
-$router->get("profile", function () use ($requestData, $authenticator, $session, $userFactory, $virusFactory, $timezone) {
-    if (!$requestData->rightHost()) Header::notFound();
-    include(__DIR__ . "/../view/profile.php");
-});
-$router->get("logout", function () {
-    session_destroy();
-    echo "<script>window.location = '" . DOMAIN . "'</script>";
-});
+$router->getMulti(["", "index.html"], fn() => $requestData->rightHost() ? (\header("Location: " . DOMAIN . "/dashboard") & Header::redirect()) : Header::notFound());
+$router->get("dashboard", fn() => $requestData->rightHost() ? include(__DIR__ . "/../view/dashboard.php") : Header::notFound());
+$router->get("virus", fn() => $requestData->rightHost() ? include(__DIR__ . "/../view/virus.php") : Header::notFound());
+$router->get("attack", fn() => $requestData->rightHost() ? include(__DIR__ . "/../view/attack.php") : Header::notFound());
+$router->get("login", fn() => $requestData->rightHost() ? include(__DIR__ . "/../view/login.php") : Header::notFound());
+$router->get("faq", fn() => $requestData->rightHost() ? include(__DIR__ . "/../view/faq.php") : Header::notFound());
+$router->get("tutorials", fn() => $requestData->rightHost() ? include(__DIR__ . "/../view/tutorial.php") : Header::notFound());
+$router->get("profile", fn() => $requestData->rightHost() ? include(__DIR__ . "/../view/profile.php") : Header::notFound());
+$router->get("logout", fn() => session_destroy() xor print("<script>window.location = '" . DOMAIN . "'</script>"));
+$router->get("ping", fn() => $requestData->rightHost() ? "" : Header::notFound());
 
 // and resources
 $router->get("resources/images/*", function () use ($requestData) {
@@ -56,13 +29,13 @@ $router->get("resources/images/*", function () use ($requestData) {
 });
 
 // and cli stuff, only allowing local processes to invoke this
-$router->getMulti(["cli/*", "cli/*/*", "cli/*/*/*"], function() use ($requestData, $userFactory, $virusFactory, $attackFactory, $whitelistFactory, $mysqli) {
-    $whitelist = $whitelistFactory->new();
-    $whitelist->addIp("localhost");
-    if (!$whitelist->allowed($requestData->getRemoteIp()))
-        $requestData->rightHost() ? Header::redirectToHome() : Header::notFound();
+$router->getMulti(["cli/*", "cli/*/*", "cli/*/*/*"], function () use ($requestData, $userFactory, $virusFactory, $attackFactory, $whitelistFactory, $mysqli) {
+    ($whitelist = $whitelistFactory->new())->addIp("localhost");
+    if (!$whitelist->allowed($requestData->getRemoteIp())) $requestData->rightHost() ? Header::redirectToHome() : Header::notFound();
     include(__DIR__ . "/../cli/" . $requestData->getExplodedPath()[1] . ".php");
 });
-$router->get("test", function() use ($whitelistFactory, $requestData, $packageRegistrar, $mysqli) {
-    include(__DIR__ . "/../test.php");
+$router->get("test", fn() => include(__DIR__ . "/../test.php"));
+
+$router->get("test/a/b", function () use ($requestData) {
+    var_dump(\Kelvinho\Virus\filter(explode("/", $requestData->serverVariables["SCRIPT_NAME"]), fn($el) => $el));
 });

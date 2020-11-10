@@ -93,7 +93,7 @@ class Styles {
                 background-color: var(--bg);
             }
 
-            p, .p, label, .table-heads, table tr, textarea, input[type="text"], select, .menuStreamSaved, pre {
+            p, .p, label, .table-heads, table tr, textarea, input[type="text"], select, .menuStreamSaved, pre, div {
                 color: var(--text) !important;
             }
 
@@ -168,6 +168,7 @@ class Styles {
                 font-size: 1.5em;
                 z-index: 50000;
                 border-radius: 32px;
+                color: #111111 !important;
             }
 
             @media only screen and (max-width: 600px) {

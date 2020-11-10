@@ -6,5 +6,4 @@
 
 /** @var \Kelvinho\Virus\Attack\AttackBase $this */
 
-$this->cancel();
-$this->saveState();
+$this->cancel()->saveState();

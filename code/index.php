@@ -31,14 +31,18 @@ $autoload->register();
 session_start();
 $session = new Session();
 
+$requestData = new RequestData();
+$whitelistFactory = new WhitelistFactory();
+$blacklistFactory = new BlacklistFactory();
+
+file_put_contents(DATA_DIR . "/logs/allPaths", $requestData->getPath(), FILE_APPEND);
+
 $mysqli = new mysqli(getenv("MYSQL_HOST"), getenv("MYSQL_USER"), getenv("MYSQL_PASSWORD"), getenv("MYSQL_DATABASE"));
 if ($mysqli->connect_errno) Logs::error("Mysql failed. Info: $mysqli->connect_error");
 
 $packageRegistrar = new PackageRegistrar($mysqli, __DIR__);
 
-$requestData = new RequestData();
-$whitelistFactory = new WhitelistFactory();
-$blacklistFactory = new BlacklistFactory();
+file_put_contents(DATA_DIR . "/logs/allPaths", "\n", FILE_APPEND);
 
 $timezone = new Timezone();
 $usageFactory = new UsageFactory($mysqli);
@@ -48,7 +52,7 @@ $demos = new Demos($session);
 $idGenerator = new IdGeneratorImp($mysqli);
 
 /** @var \Kelvinho\Virus\User\UserFactory $userFactory */
-$userFactory = new UserFactoryImp($mysqli, $usageFactory, $timezone);
+$userFactory = new UserFactoryImp($mysqli, $usageFactory, $timezone, $session);
 
 /** @var \Kelvinho\Virus\Attack\AttackFactory $attackFactory */
 $attackFactory = new AttackFactoryImp();
@@ -61,9 +65,14 @@ $authenticator = new AuthenticatorImp($session, $mysqli);
 
 $attackFactory->addContext($requestData, $session, $userFactory, $virusFactory, $idGenerator, $mysqli, $packageRegistrar, $usageFactory);
 
+/*
+$e = $requestData->getExplodedPath();
+if (!($e[0] == "vrs" and count($e) == 3))
+    file_put_contents(DATA_DIR . "/requests", "\n" . $requestData->getPath(), FILE_APPEND);
+/**/
 // create a router, add routes and run
 $router = new Router($requestData);
 foreach (glob(__DIR__ . "/routes/*.php") as $file) require_once($file);
-$router->run();
+$router->run();/**/
 
 $mysqli->close();

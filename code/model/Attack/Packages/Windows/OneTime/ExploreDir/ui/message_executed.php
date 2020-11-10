@@ -74,26 +74,16 @@ process 0d2, given depth 0 by hand, no prev, reads, echos. Loops
  */
 function processLine($handle, int $givenDepth, array &$path, string $unprocessedLine = null): ?string {
     if ($unprocessedLine != null) {
-        if (empty(trim($unprocessedLine))) {
-            Logs::unreachableState("ExploreDir package, admin screen");
-        }
+        if (empty(trim($unprocessedLine))) Logs::unreachableState("ExploreDir package, admin screen");
         $lineDepth = (int)explode(";", $unprocessedLine)[0];
-        if ($lineDepth < $givenDepth) {
-            return $unprocessedLine;
-        }
+        if ($lineDepth < $givenDepth) return $unprocessedLine;
         $line = $unprocessedLine;
     } else {
         $line = fgets($handle);
-        if ($line === false) {
-            return null;
-        }
-        if (empty(trim($line))) {
-            return null;
-        }
+        if ($line === false) return null;
+        if (empty(trim($line))) return null;
     }
-    $contents = map(explode(";", $line), function ($element) {
-        return trim($element);
-    });
+    $contents = map(explode(";", $line), fn($element) => trim($element));
     switch ($contents[1]) {
         case "f": ?>
             <li>
@@ -102,9 +92,7 @@ function processLine($handle, int $givenDepth, array &$path, string $unprocessed
             <?php return "";
         case "d":
             $lineDepth = (int)$contents[0];
-            if ($lineDepth < $givenDepth) {
-                return $line;
-            }
+            if ($lineDepth < $givenDepth) return $line;
             $hash = "id_" . hash("sha256", rand()); ?>
             <li>
                 <pre onclick="toggle('<?php echo $hash; ?>')"
@@ -115,14 +103,10 @@ function processLine($handle, int $givenDepth, array &$path, string $unprocessed
                     array_push($path, trim($contents[4]));
                     while (true) {
                         $unprocessedLine = processLine($handle, $givenDepth + 1, $path, $unprocessedLine);
-                        if ($unprocessedLine === null) {
-                            break;
-                        }
+                        if ($unprocessedLine === null) break;
                         if ($unprocessedLine !== "") {
                             $contents = explode(";", $unprocessedLine);
-                            if (((int)$contents[0]) <= $givenDepth) { // return unprocessed line
-                                break;
-                            }
+                            if (((int)$contents[0]) <= $givenDepth) break; // return unprocessed line
                         }
                     }
                     array_pop($path);
@@ -130,13 +114,10 @@ function processLine($handle, int $givenDepth, array &$path, string $unprocessed
                 </ul>
             </li>
             <?php
-            if ($unprocessedLine != null) {
-                return $unprocessedLine;
-            }
+            if ($unprocessedLine != null) return $unprocessedLine;
             return "";
         default:
-            Logs::unreachableState("ExploreDir package, admin screen, f|d");
-            return null;
+            return Logs::unreachableState("ExploreDir package, admin screen, f|d") & 0;
     }
 }
 
@@ -151,21 +132,17 @@ function processLine($handle, int $givenDepth, array &$path, string $unprocessed
     the folder really does not have anything in it, or you have entered a nonexistent directory.</p>
 <p>This is the file tree of <?php echo $attack->getRootDir(); ?></p>
 <?php
-$handle = fopen(DATA_FILE . "/attacks/" . $attack->getAttackId() . "/dirs.txt", "r");
-if ($handle === false) {
-    ?>(Can't read internal file)<?php
-}
+$handle = fopen(DATA_DIR . "/attacks/" . $attack->getAttackId() . "/dirs.txt", "r");
+if ($handle === false) echo "(Can't read internal file)";
 fgets($handle); // skips first line, cuz it's supposed to be empty
 ?>
-<ul style="list-style-type: none;overflow: auto;">
+<ul style="list-style-type: none;overflow: auto;background-color: var(--surface)">
     <?php
     $unprocessedLine = null;
     $path = [str_replace("\\", "\\\\", trim($attack->getRootDir(), "\\"))];
     while (true) {
         $unprocessedLine = processLine($handle, 0, $path, $unprocessedLine);
-        if ($unprocessedLine === null) {
-            break;
-        }
+        if ($unprocessedLine === null) break;
     }
     ?>
 </ul>

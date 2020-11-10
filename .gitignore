@@ -1,6 +1,8 @@
-/backup/*
-!/backup/backup.sh
-!/backup/restore.sh
+/backup/**/
+!/backup/day/backup.sh
+!/backup/day/restore.sh
+!/backup/4hour/backup.sh
+!/backup/4hour/restore.sh
 docker-compose.yml
 /data
 .env

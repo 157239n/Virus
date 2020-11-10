@@ -5,6 +5,7 @@ mkdir /data
 mkdir /data/users
 mkdir /data/viruses
 mkdir /data/attacks
+mkdir /data/logs
 touch /var/log/apache2/virusError.log
 chown -R www-data:www-data /data
 chown -R www-data:www-data /var/www/virus

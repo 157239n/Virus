@@ -5,13 +5,7 @@ use Kelvinho\Virus\Singleton\Header;
 global $requestData, $authenticator, $virusFactory;
 
 $virus_id = $requestData->postCheck("virus_id");
-$name = $requestData->postCheck("name");
-$profile = $requestData->postCheck("profile");
 
 if (!$virusFactory->exists($virus_id)) Header::badRequest();
 if (!$authenticator->authorized($virus_id)) Header::forbidden();
-
-$virus = $virusFactory->get($virus_id);
-$virus->setName($name);
-$virus->setProfile($profile);
-$virus->saveState();
+$virusFactory->get($virus_id)->setName($requestData->postCheck("name"))->setProfile($requestData->postCheck("profile"))->saveState();

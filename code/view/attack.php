@@ -6,7 +6,7 @@ use Kelvinho\Virus\Singleton\Header;
 use Kelvinho\Virus\Singleton\HtmlTemplate;
 use Kelvinho\Virus\Singleton\Logs;
 
-global $session, $authenticator, $userFactory, $virusFactory, $attackFactory, $timezone;
+global $session, $authenticator, $userFactory, $virusFactory, $attackFactory, $timezone, $packageRegistrar;
 
 /** @var PackageRegistrar $packageRegistrar */
 
@@ -22,24 +22,15 @@ global $session, $authenticator, $userFactory, $virusFactory, $attackFactory, $t
  * - styles.php: extra css. This is placed inside the head tag, meaning you have to wrap this around style tag
  */
 
-if (!$session->has("virus_id")) Header::redirectToHome();
-if (!$session->has("attack_id")) Header::redirectToHome();
-
-$virus_id = $session->getCheck("virus_id");
-$attack_id = $session->getCheck("attack_id");
-
-if (!$authenticator->authorized($virus_id, $attack_id)) Header::redirectToHome();
-
+if (!$session->hasAll(["virus_id", "attack_id", "user_handle"])) Header::redirectToHome();
+if (!$authenticator->authorized($virus_id = $session->getCheck("virus_id"), $attack_id = $session->getCheck("attack_id"))) Header::redirectToHome();
 $virus = $virusFactory->get($virus_id);
 $attack = $attackFactory->get($attack_id);
-
 $packageDirectory = $packageRegistrar->getLocation($attack->getPackageDbName());
-if (!$session->has("attack_id")) Header::redirectToHome();
-
-$user = $userFactory->get($session->get("user_handle")); ?>
+$user = $userFactory->currentChecked(); ?>
 <html lang="en_US">
 <head>
-    <title>Attack info</title>
+    <title></title>
     <?php HtmlTemplate::header($user->isDarkMode()); ?>
     <?php @include($packageDirectory . "/ui/styles.php"); ?>
 </head>
@@ -95,7 +86,7 @@ switch ($attack->getStatus()) {
         @include $packageDirectory . "/ui/message_executed.php";
         break;
     default:
-        Logs::error("Attack status of " . $attack->getStatus() . " is not defined. This really should not happen at all and please dig into it immediately.");
+        Logs::unreachableState("Attack status of " . $attack->getStatus() . " is not defined. This really should not happen at all and please dig into it immediately.");
 }
 @include($packageDirectory . "/ui/footnote.php"); ?>
 <?php HtmlTemplate::scripts(); ?>
@@ -103,11 +94,9 @@ switch ($attack->getStatus()) {
     function update() {
         $.ajax({
             url: "<?php echo DOMAIN . "/vrs/" . $attack->getVirusId() . "/aks/" . $attack->getAttackId() . "/ctrls/update"; ?>",
-            type: "POST",
-            data: {
+            type: "POST", data: {
                 name: $("#name").val(),
-                profile: $("#profile").val()
-                <?php @include($packageDirectory . "/ui/fields_js.php"); ?>
+                profile: $("#profile").val()<?php @include($packageDirectory . "/ui/fields_js.php"); ?>
             },
             success: () => window.location = "<?php echo DOMAIN . "/ctrls/viewAttack?vrs=" . $attack->getVirusId() . "&aks=" . $attack->getAttackId(); ?>",
             error: () => toast.displayOfflineMessage("Can't update this attack.")
@@ -117,10 +106,8 @@ switch ($attack->getStatus()) {
     function deployAttack() {
         $.ajax({
             url: "<?php echo DOMAIN . "/vrs/" . $attack->getVirusId() . "/aks/" . $attack->getAttackId() . "/ctrls/deploy"; ?>",
-            type: "POST",
-            data: {
-                virus_id: "<?php echo $attack->getVirusId(); ?>",
-                attack_id: "<?php echo $attack->getAttackId(); ?>"
+            type: "POST", data: {
+                virus_id: "<?php echo $attack->getVirusId(); ?>", attack_id: "<?php echo $attack->getAttackId(); ?>"
             },
             success: () => window.location = "<?php echo DOMAIN . "/ctrls/viewAttack?vrs=" . $attack->getVirusId() . "&aks=" . $attack->getAttackId(); ?>",
             error: () => toast.displayOfflineMessage("Can't deploy attack.")
@@ -130,10 +117,8 @@ switch ($attack->getStatus()) {
     function cancelAttack() {
         $.ajax({
             url: "<?php echo DOMAIN . "/vrs/" . $attack->getVirusId() . "/aks/" . $attack->getAttackId() . "/ctrls/cancel"; ?>",
-            type: "POST",
-            data: {
-                virus_id: "<?php echo $attack->getVirusId(); ?>",
-                attack_id: "<?php echo $attack->getAttackId(); ?>"
+            type: "POST", data: {
+                virus_id: "<?php echo $attack->getVirusId(); ?>", attack_id: "<?php echo $attack->getAttackId(); ?>"
             },
             success: () => window.location = "<?php echo DOMAIN . "/ctrls/viewAttack?vrs=" . $attack->getVirusId() . "&aks=" . $attack->getAttackId(); ?>",
             error: () => toast.displayOfflineMessage("Can't cancel attack")
@@ -142,9 +127,12 @@ switch ($attack->getStatus()) {
 
     autoAdjustHeight($('#profile'));
     autoAdjustHeight($('#package_description'));
+
+    let title = "<?php echo $virus->getName(); ?> - Attack info";
+    document.title = title;
     <?php if ($attack->getStatus() === AttackBase::STATUS_DEPLOYED && $attack->getType() !== AttackBase::TYPE_BACKGROUND) { ?>
     // if results are ready, then refreshes the page
-    setInterval(checkExecuted, 3000);
+    setInterval(checkExecuted, 500);
 
     function checkExecuted() {
         $.ajax({
@@ -157,11 +145,11 @@ switch ($attack->getStatus()) {
     // these are for blinking the title if the user has not focused on the screen, as a way to notify them
     if ($attack->getStatus() === AttackBase::STATUS_EXECUTED) { ?>
     let state = 0;
-    blinkTitleInterval = setInterval(() => document.title = (state = 1 - state) === 0 ? "(Executed) Attack info" : "Attack info", 2000);
+    blinkTitleInterval = setInterval(() => document.title = ((state = 1 - state) === 0 ? "(Executed) " : " ") + title, 2000);
 
     $(document).on("mousemove", function () {
         clearInterval(blinkTitleInterval);
-        document.title = "Attack info";
+        document.title = title;
         $(document).off();
     });
     <?php }

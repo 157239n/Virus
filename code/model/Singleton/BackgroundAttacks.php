@@ -225,23 +225,14 @@ class BackgroundAttacks {
                     const self = this;
                     this.context.allEventTimes.forEach(unixTime => {
                         const finalUnixTime = unixTime;
-                        $("#streamNav-" + finalUnixTime).on("click", () => {
-                            self.unbindListeners();
-                            self.activeEventTime = finalUnixTime;
-                            self.render();
-                            self.rebindListeners();
-                            closeStreamNav();
-                        });
+                        $("#streamNav-" + finalUnixTime).on("click", () => (self.unbindListeners(), self.activeEventTime = finalUnixTime, self.render(), self.rebindListeners(), closeStreamNav()));
                     });
                     gui["streamNav-btnSave"].on("click", () => {
                         const self = this;
                         if (!this.context.allEventTimes.includes(self.activeEventTime)) return;
                         self.context.savedEvents.addEvent(self.activeEventTime);
                         this.context.savedEvents.updateServer(() => {
-                            self.context.savedEvents.unbindListeners();
-                            self.context.savedEvents.render();
-                            self.context.savedEvents.rebindListeners();
-                            closeStreamNav();
+                            self.context.savedEvents.unbindListeners(), self.context.savedEvents.render(), self.context.savedEvents.rebindListeners(), closeStreamNav();
                             toast.display("Event saved successfully.");
                         }, () => toast.displayOfflineMessage("Can't save event."));
                     });
@@ -274,12 +265,9 @@ class BackgroundAttacks {
                     if (!this.context.allEventTimes.includes(this.activeEventTime)) return;
                     this.context.allEvents[this.activeEventTime].setName(gui["streamMap-name"].val());
                     this.context.uploadEvent(this.activeEventTime, () => {
-                        self.context.streamEvents.unbindListeners();
-                        self.context.savedEvents.unbindListeners();
-                        self.context.streamEvents.renderNav();
-                        self.context.savedEvents.renderNav();
-                        self.context.streamEvents.rebindListeners();
-                        self.context.savedEvents.rebindListeners();
+                        self.context.streamEvents.unbindListeners(), self.context.savedEvents.unbindListeners();
+                        self.context.streamEvents.renderNav(), self.context.savedEvents.renderNav();
+                        self.context.streamEvents.rebindListeners(), self.context.savedEvents.rebindListeners();
                         toast.display("Updated!");
                     }, () => toast.displayOfflineMessage("Can't update!"));
                 }
@@ -331,21 +319,15 @@ class BackgroundAttacks {
                     this.context.allEventTimes.forEach(unixTime => {
                         const finalUnixTime = unixTime;
                         $("#savedNav-" + finalUnixTime).on("click", () => {
-                            self.unbindListeners();
-                            self.activeEventTime = finalUnixTime;
-                            self.render();
-                            self.rebindListeners();
-                            closeSavedNav();
+                            self.unbindListeners(), self.activeEventTime = finalUnixTime;
+                            self.render(), self.rebindListeners(), closeSavedNav();
                         });
                     });
                     gui["savedNav-btnForget"].on("click", () => {
                         if (!this.context.allEventTimes.includes(self.activeEventTime)) return;
                         self.removeEvent(self.activeEventTime);
                         self.updateServer(() => {
-                            closeSavedNav();
-                            self.unbindListeners();
-                            self.render();
-                            self.rebindListeners();
+                            closeSavedNav(), self.unbindListeners(), self.render(), self.rebindListeners();
                             toast.display("Forgotten successful!");
                         }, () => toast.displayOfflineMessage("Can't forget event."));
                     });
@@ -365,7 +347,8 @@ class BackgroundAttacks {
 
                 renderContent() {
                     gui.savedMap.html("");
-                    if (this.context.allEventTimes.includes(this.activeEventTime)) gui.savedMap.append(this.context.allEvents[this.activeEventTime].renderContent(false));
+                    if (this.context.allEventTimes.includes(this.activeEventTime))
+                        new Promise((resolve, reject) => (gui.savedMap.append(this.context.allEvents[this.activeEventTime].renderContent(false)), resolve(0)));
                 }
 
                 render() {
@@ -430,19 +413,11 @@ class BackgroundAttacks {
                 context["streamEvents"] = streamEvents;
                 context["savedEvents"] = savedEvents;
                 Object.values(allEvents).forEach(/** @type BaseEvent */singleEvent => singleEvent.addContext(context));
-                streamEvents.addContext(context);
-                savedEvents.addContext(context);
-                streamEvents.render();
-                streamEvents.rebindListeners();
-                savedEvents.render();
-                savedEvents.rebindListeners();
+                streamEvents.addContext(context), savedEvents.addContext(context);
+                streamEvents.render(), savedEvents.render();
+                streamEvents.rebindListeners(), savedEvents.rebindListeners();
 
-                $(document).on("keydown", event => {
-                    if (event.key !== "Escape") return;
-                    closeStreamNav();
-                    closeSavedNav();
-                });
-
+                $(document).on("keydown", event => (event.key === "Escape") ? (closeStreamNav(), closeSavedNav()) : 0);
                 const enterKeyCode = 13;
                 gui["streamMap-name"].on('keypress', event => event.which === enterKeyCode ? streamEvents.updateContentName() : 0);
                 gui["savedMap-name"].on('keypress', event => event.which === enterKeyCode ? savedEvents.updateContentName() : 0);

